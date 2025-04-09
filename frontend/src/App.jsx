@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import SignIn from "./_auth/page/SignIn";
 import SignUp from "./_auth/page/SignUp";
 import ForgotPassword from "./_auth/page/ForgotPassword";
-import { Cart, Categories, Collections, Home, Offers } from "./_root/page";
+import { Cart, Categories, Collections, Home, Offers, Orders, Profile } from "./_root/page";
 import AuthLayout from "./_auth/AuthLayout";
 import RootLayout from "./_root/RootLayout";
 
@@ -27,6 +27,8 @@ const App = () => {
           <Route path="/categories" element={<Categories />} />
           <Route path="/collections" element={<Collections />} />
           <Route path="/offers" element={<Offers />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/orders" element={<Orders />} />
         </Route>
       </Routes>
       {/* Toast notifications */}
