@@ -17,7 +17,7 @@ const Navbar = ({ toggleSidebar }) => {
    // Detect scroll position to change navbar appearance
    useEffect(() => {
       const handleScroll = () => {
-         const isScrolled = window.scrollY > 20;
+         const isScrolled = window.scrollY > 40;
          if (isScrolled !== scrolled) {
             setScrolled(isScrolled);
          }
@@ -89,14 +89,18 @@ const Navbar = ({ toggleSidebar }) => {
                </div>
 
                {/* middle logo */}
-               <div className="absolute inset-0 flex items-center justify-center flex-grow pointer-events-none">
-                  <Link to={"/"} className="text-white text-2xl font-semibold hover:text-primary-300 transition-all duration-300 pointer-events-auto cursor-pointer">
-                     <img
-                        src="./logo.png"
-                        className='h-20 w-20 rounded-full'
-                        alt="" />
-                  </Link>
-               </div>
+               {
+                  !scrolled && (
+                     < div className="absolute inset-0 flex items-center justify-center flex-grow pointer-events-none">
+                        <Link to={"/"} className="text-white text-2xl font-semibold hover:text-primary-300 transition-all duration-300 pointer-events-auto cursor-pointer">
+                           <img
+                              src="./logo.png"
+                              className='h-20 w-20 rounded-full'
+                              alt="" />
+                        </Link>
+                     </div>
+                  )
+               }
 
                {/* Right icons */}
                <div className="flex items-center gap-5">
@@ -179,7 +183,7 @@ const Navbar = ({ toggleSidebar }) => {
                   )}
                </div>
             </nav>
-         </section>
+         </section >
       </>
    )
 }

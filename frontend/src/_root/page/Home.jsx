@@ -1,16 +1,14 @@
-import React from 'react'
+import React from 'react';
 // Import Swiper React components
-import { Swiper, SwiperSlide } from 'swiper/react'
-
+import { Swiper, SwiperSlide } from 'swiper/react';
 // Import Swiper styles
-import 'swiper/css/scrollbar'
-import 'swiper/css/pagination'
-import 'swiper/css/navigation'
-
-import 'swiper/css'
-
+import 'swiper/css';
+import 'swiper/css/scrollbar';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 // Import required modules
-import { Scrollbar, Pagination, Autoplay, Navigation } from 'swiper/modules'
+import { Scrollbar, Pagination, Autoplay, Navigation } from 'swiper/modules';
+import ProductCard from '../../components/shared/ProductCard';
 
 // Banner images for the swiper
 const bannerImages = [
@@ -46,12 +44,76 @@ const bannerImages = [
   }
 ];
 
+// Sample product data
+const products = [
+  {
+    id: 1,
+    name: "Flamewave Oversized T-Shirt",
+    description: "Men's Brown Oversized Cargo Joggers",
+    image: [
+      "https://picsum.photos/300/400",
+      "https://images.unsplash.com/photo-1592513002316-e4fa19175023?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzh8fG1hcnZlbHxlbnwwfHwwfHx8MA%3D%3D",
+    ],
+    price: {
+      current: 1299,
+      original: 1999,
+      discount: 20
+    }
+  },
+  {
+    id: 2,
+    name: "Urban Streetwear Jacket",
+    description: "Black Denim Urban Style Jacket",
+    image: [
+      "https://picsum.photos/300/400",
+      "https://images.unsplash.com/photo-1592513002316-e4fa19175023?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzh8fG1hcnZlbHxlbnwwfHwwfHx8MA%3D%3D",
+    ],
+    price: {
+      current: 2499,
+      original: 3999,
+      discount: 35
+    }
+  },
+  {
+    id: 3,
+    name: "Comfort Slim Fit Pants",
+    description: "Navy Blue Tapered Fit Trousers",
+    image: [
+      "https://picsum.photos/300/400",
+      "https://images.unsplash.com/photo-1592513002316-e4fa19175023?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzh8fG1hcnZlbHxlbnwwfHwwfHx8MA%3D%3D",
+    ],
+    price: {
+      current: 1799,
+      original: 2299,
+      discount: 15
+    }
+  },
+  {
+    id: 4,
+    name: "Classic White Sneakers",
+    description: "Casual Low-Top Canvas Shoes",
+    image: [
+      "https://picsum.photos/300/400",
+      "https://images.unsplash.com/photo-1592513002316-e4fa19175023?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzh8fG1hcnZlbHxlbnwwfHwwfHx8MA%3D%3D",
+    ],
+    price: {
+      current: 999,
+      original: 1499,
+      discount: 25
+    }
+  }
+];
+
 const Home = () => {
   return (
     <>
       <section className='w-full h-fit relative top-[-30px]'>
         <div className="banner-swiper-container">
           <Swiper
+            pagination={{
+              clickable: true,
+            }}
+            navigation={true}
             scrollbar={{
               hide: true,
             }}
@@ -77,8 +139,22 @@ const Home = () => {
           </Swiper>
         </div>
       </section>
-    </>
-  )
-}
 
-export default Home
+      <section className='w-full h-fit relative top-[-30px] px-4 md:px-8'>
+        <h1 className='text-3xl font-bold text-center my-10 text-primary-300'>
+          NEW ARRIVALS
+        </h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {products.map(product => (
+            <div key={product.id} className="flex items-center justify-center">
+              <ProductCard product={product} />
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+};
+
+export default Home;
