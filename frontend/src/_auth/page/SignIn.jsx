@@ -21,48 +21,37 @@ const SignIn = () => {
   };
 
   return (
-    <div className="text-gray-100">
-      <h2 className="text-2xl font-bold text-center mb-6 text-primary-300">Sign In</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+    <div className="text-gray-100 max-w-md mx-auto p-6">
+      <h2 className="text-2xl font-bold text-center mb-6 text-white">Log In</h2>
+      <p className='text-sm font-normal text-center mb-8'>Please enter your e-mail and password</p>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="relative">
           <input
             type="email"
             id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-200"
+            placeholder="Email address"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-200 placeholder-gray-500"
             required
           />
         </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+        <div className="relative">
           <input
             type="password"
             id="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-200"
+            placeholder="Password"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-200 placeholder-gray-500"
             required
           />
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-primary-600 focus:ring-primary-500"
-            />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-300">
-              Remember me
-            </label>
-          </div>
-
+        <div className="flex items-center justify-end">
           <Link to="/forgot-password" className="text-sm text-primary-400 hover:text-primary-300">
             Forgot your password?
           </Link>
@@ -70,16 +59,30 @@ const SignIn = () => {
 
         <button
           type="submit"
-          className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-gray-100 rounded-md transition-colors"
+          className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-gray-100 rounded-md transition-colors font-medium"
         >
-          Sign in
+          Log In
+        </button>
+
+        <div className="flex items-center my-4">
+          <div className="flex-grow h-px bg-gray-700"></div>
+          <span className="px-4 text-sm text-gray-500 font-medium">OR</span>
+          <div className="flex-grow h-px bg-gray-700"></div>
+        </div>
+
+        <button
+          type="button"
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-gray-800 hover:bg-gray-700 text-gray-100 border border-gray-700 rounded-md transition-colors"
+        >
+         <img src="./google.svg" alt="Google" className="w-5 h-5" />
+          Continue with Google
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-gray-400">
-        Don't have an account?{' '}
-        <Link to="/sign-up" className="text-primary-400 hover:text-primary-300">
-          Sign up
+      <p className="mt-6 text-center text-sm text-gray-400">
+        New User ? {' '}
+        <Link to="/sign-up" className="text-primary-400 hover:text-primary-300 font-medium">
+          Create Account
         </Link>
       </p>
     </div>

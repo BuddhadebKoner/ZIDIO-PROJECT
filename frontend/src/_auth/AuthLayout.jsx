@@ -3,31 +3,26 @@ import { Outlet, Link } from 'react-router-dom';
 
 const AuthLayout = () => {
   return (
-    <div className="flex min-h-screen bg-gray-950">
+    <div className="flex h-fit bg-gray-950 overflow-hidden">
       {/* Main content/form section */}
+      <div className="hidden lg:block h-screen w-1/2 bg-gray-900 relative">
+        <div
+          className="absolute inset-0 flex justify-center items-center">
+          <img
+            src="https://images.unsplash.com/photo-1592513002316-e4fa19175023?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzh8fG1hcnZlbHxlbnwwfHwwfHx8MA%3D%3D"
+            className='w-full h-full object-cover object-center'
+            alt="" />
+        </div>
+      </div>
       <section
         className="flex flex-1 justify-center items-center flex-col py-10 px-4 sm:px-6 md:px-8"
       >
-        <Link to="/" className="mb-10 text-2xl font-bold text-primary-300 hover:text-primary-200 transition-colors">
-          Logo
-        </Link>
-        <div className="w-full max-w-md bg-gray-900 rounded-xl shadow-xl p-8 border border-gray-800">
+        <div className="w-full max-w-md p-8">
           <Outlet />
         </div>
       </section>
 
       {/* Auth sidebar/image section */}
-      <div className="hidden lg:block h-screen w-1/2 bg-gray-900 relative">
-        <div
-          className="absolute inset-0 flex justify-center items-center">
-          <div className="text-center p-8">
-            <h1 className="text-4xl font-bold text-primary-300 mb-4">Welcome Back</h1>
-            <p className="text-gray-300 max-w-md">
-              Sign in to access your account, view your orders, and enjoy a personalized shopping experience.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

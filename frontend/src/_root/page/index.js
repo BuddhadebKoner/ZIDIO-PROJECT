@@ -1,2 +1,5 @@
 export { default as Home } from './Home'
 export { default as Cart } from './Cart'
+export { default as Categories } from './Categories'
+export { default as Collections } from './Collections'
+export { default as Offers } from './Offers'
