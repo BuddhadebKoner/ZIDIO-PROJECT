@@ -2,27 +2,77 @@
 @import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
 
 @theme {
-   --color-background: #121212;
-   --color-surface: #1e1e1e;
+   /* Primary Colors - Deep Burgundy */
+   --color-primary-50: #fdf2f4;
+   --color-primary-100: #fbe6ea;
+   --color-primary-200: #f5c0ca;
+   --color-primary-300: #ef99aa;
+   --color-primary-400: #e5728c;
+   --color-primary-500: #d44d6e;
+   --color-primary-600: #b62e50;
+   --color-primary-700: #961c3e;
+   --color-primary-800: #77112f;
+   --color-primary-900: #56021F;
+   --color-primary-950: #440119;
 
-   --color-primary-50: oklch(0.88 0.10 240);
-   --color-primary-100: oklch(0.82 0.12 240);
-   --color-primary-200: oklch(0.76 0.14 240);
-   --color-primary-300: oklch(0.70 0.16 240);
-   --color-primary-400: oklch(0.64 0.18 240);
-   --color-primary-500: oklch(0.58 0.20 240);
-   --color-primary-600: oklch(0.52 0.22 240);
-   --color-primary-700: oklch(0.46 0.24 240);
-   --color-primary-800: oklch(0.40 0.26 240);
-   --color-primary-900: oklch(0.34 0.28 240);
-   --color-primary-950: oklch(0.30 0.30 240);
+   /* Secondary Colors - Raspberry */
+   --color-secondary-50: #fdf2f7;
+   --color-secondary-100: #fce8f0;
+   --color-secondary-200: #fad0e1;
+   --color-secondary-300: #f6a7c5;
+   --color-secondary-400: #ef7aa5;
+   --color-secondary-500: #e24d84;
+   --color-secondary-600: #c93269;
+   --color-secondary-700: #a32355;
+   --color-secondary-800: #7d1c4a;
+   --color-secondary-900: #5c1439;
+   --color-secondary-950: #4a0b2c;
 
-   --color-mint-500: oklch(0.72 0.11 178);
+   /* Accent Colors - Dusty Rose */
+   --color-accent-50: #fbf6f7;
+   --color-accent-100: #f8ecf0;
+   --color-accent-200: #f3dde3;
+   --color-accent-300: #ebc6d2;
+   --color-accent-400: #e0a5b7;
+   --color-accent-500: #d17d98;
+   --color-accent-600: #c6607e;
+   --color-accent-700: #b04967;
+   --color-accent-800: #863a51;
+   --color-accent-900: #6a2e40;
+   --color-accent-950: #3e1823;
 
-   --color-accent-500: oklch(0.85 0.10 40);
+   /* Background Colors - Light Pink */
+   --color-bg-soft: #f4cce9;
+   --color-bg-lighter: #faeaf7;
+   --color-bg-light: #fcf5fb;
+   --color-bg-white: #ffffff;
 
-   --color-text: #e0e0e0;
+   /* Neutral Colors */
+   --color-gray-50: #f8f8f8;
+   --color-gray-100: #f0f0f0;
+   --color-gray-200: #e4e4e4;
+   --color-gray-300: #d1d1d1;
+   --color-gray-400: #b4b4b4;
+   --color-gray-500: #9a9a9a;
+   --color-gray-600: #7c7c7c;
+   --color-gray-700: #686868;
+   --color-gray-800: #3d3d3d;
+   --color-gray-900: #282828;
+   --color-gray-950: #181818;
+
+   /* Semantic Colors */
+   --color-success: #22c55e;
+   --color-warning: #eab308;
+   --color-error: #ef4444;
+   --color-info: #3b82f6;
+
+   /* Surface and Text */
+   --color-background: var(--color-gray-50);
+   --color-surface: var(--color-bg-white);
+   --color-text: var(--color-gray-900);
+   --color-text-muted: var(--color-gray-600);
 }
+
 
 html {
    width: 100%;
@@ -34,14 +84,65 @@ html {
    -ms-text-size-adjust: 100%;
    -webkit-tap-highlight-color: transparent;
    -webkit-overflow-scrolling: touch;
-   -webkit-font-smoothing: antialiased;
 }
 
 body {
+   width: 100%;
+   min-height: 100vh;
+   line-height: 1.5;
    font-family: "Sen", sans-serif;
    font-style: normal;
    box-sizing: border-box;
    margin: 0;
    padding: 0;
    overflow-x: hidden;
+   background-color: var(--color-background);
+   color: var(--color-text);
+}
+
+/* Swiper styling */
+.banner-swiper-container {
+   width: 100%;
+   overflow: hidden;
+}
+
+.banner-swiper {
+   width: 100%;
+   height: 100%;
+}
+
+.swiper-pagination-bullet {
+   background: white !important;
+   opacity: 0.7;
+}
+
+.swiper-pagination-bullet-active {
+   background: var(--color-primary-300) !important;
+   opacity: 1;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+   color: white !important;
+   background: rgba(0, 0, 0, 0.3);
+   width: 40px !important;
+   height: 40px !important;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+   font-size: 18px !important;
+}
+
+/* For responsive images on small screens */
+@media (max-width: 640px) {
+
+   .swiper-button-next,
+   .swiper-button-prev {
+      display: none !important;
+   }
 }
