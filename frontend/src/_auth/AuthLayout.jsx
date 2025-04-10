@@ -15,24 +15,25 @@ const AuthLayout = () => {
         </div>
       </div>
       <section
-        className="w-1/2 flex justify-center items-center flex-col py-10 px-4 sm:px-6 md:px-8"
+        className="relative w-1/2 flex justify-center items-center flex-col py-10 px-4 sm:px-6 md:px-8"
       >
-        <div className='flex justify-center items-center'>
+        <Link to="/" className="absolute top-5 left-5 flex justify-center items-center">
           <img
             src="./logo.png"
             className='w-10 h-10'
             alt="logo" />
-          <Link to="/" className="text-2xl font-bold text-white">
+
+          <p className='text-xl font-bold text-white'>
             Home
-          </Link>
-        </div>
+          </p>
+        </Link>
         <div className="w-full">
           <Outlet />
         </div>
       </section>
 
       {/* Auth sidebar/image section */}
-    </div>
+    </div >
   );
 };
 
