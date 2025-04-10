@@ -14,7 +14,7 @@ const Navbar = ({ toggleSidebar }) => {
    } = useUser();
    const { signOut } = useClerk();
 
-   // Detect scroll position to change navbar appearance
+   // Detect scroll position to change navbar appearance 
    useEffect(() => {
       const handleScroll = () => {
          const isScrolled = window.scrollY > 40;

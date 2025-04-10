@@ -15,9 +15,18 @@ const AuthLayout = () => {
         </div>
       </div>
       <section
-        className="flex flex-1 justify-center items-center flex-col py-10 px-4 sm:px-6 md:px-8"
+        className="w-1/2 flex justify-center items-center flex-col py-10 px-4 sm:px-6 md:px-8"
       >
-        <div className="w-full max-w-md p-8">
+        <div className='flex justify-center items-center'>
+          <img
+            src="./logo.png"
+            className='w-10 h-10'
+            alt="logo" />
+          <Link to="/" className="text-2xl font-bold text-white">
+            Home
+          </Link>
+        </div>
+        <div className="w-full">
           <Outlet />
         </div>
       </section>

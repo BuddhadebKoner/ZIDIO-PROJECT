@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
 
-:root {
+@theme {
    /* Primary Colors - Deep Burgundy */
    --color-primary-50: #fdf2f4;
    --color-primary-100: #fbe6ea;
@@ -73,6 +73,82 @@
    --color-text-muted: #b4b4b4;
 }
 
+/* Custom utilities */
+.bg-gradient-overlay {
+   background: linear-gradient(to top, var(--color-background), var(--color-surface)/60%, transparent);
+}
+
+/* Add custom utilities to tailwind */
+@utilities {
+   .bg-primary-50 {
+      background-color: var(--color-primary-50);
+   }
+
+   .bg-primary-100 {
+      background-color: var(--color-primary-100);
+   }
+
+   .bg-primary-200 {
+      background-color: var(--color-primary-200);
+   }
+
+   .bg-primary-300 {
+      background-color: var(--color-primary-300);
+   }
+
+   .bg-primary-400 {
+      background-color: var(--color-primary-400);
+   }
+
+   .bg-primary-500 {
+      background-color: var(--color-primary-500);
+   }
+
+   .bg-primary-600 {
+      background-color: var(--color-primary-600);
+   }
+
+   .bg-primary-700 {
+      background-color: var(--color-primary-700);
+   }
+
+   .bg-primary-800 {
+      background-color: var(--color-primary-800);
+   }
+
+   .bg-primary-900 {
+      background-color: var(--color-primary-900);
+   }
+
+   .bg-primary-950 {
+      background-color: var(--color-primary-950);
+   }
+
+   .bg-secondary-500 {
+      background-color: var(--color-secondary-500);
+   }
+
+   .bg-accent-500 {
+      background-color: var(--color-accent-500);
+   }
+
+   .bg-surface {
+      background-color: var(--color-surface);
+   }
+
+   .text-text {
+      color: var(--color-text);
+   }
+
+   .text-text-muted {
+      color: var(--color-text-muted);
+   }
+
+   .text-bg-white {
+      color: var(--color-bg-white);
+   }
+}
+
 html {
    width: 100%;
    min-height: 100vh;
@@ -97,6 +173,13 @@ body {
    overflow-x: hidden;
    background-color: var(--color-background);
    color: var(--color-text);
+}
+
+button {
+   font-family: inherit;
+   font-size: inherit;
+   line-height: inherit;
+   cursor: pointer;
 }
 
 /* Swiper styling */
@@ -166,6 +249,7 @@ body {
 
 /* For responsive images on small screens */
 @media (max-width: 640px) {
+
    .swiper-button-next,
    .swiper-button-prev {
       display: none !important;
