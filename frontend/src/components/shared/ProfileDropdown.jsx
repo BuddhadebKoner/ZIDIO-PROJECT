@@ -34,7 +34,7 @@ const ProfileDropdown = () => {
    const menuItems = [
       { label: "Profile", path: "/profile" },
       { label: "Dashboard", path: "/dashboard" },
-      { label: "Orders", path: "/orders" },
+      { label: "Orders", path: "/profile/orders" },
       { label: "Your Cart", path: "/cart" },
    ];
 

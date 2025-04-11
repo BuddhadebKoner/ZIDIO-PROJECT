@@ -11,7 +11,7 @@ const RootLayout = () => {
   };
 
   return (
-    <div className="w-full flex flex-col min-h-screen bg-gray-950">
+    <div className="w-full flex flex-col min-h-fit">
       <Navbar toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <main className="flex-1 py-8 z-30">

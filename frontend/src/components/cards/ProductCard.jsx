@@ -33,7 +33,7 @@ const ProductCard = ({ product }) => {
 
    return (
       <Card
-         className="cursor-pointer w-full max-w-[400px] sm:max-w-[220px] md:max-w-[400px] lg:max-w-[280px] border border-gray-800 
+         className="cursor-pointer w-full border border-gray-800 
                   hover:border-gray-700 transition-all duration-300 transform hover:translate-y-[-5px] 
                   hover:shadow-lg hover:shadow-primary-900/10"
          radius="lg"
@@ -44,7 +44,7 @@ const ProductCard = ({ product }) => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
          >
-            <div className="relative w-full h-[400px] sm:h-[400px] md:h-[400px] overflow-hidden">
+            <div className="relative w-full h-[300px] overflow-hidden">
                {/* First image (shown by default) */}
                <img
                   src={firstImage}
