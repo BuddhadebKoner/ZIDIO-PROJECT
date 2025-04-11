@@ -1,9 +1,11 @@
 // CategoryDropdown.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
-   
+   const [scrolled, setScrolled] = useState(false);
+
+
    // Default data if not provided
    const defaultCategories = [
       {
@@ -38,26 +40,42 @@ const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
          ]
       }
    ];
-   
+
    const defaultCollections = [
       {
-         title: "TRENDING",
+         title: "MARVEL 2025",
          links: [
-            { name: "Summer Collection", path: "/collections/summer" },
-            { name: "Festive Collection", path: "/collections/festive" },
-            { name: "New Arrivals", path: "/collections/new-arrivals" },
+            { name: "Iron Man", path: "/collections/marvel-2025/iron-man" },
+            { name: "Captain America", path: "/collections/marvel-2025/captain-america" },
+            { name: "Spider Man", path: "/collections/marvel-2025/spider-man" },
          ]
       },
       {
-         title: "OCCASIONS",
+         title: "DC 2025",
          links: [
-            { name: "Casual Wear", path: "/collections/casual" },
-            { name: "Party Wear", path: "/collections/party" },
-            { name: "Formal Wear", path: "/collections/formal" },
+            { name: "Batman", path: "/collections/dc-2025/batman" },
+            { name: "Superman", path: "/collections/dc-2025/superman" },
+            { name: "Wonder Woman", path: "/collections/dc-2025/wonder-woman" },
+         ]
+      },
+      {
+         title: "STAR WARS",
+         links: [
+            { name: "Luke Skywalker", path: "/collections/star-wars/luke-skywalker" },
+            { name: "Darth Vader", path: "/collections/star-wars/darth-vader" },
+            { name: "Yoda", path: "/collections/star-wars/yoda" },
+         ]
+      },
+      {
+         title: "HARRY POTTER",
+         links: [
+            { name: "Gryffindor", path: "/collections/harry-potter/gryffindor" },
+            { name: "Slytherin", path: "/collections/harry-potter/slytherin" },
+            { name: "Hufflepuff", path: "/collections/harry-potter/hufflepuff" },
          ]
       }
    ];
-   
+
    const defaultOffers = [
       {
          title: "DISCOUNTS",
@@ -76,10 +94,10 @@ const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
          ]
       }
    ];
-   
+
    // Select data based on dropdown type
    let displayData;
-   switch(type) {
+   switch (type) {
       case 'collection':
          displayData = dropdownData || defaultCollections;
          break;
@@ -89,6 +107,7 @@ const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
       default:
          displayData = dropdownData || defaultCategories;
    }
+
 
    return (
       <div className='fixed top-25 left-0 right-0 w-full h-auto bg-black/90 backdrop-blur-md border-t border-white/10 py-8 z-30'>

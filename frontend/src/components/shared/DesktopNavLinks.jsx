@@ -1,7 +1,7 @@
 // DesktopNavLinks.jsx
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import CategoryDropdown from './CategoryDropdown';
+import NavbarDropdown from './NavbarDropdown';
 
 const DesktopNavLinks = () => {
    const [activeDropdown, setActiveDropdown] = useState(null);
@@ -45,7 +45,7 @@ const DesktopNavLinks = () => {
 
                {activeDropdown === item.type && (
                   <div onMouseEnter={() => handleMouseEnter(item.type)} onMouseLeave={handleMouseLeave}>
-                     <CategoryDropdown type={item.type} />
+                     <NavbarDropdown type={item.type} />
                   </div>
                )}
             </div>
