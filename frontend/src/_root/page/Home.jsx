@@ -9,10 +9,7 @@ import Hero from '../../components/HomeSection/Hero';
 import WomenCropTops from '../../components/HomeSection/WomenCropTops';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
 
-
-
 const Home = () => {
-  // Hero section loads immediately, others load when scrolled into view
   return (
     <>
       {/* Hero is loaded immediately with animation */}

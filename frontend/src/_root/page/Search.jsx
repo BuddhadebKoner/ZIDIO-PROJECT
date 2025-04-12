@@ -7,10 +7,10 @@ const Search = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  
+
   // Get query parameter
   const query = searchParams.get('q') || '';
-  
+
   // Fetch products based on search query
   useEffect(() => {
     const fetchProducts = async () => {
@@ -19,16 +19,12 @@ const Search = () => {
         setLoading(false);
         return;
       }
-      
+
       setLoading(true);
-      
+
       try {
         // Example API call - replace with your actual API
-        // const response = await fetch(`/api/products?search=${query}`);
-        // const data = await response.json();
-        // setProducts(data.products);
-        
-        // For now, let's simulate it
+
         setTimeout(() => {
           setProducts([]);
           setLoading(false);
@@ -38,29 +34,28 @@ const Search = () => {
         setLoading(false);
       }
     };
-    
+
     fetchProducts();
   }, [query]);
-  
+
   // Handle search input change
   const handleSearch = (e) => {
     e.preventDefault();
     const searchValue = e.target.search.value.trim();
-    
+
     if (searchValue) {
       setSearchParams({ q: searchValue });
     } else {
-      // Clear search params if empty search
       setSearchParams({});
     }
   };
-  
+
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="w-full h-fit px-4 md:px-8 lg:px-30 mt-20">
       <h1 className="text-2xl font-bold mb-6">
         {query ? `Search results for "${query}"` : 'Search Products'}
       </h1>
-      
+
       {/* Search form */}
       <form onSubmit={handleSearch} className="mb-8">
         <div className="flex gap-2 max-w-xl mx-auto">
@@ -72,15 +67,15 @@ const Search = () => {
             className="flex-1 p-3 border border-gray-300 rounded"
             autoFocus
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="bg-primary-500 text-white px-6 py-3 rounded hover:bg-primary-600 transition-colors"
           >
             Search
           </button>
         </div>
       </form>
-      
+
       {/* Results section */}
       {loading ? (
         <div className="flex justify-center items-center h-40">

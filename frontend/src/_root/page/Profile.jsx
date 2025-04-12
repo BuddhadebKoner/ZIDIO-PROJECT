@@ -36,7 +36,7 @@ const Profile = () => {
   ];
 
   return (
-    <div className="flex flex-col md:flex-row min-h-fit mt-10 px-4 md:px-8 lg:px-30 py-4">
+    <div className="flex flex-col md:flex-row min-h-fit mt-20 px-4 md:px-8 lg:px-30 py-4 ">
       {/* Mobile menu toggle */}
       <div className="md:hidden">
         <button

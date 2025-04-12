@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 // Import components
 import ProductImageGallery from '../../components/product/ProductImageGallery'
-import ProductPriceDetails from '../../components/product/ProductPriceDetails'
 import ProductReviews from '../../components/product/ProductReviews'
 import { Heart, ShoppingCart, Minus, Plus, Truck } from 'lucide-react'
 
@@ -36,8 +35,8 @@ const Product = () => {
     title: 'Modern T-Shirt Design',
     subTitle: 'Premium quality cotton t-shirt with stylish design',
     description: 'A high-quality cotton t-shirt with unique graphic design. Perfect for casual wear or as a gift.',
-    productAbout: 'This premium t-shirt is made from 100% combed ring-spun cotton, providing exceptional comfort and durability. The design is printed using eco-friendly water-based inks that won\'t crack or fade.',
-    price: 29.99,
+    productAbout: 'This premium t-shirt is made from 100% combed ring-spun cotton, providing exceptional comfort and durability. The design is printed using eco-friendly water-based inks that won\'t ',
+    price: 2039,
     images: [
       { imageUrl: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=3314&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', imageId: 'img1' },
       { imageUrl: 'https://images.unsplash.com/photo-1622445275463-afa2ab738c34?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D', imageId: 'img2' },
@@ -88,50 +87,46 @@ const Product = () => {
     new Date(product.offerStartDate) <= new Date() &&
     new Date(product.offerEndDate) >= new Date();
 
-  const discountedPrice = isOfferActive
-    ? product.price - (product.price * (product.discount / 100))
+  const discountedPriceInRupees = isOfferActive
+    ? product.price - (product.price * product.discount) / 100
     : product.price;
 
-  const formattedPrice = `$${product.price.toFixed(2)}`;
-  const formattedDiscountedPrice = `$${discountedPrice.toFixed(2)}`;
+  const formattedPrice = `₹${Math.round(product.price).toLocaleString('en-IN')}`;
+  const formattedDiscountedPrice = `₹${Math.round(discountedPriceInRupees).toLocaleString('en-IN')}`;
   const productType = product.category?.type || 't-shirt';
   const statusColorClass = isOfferActive ? 'text-green-500' : 'text-gray-500';
 
-  // Check if product is in user's cart
   const isInCart = currentUser?.cart?.products?.some(item => item.productId === product.slug) || false;
 
-  // Get available sizes from product data
   const sizes = product?.size || [];
 
-  // Fetch product data based on slug
   useEffect(() => {
-    // In a real app, you would fetch product data here
     console.log(`Fetching product data for slug: ${slug}`);
-    // For now, we're using the dummy data defined above
   }, [slug]);
 
   return (
-    <div className="min-h-screen px-4 md:px-8 lg:px-30 py-4 mt-10">
+    <div className="min-h-screen px-4 md:px-8 lg:px-30 py-4 mt-20">
       <div className="mx-auto">
-        {/* Breadcrumb navigation */}
-        <nav className="mb-6 text-xs sm:text-sm overflow-x-auto whitespace-nowrap">
-          <ol className="flex items-center">
-            <li className="flex items-center">
-              <Link to="/" className="text-gray-400 hover:text-primary-300">
-                Home
-              </Link>
-              <span className="mx-2 text-gray-400">/</span>
-            </li>
-            <li className="text-white font-medium truncate max-w-[150px] sm:max-w-xs">
-              {product.title}
-            </li>
-          </ol>
-        </nav>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Image Column */}
-          <div className="w-full">
-            <ProductImageGallery images={product.images} />
+          {/* Image Column - Made sticky */}
+          <div className="w-full flex flex-col md:sticky md:top-24 md:self-start md:max-h-[calc(100vh-120px)]">
+          {/* Breadcrumb navigation */}
+            <nav className="mb-6 text-xs sm:text-sm overflow-x-auto whitespace-nowrap">
+              <ol className="flex items-center">
+                <li className="flex items-center">
+                  <Link to="/" className="text-gray-400 hover:text-primary-300">
+                    Home
+                  </Link>
+                  <span className="mx-2 text-gray-400">/</span>
+                </li>
+                <li className="text-white font-medium truncate max-w-[150px] sm:max-w-xs">
+                  {product.title}
+                </li>
+              </ol>
+            </nav>
+            <div className="md:overflow-y-hidden md:pb-4">
+              <ProductImageGallery images={product.images} />
+            </div>
 
             {/* Mobile view - Tab navigation and pricing card */}
             <div className="md:hidden mt-6">
@@ -154,6 +149,16 @@ const Product = () => {
 
           {/* Product Details Column */}
           <div className="flex flex-col space-y-6">
+            {/* website logo */}
+            <div className='flex items-center justify-start space-y-2 mb-4'>
+              <img
+                src="/logo.png"
+                className='h-10 w-10'
+                alt="logo" />
+              <p className='flex items-center text-gray-400'>
+                <span className='text-white font-semibold text-lg'>Buddha's Clothings</span>
+              </p>
+            </div>
             {/* Tags section */}
             <div className="flex flex-wrap gap-2 mb-2">
               {product.tags && product.tags.length > 0 ? (
@@ -348,46 +353,46 @@ const Product = () => {
               )}
             </div>
           </div>
-        </div>
 
-        {/* Mobile view description and reviews */}
-        <div className="md:hidden mt-8">
-          {activeTab === 'description' && (
-            <div className="text-gray-300 space-y-4">
-              <h3 className="text-lg font-semibold text-white">About This Product</h3>
-              <p>{product.productAbout}</p>
+          {/* Mobile view description and reviews */}
+          <div className="md:hidden mt-8">
+            {activeTab === 'description' && (
+              <div className="text-gray-300 space-y-4">
+                <h3 className="text-lg font-semibold text-white">About This Product</h3>
+                <p>{product.productAbout}</p>
 
-              <h4 className="text-base font-medium text-white mt-4">Materials & Features</h4>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {product.technologyStack.map((tech, index) => (
-                  <span key={index} className="bg-surface px-3 py-1 rounded-full text-sm">
-                    {tech}
-                  </span>
-                ))}
+                <h4 className="text-base font-medium text-white mt-4">Materials & Features</h4>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {product.technologyStack.map((tech, index) => (
+                    <span key={index} className="bg-surface px-3 py-1 rounded-full text-sm">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-2 mt-4">
+                  <div className="bg-surface px-3 py-2 rounded-md">
+                    <span className="text-xs text-gray-400">Type</span>
+                    <p className="font-medium text-sm">{productType}</p>
+                  </div>
+                  <div className="bg-surface px-3 py-2 rounded-md">
+                    <span className="text-xs text-gray-400">Sales</span>
+                    <p className="font-medium text-sm">{product.totalSold} sold</p>
+                  </div>
+                  <div className="bg-surface px-3 py-2 rounded-md">
+                    <span className="text-xs text-gray-400">Rating</span>
+                    <p className="font-medium text-sm">{product.totalRating}/5</p>
+                  </div>
+                </div>
               </div>
+            )}
 
-              <div className="flex flex-wrap gap-2 mt-4">
-                <div className="bg-surface px-3 py-2 rounded-md">
-                  <span className="text-xs text-gray-400">Type</span>
-                  <p className="font-medium text-sm">{productType}</p>
-                </div>
-                <div className="bg-surface px-3 py-2 rounded-md">
-                  <span className="text-xs text-gray-400">Sales</span>
-                  <p className="font-medium text-sm">{product.totalSold} sold</p>
-                </div>
-                <div className="bg-surface px-3 py-2 rounded-md">
-                  <span className="text-xs text-gray-400">Rating</span>
-                  <p className="font-medium text-sm">{product.totalRating}/5</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'reviews' && (
-            <ProductReviews
-              slug={slug}
-            />
-          )}
+            {activeTab === 'reviews' && (
+              <ProductReviews
+                slug={slug}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
