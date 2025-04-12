@@ -16,7 +16,9 @@ const Home = () => {
   return (
     <>
       {/* Hero is loaded immediately with animation */}
-      <Hero />
+      <div className='pt-8'>
+        <Hero />
+      </div>
 
       {/* Other sections load when scrolled into view */}
       <AnimatedSection delay={100}>

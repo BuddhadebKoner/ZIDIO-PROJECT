@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import SignIn from "./_auth/page/SignIn";
 import SignUp from "./_auth/page/SignUp";
 import ForgotPassword from "./_auth/page/ForgotPassword";
-import { AccountDetails, Address, Cart, Categories, Collections, Home, Offers, Orders, Profile, Search } from "./_root/page";
+import { AccountDetails, Address, Cart, Categories, Collections, Home, Offers, Orders, Product, Profile, Search, Wishlist } from "./_root/page";
 import AuthLayout from "./_auth/AuthLayout";
 import RootLayout from "./_root/RootLayout";
 import { useEffect, useRef, createContext, useContext } from "react";
@@ -66,7 +66,7 @@ const App = () => {
           <Route path='/' element={<Home />} />
           <Route path='/cart' element={<Cart />} />
           <Route path="/categories/:category/:type" element={<Categories />} />
-          <Route path="/collections/:collections/:type" element={<Collections />} />
+          <Route path="/collections/:collections" element={<Collections />} />
           <Route path="/offers" element={<Offers />} />
           <Route path="/profile" element={<Profile />} >
             <Route path="/profile/orders" element={<Orders />} />
@@ -74,6 +74,8 @@ const App = () => {
             <Route path="/profile/account-details" element={<AccountDetails />} />
           </Route>
           <Route path="/search" element={<Search />} />
+          <Route path="/product/:slug" element={<Product />} />
+          <Route path="/wishlist" element={<Wishlist />} />
         </Route>
       </Routes>
       {/* Toast notifications */}

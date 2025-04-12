@@ -24,7 +24,7 @@ const DesktopNavLinks = () => {
    const navItems = [
       { type: 'category', label: 'Shop By Category', path: '/categories' },
       { type: 'collection', label: 'Shop By Collection', path: '/collections' },
-      { type: 'offers', label: 'Offers', path: '/offers' },
+      { type: 'offers', label: 'Offers', path: '/offers', noDropdown: true },
    ];
 
    return (
@@ -33,8 +33,8 @@ const DesktopNavLinks = () => {
             <div
                key={item.type}
                className="relative"
-               onMouseEnter={() => handleMouseEnter(item.type)}
-               onMouseLeave={handleMouseLeave}
+               onMouseEnter={item.noDropdown ? undefined : () => handleMouseEnter(item.type)}
+               onMouseLeave={item.noDropdown ? undefined : handleMouseLeave}
             >
                <Link
                   to={item.path}
@@ -43,7 +43,7 @@ const DesktopNavLinks = () => {
                   {item.label}
                </Link>
 
-               {activeDropdown === item.type && (
+               {!item.noDropdown && activeDropdown === item.type && (
                   <div onMouseEnter={() => handleMouseEnter(item.type)} onMouseLeave={handleMouseLeave}>
                      <NavbarDropdown type={item.type} />
                   </div>

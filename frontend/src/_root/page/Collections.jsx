@@ -4,7 +4,7 @@ import ProductCard from '../../components/cards/ProductCard';
 
 const Collections = () => {
   // grab type from url
-  const { type, collections } = useParams()
+  const { collections } = useParams()
 
   const formatString = (str) => {
     return str
@@ -12,7 +12,6 @@ const Collections = () => {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
-
 
   // Sample product data
   const products = [
@@ -28,7 +27,8 @@ const Collections = () => {
         current: 1299,
         original: 1999,
         discount: 20
-      }
+      },
+      slug: "flamewave-oversized-t-shirt"
     },
     {
       id: 2,
@@ -42,7 +42,8 @@ const Collections = () => {
         current: 2499,
         original: 3999,
         discount: 35
-      }
+      },
+      slug: "flamewave-oversized-t-shirt"
     },
     {
       id: 3,
@@ -56,7 +57,8 @@ const Collections = () => {
         current: 1799,
         original: 2299,
         discount: 15
-      }
+      },
+      slug: "flamewave-oversized-t-shirt"
     },
     {
       id: 4,
@@ -70,7 +72,8 @@ const Collections = () => {
         current: 999,
         original: 1499,
         discount: 25
-      }
+      },
+      slug: "flamewave-oversized-t-shirt"
     },
     {
       id: 5,
@@ -84,7 +87,8 @@ const Collections = () => {
         current: 1299,
         original: 1999,
         discount: 20
-      }
+      },
+      slug: "flamewave-oversized-t-shirt"
     },
     {
       id: 6,
@@ -98,7 +102,8 @@ const Collections = () => {
         current: 2499,
         original: 3999,
         discount: 35
-      }
+      },
+      slug: "flamewave-oversized-t-shirt"
     },
     {
       id: 7,
@@ -112,7 +117,8 @@ const Collections = () => {
         current: 1799,
         original: 2299,
         discount: 15
-      }
+      },
+      slug: "flamewave-oversized-t-shirt"
     },
     {
       id: 8,
@@ -126,27 +132,31 @@ const Collections = () => {
         current: 999,
         original: 1499,
         discount: 25
-      }
+      },
+      slug: "flamewave-oversized-t-shirt"
     },
   ];
 
+
   return (
     <>
-      <div className='flex flex-col justify-center items-center py-10'>
-        <h1 className='text-3xl font-bold text-white'>
-          {formatString(type)}{" "} {collections.charAt(0).toUpperCase() + collections.slice(1)}
-        </h1>
-
+      <div className='flex flex-col justify-center items-center'>
         {/* banner */}
-        <div className='w-fit h-fit mt-10'>
+        <div className='w-fit h-fit'>
           <img
             src="/garbage/banner.png"
             className='w-fit h-fit object-cover'
             alt="" />
         </div>
 
-        <div className="container mx-auto px-4 py-6 mt-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <h1 className='text-3xl font-bold text-white mt-10'>
+          {formatString(collections)}
+        </h1>
+
+
+        {/* products */}
+        <div className="container mx-auto px-2 sm:px-4 py-6 mt-2">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {products.map(product => (
               <div key={product.id} className="w-full">
                 <ProductCard product={product} />

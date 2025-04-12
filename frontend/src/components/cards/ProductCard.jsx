@@ -3,6 +3,7 @@ import Card from '../shared/Card'
 import CardFooter from '../shared/CardFooter'
 import AddToCart from '../buttons/AddToCart'
 import { Heart, ShoppingCart } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const ProductCard = ({ product }) => {
    const [isHovered, setIsHovered] = useState(false);
@@ -38,33 +39,38 @@ const ProductCard = ({ product }) => {
                   hover:shadow-lg hover:shadow-primary-900/10"
          radius="lg"
          shadow="sm"
+         slug={product.slug}
       >
          <div
             className="p-0 overflow-hidden relative group"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
          >
-            <div className="relative w-full h-[300px] overflow-hidden">
-               {/* First image (shown by default) */}
-               <img
-                  src={firstImage}
-                  alt={`${product.name} - view 1`}
-                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out 
+            <Link
+               to={`/product/${product.slug}`}>
+               <div className="relative w-full h-[200px] xs:h-[220px] sm:h-[250px] md:h-[280px] overflow-hidden">
+
+                  {/* First image (shown by default) */}
+                  <img
+                     src={firstImage}
+                     alt={`${product.name} - view 1`}
+                     className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out 
                            ${isHovered ? 'opacity-0 scale-110' : 'opacity-100 scale-100'}`}
-               />
+                  />
 
-               {/* Second image (shown on hover) */}
-               <img
-                  src={secondImage}
-                  alt={`${product.name} - view 2`}
-                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out 
+                  {/* Second image (shown on hover) */}
+                  <img
+                     src={secondImage}
+                     alt={`${product.name} - view 2`}
+                     className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out 
                            ${isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
-               />
+                  />
 
-               {/* Overlay on hover */}
-               <div className={`absolute inset-0 bg-black/10 transition-opacity duration-300 
+                  {/* Overlay on hover */}
+                  <div className={`absolute inset-0 bg-black/10 transition-opacity duration-300 
                              ${isHovered ? 'opacity-100' : 'opacity-0'}`}></div>
-            </div>
+               </div>
+            </Link>
 
             {/* Wishlist button */}
             <button
@@ -89,16 +95,16 @@ const ProductCard = ({ product }) => {
             </div>
          </div>
 
-         <CardFooter className="flex flex-col items-start gap-1.5 px-3 py-3 bg-surface">
-            <h3 className="font-medium text-gray-100 text-sm sm:text-base line-clamp-1">{product.name}</h3>
-            <p className="text-xs sm:text-sm text-gray-400 line-clamp-1">{product.description}</p>
-            <div className="flex gap-2 items-center mt-0.5">
-               <span className="text-gray-100 font-semibold">₹{product.price.current}</span>
+         <CardFooter className="flex flex-col items-start gap-1 px-2 sm:px-3 py-2 sm:py-3 bg-surface">
+            <h3 className="font-medium text-gray-100 text-xs sm:text-sm md:text-base line-clamp-1">{product.name}</h3>
+            <p className="text-xs text-gray-400 line-clamp-1">{product.description}</p>
+            <div className="flex gap-1 sm:gap-2 items-center mt-0.5">
+               <span className="text-gray-100 font-semibold text-xs sm:text-sm">₹{product.price.current}</span>
                {product.price.original && (
-                  <span className="text-gray-500 line-through text-xs sm:text-sm">₹{product.price.original}</span>
+                  <span className="text-gray-500 line-through text-xs">₹{product.price.original}</span>
                )}
                {product.price.discount && (
-                  <span className="text-green-500 text-xs sm:text-sm font-medium">{product.price.discount}% off</span>
+                  <span className="text-green-500 text-xs font-medium">{product.price.discount}% off</span>
                )}
             </div>
          </CardFooter>

@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
    const [scrolled, setScrolled] = useState(false);
 
-
    // Default data if not provided
    const defaultCategories = [
       {
@@ -44,35 +43,19 @@ const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
    const defaultCollections = [
       {
          title: "MARVEL 2025",
-         links: [
-            { name: "Iron Man", path: "/collections/marvel-2025/iron-man" },
-            { name: "Captain America", path: "/collections/marvel-2025/captain-america" },
-            { name: "Spider Man", path: "/collections/marvel-2025/spider-man" },
-         ]
+         path: "/collections/marvel-2025/"
       },
       {
          title: "DC 2025",
-         links: [
-            { name: "Batman", path: "/collections/dc-2025/batman" },
-            { name: "Superman", path: "/collections/dc-2025/superman" },
-            { name: "Wonder Woman", path: "/collections/dc-2025/wonder-woman" },
-         ]
+         path: "/collections/dc-2025/"
       },
       {
          title: "STAR WARS",
-         links: [
-            { name: "Luke Skywalker", path: "/collections/star-wars/luke-skywalker" },
-            { name: "Darth Vader", path: "/collections/star-wars/darth-vader" },
-            { name: "Yoda", path: "/collections/star-wars/yoda" },
-         ]
+         path: "/collections/star-wars/"
       },
       {
          title: "HARRY POTTER",
-         links: [
-            { name: "Gryffindor", path: "/collections/harry-potter/gryffindor" },
-            { name: "Slytherin", path: "/collections/harry-potter/slytherin" },
-            { name: "Hufflepuff", path: "/collections/harry-potter/hufflepuff" },
-         ]
+         path: "/collections/harry-potter/"
       }
    ];
 
@@ -108,29 +91,43 @@ const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
          displayData = dropdownData || defaultCategories;
    }
 
-
    return (
       <div className='fixed top-25 left-0 right-0 w-full h-auto bg-black/90 backdrop-blur-md border-t border-white/10 py-8 z-30'>
          <div className='container mx-auto px-8'>
             <div className='grid grid-cols-4 gap-8 max-w-6xl mx-auto'>
-               {displayData.map((section, index) => (
-                  <div key={index} className="flex flex-col gap-4">
-                     <h3 className="text-white font-bold text-base mb-2 border-b border-white/10 pb-2">
-                        {section.title}
-                     </h3>
-                     <div className="flex flex-col gap-3">
-                        {section.links.map((link, linkIndex) => (
-                           <Link
-                              key={linkIndex}
-                              to={link.path}
-                              className="text-gray-300 text-sm hover:text-primary-300 transition-all"
-                           >
-                              {link.name}
-                           </Link>
-                        ))}
+               {type === 'collection' ? (
+                  // Render collection items (title only with direct path)
+                  displayData.map((collection, index) => (
+                     <div key={index} className="flex flex-col gap-4">
+                        <Link
+                           to={collection.path}
+                           className="text-white font-bold text-base hover:text-primary-300 transition-all"
+                        >
+                           {collection.title}
+                        </Link>
                      </div>
-                  </div>
-               ))}
+                  ))
+               ) : (
+                  // Render category and offers with nested links
+                  displayData.map((section, index) => (
+                     <div key={index} className="flex flex-col gap-4">
+                        <h3 className="text-white font-bold text-base mb-2 border-b border-white/10 pb-2">
+                           {section.title}
+                        </h3>
+                        <div className="flex flex-col gap-3">
+                           {section.links.map((link, linkIndex) => (
+                              <Link
+                                 key={linkIndex}
+                                 to={link.path}
+                                 className="text-gray-300 text-sm hover:text-primary-300 transition-all"
+                              >
+                                 {link.name}
+                              </Link>
+                           ))}
+                        </div>
+                     </div>
+                  ))
+               )}
             </div>
          </div>
       </div>

@@ -1,6 +1,7 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 
-const Card = ({ children, className, radius = "md", shadow = "sm" }) => {
+const Card = ({ children, className, radius = "md", shadow = "sm", slug }) => {
   const radiusClasses = {
     none: "rounded-none",
     sm: "rounded-sm",
@@ -9,7 +10,7 @@ const Card = ({ children, className, radius = "md", shadow = "sm" }) => {
     xl: "rounded-xl",
     full: "rounded-full"
   };
-  
+
   const shadowClasses = {
     none: "shadow-none",
     sm: "shadow-sm",
@@ -17,9 +18,10 @@ const Card = ({ children, className, radius = "md", shadow = "sm" }) => {
     lg: "shadow-lg",
     xl: "shadow-xl"
   };
-  
+
   return (
-    <div className={`bg-surface border border-gray-800 ${radiusClasses[radius] || ""} ${shadowClasses[shadow] || ""} ${className || ""}`}>
+    <div
+      className={`bg-surface border border-gray-800 ${radiusClasses[radius] || ""} ${shadowClasses[shadow] || ""} ${className || ""}`}>
       {children}
     </div>
   )
