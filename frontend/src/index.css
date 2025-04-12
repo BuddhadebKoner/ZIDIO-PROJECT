@@ -159,6 +159,30 @@
   animation: fadeIn 0.8s ease forwards;
 }
 
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
+
+@keyframes comicGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Twinkling stars animation */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
 html {
    width: 100%;
    min-height: 100vh;
@@ -181,15 +205,260 @@ body {
    margin: 0;
    padding: 0;
    overflow-x: hidden;
-   background-color: var(--color-background);
    color: var(--color-text);
+   
+   /* Solid background instead of gradient */
+   background: #121212;
+   position: relative;
 }
 
-button {
-   font-family: inherit;
-   font-size: inherit;
-   line-height: inherit;
-   cursor: pointer;
+/* Comic-style decorative pattern elements */
+body::before {
+   content: '';
+   position: fixed;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-image: 
+     radial-gradient(circle at 15% 15%, rgba(214, 51, 108, 0.07) 25px, transparent 26px),
+     radial-gradient(circle at 85% 30%, rgba(214, 51, 108, 0.07) 20px, transparent 21px),
+     radial-gradient(circle at 30% 65%, rgba(214, 51, 108, 0.07) 30px, transparent 31px),
+     radial-gradient(circle at 85% 75%, rgba(214, 51, 108, 0.07) 15px, transparent 16px),
+     radial-gradient(circle at 50% 50%, rgba(214, 51, 108, 0.05) 80px, transparent 81px),
+     url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0L22.5 15H37.5L25 25L30 40L20 30L10 40L15 25L2.5 15H17.5L20 0Z' fill='rgba(214, 51, 108, 0.03)' /%3E%3C/svg%3E");
+   background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 300px 300px;
+   background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 50px 50px;
+   pointer-events: none;
+   z-index: -1;
+}
+
+/* Comic-style line elements */
+body::after {
+   content: '';
+   position: fixed;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18l5-7M40 30l-8-5M70 80l10-8M90 20L80 30M20 80l-4-10M50 50l15 15M60 20l-5 15' stroke='rgba(214, 51, 108, 0.08)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+   opacity: 0.5;
+   pointer-events: none;
+   z-index: -1;
+   animation: pulse 10s ease-in-out infinite;
+}
+
+/* Enhanced white dots and stars */
+.star-dots {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    /* Enhanced white dots with higher opacity */
+    radial-gradient(1px at 20% 10%, rgba(255, 255, 255, 0.9) 1px, transparent 2px),
+    radial-gradient(1.5px at 40% 30%, rgba(214, 51, 108, 0.6) 1px, transparent 2px),
+    radial-gradient(1px at 60% 15%, rgba(255, 255, 255, 0.8) 1px, transparent 2px),
+    radial-gradient(2px at 75% 45%, rgba(214, 51, 108, 0.7) 1px, transparent 3px),
+    radial-gradient(1px at 35% 65%, rgba(255, 255, 255, 0.85) 1px, transparent 2px),
+    radial-gradient(1.5px at 85% 80%, rgba(214, 51, 108, 0.6) 1px, transparent 2px),
+    radial-gradient(2px at 90% 5%, rgba(255, 255, 255, 0.9) 1px, transparent 3px),
+    radial-gradient(1px at 15% 85%, rgba(255, 255, 255, 0.8) 1px, transparent 2px),
+    radial-gradient(1.5px at 50% 95%, rgba(214, 51, 108, 0.5) 1px, transparent 2px),
+    /* Extra dots for more density */
+    radial-gradient(1.2px at 10% 40%, rgba(255, 255, 255, 0.8) 1px, transparent 2px),
+    radial-gradient(1px at 30% 20%, rgba(214, 51, 108, 0.6) 1px, transparent 2px),
+    radial-gradient(1.3px at 70% 60%, rgba(255, 255, 255, 0.85) 1px, transparent 2px),
+    radial-gradient(1px at 80% 25%, rgba(214, 51, 108, 0.7) 1px, transparent 2px),
+    radial-gradient(1.4px at 25% 50%, rgba(255, 255, 255, 0.75) 1px, transparent 2px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Enhanced sparkles with longer animation */
+.sparkle {
+  position: fixed;
+  width: 3px;
+  height: 3px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 4px 2px rgba(255, 255, 255, 0.6);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.sparkle:nth-child(1) {
+  top: 10%;
+  left: 20%;
+  animation: twinkle 4s infinite 0.5s;
+}
+
+.sparkle:nth-child(2) {
+  top: 25%;
+  left: 80%;
+  animation: twinkle 5s infinite 1s;
+}
+
+.sparkle:nth-child(3) {
+  top: 60%;
+  left: 5%;
+  animation: twinkle 3.5s infinite 1.5s;
+}
+
+.sparkle:nth-child(4) {
+  top: 75%;
+  left: 65%;
+  animation: twinkle 4.5s infinite 0.2s;
+}
+
+.sparkle:nth-child(5) {
+  top: 85%;
+  left: 35%;
+  animation: twinkle 3s infinite 0.7s;
+}
+
+.sparkle:nth-child(6) {
+  top: 15%;
+  left: 50%;
+  animation: twinkle 5s infinite 2s;
+}
+
+/* T-shirt silhouette decoration */
+.t-shirt-decoration {
+   position: fixed;
+   bottom: -5%;
+   right: -5%;
+   width: 25%;
+   height: 25%;
+   background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M70 40 L130 40 L150 70 L170 50 L160 20 L40 20 L30 50 L50 70 L70 40 L70 170 L130 170 L130 40' stroke='rgba(214, 51, 108, 0.07)' stroke-width='5' fill='none'/%3E%3C/svg%3E");
+   background-repeat: no-repeat;
+   background-size: contain;
+   pointer-events: none;
+   z-index: -1;
+   opacity: 0.3;
+   animation: float 8s ease-in-out infinite;
+}
+
+/* For comic-style section transitions */
+.section-divider {
+   position: relative;
+   height: 6px;
+   background: transparent;
+   margin: 2.5rem 0;
+   overflow: hidden;
+}
+
+.section-divider::before {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   height: 6px;
+   background: repeating-linear-gradient(to right, 
+      transparent, 
+      transparent 15px, 
+      var(--color-primary-500) 15px, 
+      var(--color-primary-500) 30px);
+   opacity: 0.4;
+   border-radius: 3px;
+}
+
+/* For comic-style panels and card borders */
+.comic-border {
+   position: relative;
+   border: 1px solid rgba(214, 51, 108, 0.3);
+   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+   transition: all 0.3s ease;
+}
+
+.comic-border:hover {
+   transform: translateY(-5px);
+   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.comic-border::before {
+   content: '';
+   position: absolute;
+   top: -2px;
+   left: -2px;
+   right: -2px;
+   bottom: -2px;
+   background: linear-gradient(45deg, 
+      var(--color-primary-700), 
+      transparent, 
+      var(--color-secondary-700), 
+      transparent);
+   background-size: 400% 400%;
+   animation: comicGlow 8s ease infinite;
+   border-radius: inherit;
+   z-index: -1;
+   opacity: 0.3;
+}
+
+/* Comic style product card */
+.product-card {
+   position: relative;
+   transition: all 0.3s ease;
+   overflow: hidden;
+}
+
+.product-card::after {
+   content: '';
+   position: absolute;
+   top: 10px;
+   right: 10px;
+   width: 25px;
+   height: 25px;
+   background-image: url("data:image/svg+xml,%3Csvg width='25' height='25' viewBox='0 0 25 25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.5 0L15.3 9.3H25L17.4 15.1L20.1 25L12.5 19.2L4.9 25L7.6 15.1L0 9.3H9.7L12.5 0Z' fill='rgba(214, 51, 108, 0.15)'/%3E%3C/svg%3E");
+   pointer-events: none;
+   opacity: 0;
+   transform: rotate(15deg) scale(0.8);
+   transition: all 0.3s ease;
+}
+
+.product-card:hover::after {
+   opacity: 1;
+   transform: rotate(0deg) scale(1);
+}
+
+.product-card::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  width: 30px;
+  height: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15 0L18.5 10.5H30L20.5 17L24 27.5L15 21L6 27.5L9.5 17L0 10.5H11.5L15 0Z' fill='rgba(214, 51, 108, 0.3)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform: rotate(-15deg) scale(0.6);
+  transition: all 0.4s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.product-card:hover::before {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
+/* Add the t-shirt decoration element to the body */
+body::before {
+   content: '';
+   position: fixed;
+   top: 0;
+   right: 0;
+   width: 35vw;
+   height: 35vw;
+   background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M70 40 L130 40 L150 70 L170 50 L160 20 L40 20 L30 50 L50 70 L70 40 L70 170 L130 170 L130 40' stroke='rgba(214, 51, 108, 0.05)' stroke-width='5' fill='rgba(214, 51, 108, 0.01)'/%3E%3C/svg%3E");
+   background-repeat: no-repeat;
+   background-size: contain;
+   pointer-events: none;
+   z-index: -1;
+   opacity: 0.2;
 }
 
 /* Swiper styling */

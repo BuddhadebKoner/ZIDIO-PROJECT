@@ -55,6 +55,13 @@ const App = () => {
         className='flex justify-center items-center bg-gray-900 p-3 text-gray-100 border-b border-gray-800'>
         <p className="text-sm font-normal">Use code <span className="text-primary-300 font-semibold">SAVE350</span> & get ₹350/- off on order value of ₹3000</p>
       </header>
+      <div class="star-dots"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path='/sign-in' element={<SignIn />} />
