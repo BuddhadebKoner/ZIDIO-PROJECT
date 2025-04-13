@@ -22,9 +22,9 @@ const userSchema = new mongoose.Schema({
    },
    phone: {
       type: String,
-      required: true,
       unique: true,
       trim: true,
+      default: null,
    },
    role: {
       type: String,
@@ -65,6 +65,6 @@ const userSchema = new mongoose.Schema({
       },
    ],
 
-},{timestamps: true});
+}, { timestamps: true });
 
 export const User = mongoose.model('User', userSchema);

@@ -36,6 +36,16 @@ const homeContentSchema = new mongoose.Schema({
          type: mongoose.Schema.Types.ObjectId,
          ref: "Collection",
       },
+      {
+         imageUrl: {
+            type: String,
+            required: true,
+         },
+         imageId: {
+            type: String,
+            required: true,
+         },
+      }
    ],
    alltimeBestSellers: {
       type: mongoose.Schema.Types.ObjectId,
