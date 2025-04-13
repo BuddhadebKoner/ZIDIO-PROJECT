@@ -8,6 +8,7 @@ import AuthLayout from "./_auth/AuthLayout";
 import RootLayout from "./_root/RootLayout";
 import { useEffect, useRef, createContext, useContext } from "react";
 import Lenis from '@studio-freight/lenis';
+import { useAuth } from "./context/AuthContext";
 
 export const SmoothScrollContext = createContext();
 
@@ -48,6 +49,29 @@ const App = () => {
       });
     }
   };
+
+  const {
+    isAuthenticated,
+    isLoading,
+    error,
+    currentUser,
+    cartItemsCount,
+    wishlistItemsCount,
+    hasNotifications,
+  } = useAuth();
+
+  if (!isLoading) {
+    console.log({
+      isAuthenticated,
+      error,
+      currentUser,
+      cartItemsCount,
+      wishlistItemsCount,
+      hasNotifications,
+    });
+  }
+
+
 
   return (
     <SmoothScrollContext.Provider value={{ scrollToSection }}>
