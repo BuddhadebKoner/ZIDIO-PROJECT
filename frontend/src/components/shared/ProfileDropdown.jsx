@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useClerk } from '@clerk/clerk-react';
+import { getAvatarUrl } from '../../utils/constant';
 
 const ProfileDropdown = () => {
    const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -90,8 +91,8 @@ const ProfileDropdown = () => {
          >
             {currentUser?.avatar ? (
                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.fullName || "User"}
+                  src={getAvatarUrl(currentUser.avatar||"IM")} 
+                  alt={currentUser.avatar || "User Avatar"} // Use name for alt text
                   className="h-6 w-6 rounded-full object-cover border border-white/20"
                   onError={(e) => {
                      e.target.onerror = null;

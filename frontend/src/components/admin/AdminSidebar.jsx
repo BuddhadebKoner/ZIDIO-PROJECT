@@ -12,6 +12,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { getAvatarUrl } from '../../utils/constant';
 
 const AdminSidebar = () => {
   const { currentUser } = useAuth();
@@ -100,7 +101,7 @@ const AdminSidebar = () => {
             <div className="w-10 h-10 rounded-full bg-primary-800 flex items-center justify-center overflow-hidden">
               {currentUser?.avatar ? (
                 <img
-                  src={currentUser.avatar || '/default-avatar.png'}
+                  src={getAvatarUrl(currentUser.avatar) || '/default-avatar.png'}
                   className='w-10 h-10 object-cover'
                   alt={currentUser.fullName || 'Admin User'}
                 />

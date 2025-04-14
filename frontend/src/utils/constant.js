@@ -19,4 +19,11 @@ export const avatars = [
       name: 'SM',
       url: 'https://res.cloudinary.com/db4jch8sj/image/upload/v1744524376/SM_m3yerj.png',
    },
-]
+];
+
+
+// Find avatar name by URL if available
+export const getAvatarUrl = (avatarName) => {
+   const avatar = avatars.find((avatar) => avatar.name === avatarName);
+   return avatar ? avatar.url : null;
+};

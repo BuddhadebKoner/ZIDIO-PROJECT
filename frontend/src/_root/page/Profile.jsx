@@ -1,27 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { User, ShoppingBag, MapPin, LogOut, ChevronUp, ChevronDown, Camera, Loader2, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext'; // Make sure to import the actual auth context
+import { User, ShoppingBag, MapPin, LogOut, ChevronUp, ChevronDown, Camera, Loader2, AlertCircle, X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { avatars, getAvatarUrl } from '../../utils/constant';
+import { useUpdateAvatar } from '../../lib/query/queriesAndMutation';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
   const location = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [updateError, setUpdateError] = useState(null);
 
-  // Get authentication data from context
-  const { currentUser, isLoading, isAuthenticated, error } = useAuth();
+  const [uiState, setUiState] = useState({
+    errors: {
+      updateError: null,
+      generalError: null
+    },
+    notifications: []
+  });
 
-  // Available avatars in the public folder with names
-  const avatars = [
-    { path: "/garbage/avatars/BW.png", name: "BW" },
-    { path: "/garbage/avatars/CA.png", name: "CA" },
-    { path: "/garbage/avatars/IM.png", name: "IM" },
-    { path: "/garbage/avatars/SM.png", name: "SM" }
-  ];
+  const {
+    mutate: updateAvatar,
+    isPending: isUpdating,
+    error: updateErrorRaw
+  } = useUpdateAvatar();
 
-  // Redirect if not authenticated should be handled in a route guard or here
+  const { currentUser, isLoading, isAuthenticated, error: authError } = useAuth();
+
+  useEffect(() => {
+    if (updateErrorRaw) {
+      const errorMessage = updateErrorRaw.message || "Failed to update avatar. Please try again.";
+      setUiState(prev => ({
+        ...prev,
+        errors: {
+          ...prev.errors,
+          updateError: errorMessage
+        }
+      }));
+
+      const timer = setTimeout(() => {
+        setUiState(prev => ({
+          ...prev,
+          errors: {
+            ...prev.errors,
+            updateError: null
+          }
+        }));
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [updateErrorRaw]);
+
+  useEffect(() => {
+    if (authError) {
+      setUiState(prev => ({
+        ...prev,
+        errors: {
+          ...prev.errors,
+          generalError: authError
+        }
+      }));
+    }
+  }, [authError]);
+
+  const dismissError = (errorType) => {
+    setUiState(prev => ({
+      ...prev,
+      errors: {
+        ...prev.errors,
+        [errorType]: null
+      }
+    }));
+  };
+
   if (!isLoading && !isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -29,8 +80,8 @@ const Profile = () => {
           <AlertCircle className="mx-auto h-12 w-12 text-accent-500 mb-4" />
           <h3 className="text-lg font-medium mb-2">Authentication Required</h3>
           <p className="text-text-muted mb-4">Please log in to view your profile.</p>
-          <NavLink 
-            to="/login" 
+          <NavLink
+            to="/login"
             className="inline-block px-4 py-2 bg-primary-700 text-bg-white rounded-md hover:bg-primary-800 transition-colors"
           >
             Go to Login
@@ -40,31 +91,23 @@ const Profile = () => {
     );
   }
 
-  // Handle avatar selection - using proper error handling
-  const handleAvatarSelect = async (avatarPath) => {
-    setIsUpdating(true);
-    setUpdateError(null);
-    
-    try {
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (Math.random() > 0.05) {
-            resolve();
-          } else {
-            reject(new Error("Failed to update avatar"));
-          }
-        }, 1000);
-      });
-    } catch (error) {
-      setUpdateError("Failed to update avatar. Please try again.");
-      console.error("Avatar update error:", error);
-    } finally {
-      setIsUpdating(false);
-      setShowAvatarSelector(false);
-    }
+  const handleAvatarSelect = async (avatarName) => {
+    // Clear previous errors
+    dismissError('updateError');
+
+    // Use the existing updateAvatar mutation
+    updateAvatar(avatarName, {
+      onSuccess: () => {
+        // Use toast exactly as currently configured
+        toast.success("Avatar updated successfully!")
+      },
+      onError: (error) => {
+        // Add error handling with existing toast implementation
+        toast.error(error?.message || "Failed to update avatar")
+      }
+    });
   };
 
-  // Render avatar (either custom or initials)
   const renderAvatar = (size = "medium") => {
     const sizeClasses = {
       small: "w-12 h-12",
@@ -86,7 +129,7 @@ const Profile = () => {
       );
     }
 
-    const initials = currentUser.name 
+    const initials = currentUser.name
       ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
       : 'U';
 
@@ -94,7 +137,7 @@ const Profile = () => {
       return (
         <div className={`${sizeClasses[size]} rounded-full relative overflow-hidden`}>
           <img
-            src={currentUser.avatar}
+            src={getAvatarUrl(currentUser.avatar)}
             alt="User avatar"
             className="w-full h-full object-cover"
           />
@@ -111,7 +154,6 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col md:flex-row min-h-fit mt-20 px-4 md:px-8 lg:px-30 py-4">
-      {/* Mobile menu toggle */}
       <div className="md:hidden">
         <button
           onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -126,9 +168,7 @@ const Profile = () => {
       </div>
 
       <div className="flex flex-col md:flex-row w-full">
-        {/* Sidebar */}
         <aside className={`${showMobileMenu ? 'block' : 'hidden'} md:block w-full md:w-72 shadow-md md:shadow-none rounded-lg bg-surface p-4`}>
-          {/* User Quick Info */}
           <div className="pb-6 border-b border-gray-800">
             <div className="flex items-center space-x-3">
               {renderAvatar("small")}
@@ -186,7 +226,6 @@ const Profile = () => {
           </nav>
         </aside>
 
-        {/* Main Content - Outlet for nested routes */}
         <main className="flex-1 px-0 md:px-6 overflow-auto mt-10 md:mt-0">
           {location.pathname === '/profile' ? (
             <div className="">
@@ -195,37 +234,69 @@ const Profile = () => {
                   <Loader2 className="w-12 h-12 animate-spin text-primary-500 mb-4" />
                   <p className="text-text-muted">Loading your profile...</p>
                 </div>
-              ) : error ? (
+              ) : uiState.errors.generalError ? (
                 <div className="bg-accent-100 border-l-4 border-accent-500 p-4 mb-6 rounded">
-                  <div className="flex items-center">
-                    <AlertCircle className="h-6 w-6 text-accent-500 mr-3" />
-                    <p className="text-accent-700">
-                      {error || "An error occurred while loading your profile"}
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <AlertCircle className="h-6 w-6 text-accent-500 mr-3" />
+                      <p className="text-accent-700">
+                        {uiState.errors.generalError || "An error occurred while loading your profile"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => dismissError('generalError')}
+                      className="text-accent-500 hover:text-accent-700"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
                   </div>
                 </div>
               ) : (
                 <>
-                  {/* Display update error if any */}
-                  {updateError && (
-                    <div className="bg-accent-100 border-l-4 border-accent-500 p-4 mb-6 rounded">
-                      <div className="flex items-center">
-                        <AlertCircle className="h-5 w-5 text-accent-500 mr-3" />
-                        <p className="text-accent-700">{updateError}</p>
+                  {uiState.notifications.map(notification => (
+                    <div key={notification.id} className="bg-green-100 border-l-4 border-green-500 p-4 mb-6 rounded animate-fade-in">
+                      <div className="flex items-center justify-between">
+                        <p className="text-green-700">{notification.message}</p>
+                        <button
+                          onClick={() => setUiState(prev => ({
+                            ...prev,
+                            notifications: prev.notifications.filter(n => n.id !== notification.id)
+                          }))}
+                          className="text-green-500 hover:text-green-700"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {uiState.errors.updateError && (
+                    <div className="bg-accent-100 border-l-4 border-accent-500 p-4 mb-6 rounded animate-fade-in">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <AlertCircle className="h-5 w-5 text-accent-500 mr-3" />
+                          <p className="text-accent-700">
+                            {uiState.errors.updateError}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => dismissError('updateError')}
+                          className="text-accent-500 hover:text-accent-700"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
                       </div>
                     </div>
                   )}
-                
+
                   <div className="bg-surface rounded-lg shadow-sm p-6 mb-6 border border-gray-800/20">
                     <div className="flex flex-col md:flex-row md:items-center">
-                      {/* Avatar with change option */}
                       <div className="relative mb-4 md:mb-0 md:mr-6">
                         {renderAvatar("medium")}
                         <button
-                          onClick={() => setShowAvatarSelector(!showAvatarSelector)}
                           className="absolute bottom-0 right-0 bg-primary-600 p-2 rounded-full text-bg-white shadow-md"
                           title="Change avatar"
-                          disabled={isUpdating} 
+                          disabled={isUpdating}
                         >
                           {isUpdating ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -242,44 +313,31 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  {/* Avatar Selector */}
-                  {showAvatarSelector && (
-                    <div className="bg-surface p-6 rounded-lg shadow-md border border-gray-800/20 mb-6">
-                      <h3 className="font-semibold text-text mb-4">Choose Avatar</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                        {/* Option to use initials */}
+                  <div className="bg-surface p-6 rounded-lg shadow-md border border-gray-800/20 mb-6">
+                    <h3 className="font-semibold text-text mb-4">Choose Avatar</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {avatars.map((avatar) => (
                         <div
-                          onClick={() => handleAvatarSelect(null)}
-                          className={`cursor-pointer rounded-md p-2 flex flex-col items-center ${currentUser.avatar === null ? 'bg-primary-600/20 ring-2 ring-primary-600' : 'hover:bg-primary-600/20'}`}
+                          key={avatar.id}
+                          onClick={() => handleAvatarSelect(avatar.name)}
+                          className={`cursor-pointer rounded-md p-2 flex flex-col items-center ${currentUser.avatar === avatar.name
+                              ? 'bg-primary-600/20 ring-2 ring-primary-600'
+                              : 'hover:bg-primary-600/20'
+                            } ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}
                         >
-                          <div className="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center text-xl font-semibold text-bg-white">
-                            {currentUser.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || 'U'}
+                          <div className="w-16 h-16 rounded-full overflow-hidden">
+                            <img
+                              src={avatar.url}
+                              alt={`Avatar ${avatar.name}`}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
-                          <span className="mt-2 text-sm">Initials</span>
+                          <span className="mt-2 text-sm">{avatar.name}</span>
                         </div>
-
-                        {/* Available avatars */}
-                        {avatars.map((avatar, index) => (
-                          <div
-                            key={index}
-                            onClick={() => handleAvatarSelect(avatar.path)}
-                            className={`cursor-pointer rounded-md p-2 flex flex-col items-center ${currentUser.avatar === avatar.path ? 'bg-primary-600/20 ring-2 ring-primary-600' : 'hover:bg-primary-600/20'}`}
-                          >
-                            <div className="w-16 h-16 rounded-full overflow-hidden">
-                              <img
-                                src={avatar.path}
-                                alt={`Avatar ${avatar.name}`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <span className="mt-2 text-sm">{avatar.name}</span>
-                          </div>
-                        ))}
-                      </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
 
-                  {/* Order and Address summary cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20">
                       <div className="flex items-center">
@@ -303,7 +361,6 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  {/* Quick Actions */}
                   <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20">
                     <h3 className="font-semibold text-text mb-4">Quick Actions</h3>
                     <div className="flex flex-wrap gap-3">
