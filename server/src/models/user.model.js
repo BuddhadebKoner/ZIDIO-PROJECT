@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
    },
    avatar: {
       type: String,
-      default: null,
+      required: true,
    },
    address: {
       type: mongoose.Schema.Types.ObjectId,
