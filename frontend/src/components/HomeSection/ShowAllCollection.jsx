@@ -19,57 +19,57 @@ const ShowAllCollection = () => {
          id: 1,
          name: "Iron Man",
          description: "Genius billionaire in a high-tech armored suit",
-         image: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-         thumbnail: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+         image: "https://cdn.shopify.com/s/files/1/1002/7150/files/Marvel-Designs-Collection-banner-456.jpg?v=1632822779",
+         thumbnail: "/garbage/banner.png"
       },
       {
          id: 2,
          name: "Captain America",
          description: "Patriot and super soldier fighting for justice",
-         image: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-         thumbnail: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+         image: "/garbage/naruto.png",
+         thumbnail: "https://cmsapi-frontend.naruto-official.com/site/api/naruto/Image/get?path=/naruto/en/sitecommonbanner/2024/09/20/ZKD0RdfPAvXQh0M8/NARUTOMANIA-EN.png"
       },
       {
          id: 3,
          name: "Spider-Man",
          description: "The agile web-slinger saving the day",
-         image: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-         thumbnail: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+         image: "https://cdn.shopify.com/s/files/1/1002/7150/files/Marvel-Designs-Collection-banner-456.jpg?v=1632822779",
+         thumbnail: "/garbage/banner.png"
       },
       {
          id: 4,
          name: "Thor",
          description: "God of thunder with unmatched power",
-         image: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-         thumbnail: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+         image: "/garbage/naruto.png",
+         thumbnail: "https://cmsapi-frontend.naruto-official.com/site/api/naruto/Image/get?path=/naruto/en/sitecommonbanner/2024/09/20/ZKD0RdfPAvXQh0M8/NARUTOMANIA-EN.png"
       },
       {
          id: 5,
          name: "Iron Man",
          description: "Genius billionaire in a high-tech armored suit",
-         image: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-         thumbnail: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+         image: "https://cdn.shopify.com/s/files/1/1002/7150/files/Marvel-Designs-Collection-banner-456.jpg?v=1632822779",
+         thumbnail: "/garbage/banner.png"
       },
       {
          id: 6,
          name: "Captain America",
          description: "Patriot and super soldier fighting for justice",
-         image: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-         thumbnail: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+         image: "/garbage/naruto.png",
+         thumbnail: "https://cmsapi-frontend.naruto-official.com/site/api/naruto/Image/get?path=/naruto/en/sitecommonbanner/2024/09/20/ZKD0RdfPAvXQh0M8/NARUTOMANIA-EN.png"
       },
       {
          id: 7,
          name: "Spider-Man",
          description: "The agile web-slinger saving the day",
-         image: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-         thumbnail: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+         image: "https://cdn.shopify.com/s/files/1/1002/7150/files/Marvel-Designs-Collection-banner-456.jpg?v=1632822779",
+         thumbnail: "/garbage/banner.png"
       },
       {
          id: 8,
          name: "Thor",
          description: "God of thunder with unmatched power",
-         image: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-         thumbnail: "https://images.unsplash.com/photo-1519340241574-2cec6aef0c01?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+         image: "/garbage/naruto.png",
+         thumbnail: "https://cmsapi-frontend.naruto-official.com/site/api/naruto/Image/get?path=/naruto/en/sitecommonbanner/2024/09/20/ZKD0RdfPAvXQh0M8/NARUTOMANIA-EN.png"
       }
    ];
 

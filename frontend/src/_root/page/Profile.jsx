@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { User, ShoppingBag, MapPin, LogOut, ChevronUp, ChevronDown, Camera, Loader2 } from 'lucide-react';
+import { User, ShoppingBag, MapPin, LogOut, ChevronUp, ChevronDown, Camera, Loader2, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext'; // Make sure to import the actual auth context
 
 const Profile = () => {
   const location = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [userData, setUserData] = useState(null);
+  const [updateError, setUpdateError] = useState(null);
+
+  // Get authentication data from context
+  const { currentUser, isLoading, isAuthenticated, error } = useAuth();
 
   // Available avatars in the public folder with names
   const avatars = [
@@ -19,67 +21,47 @@ const Profile = () => {
     { path: "/garbage/avatars/SM.png", name: "SM" }
   ];
 
-  // Simulate fetching user data from API
-  useEffect(() => {
-    const fetchUserData = async () => {
-      setIsLoading(true);
+  // Redirect if not authenticated should be handled in a route guard or here
+  if (!isLoading && !isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center p-6 bg-surface rounded-lg shadow-md">
+          <AlertCircle className="mx-auto h-12 w-12 text-accent-500 mb-4" />
+          <h3 className="text-lg font-medium mb-2">Authentication Required</h3>
+          <p className="text-text-muted mb-4">Please log in to view your profile.</p>
+          <NavLink 
+            to="/login" 
+            className="inline-block px-4 py-2 bg-primary-700 text-bg-white rounded-md hover:bg-primary-800 transition-colors"
+          >
+            Go to Login
+          </NavLink>
+        </div>
+      </div>
+    );
+  }
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Mock user data
-      const data = {
-        name: "Buddhadeb Koner",
-        email: "iambuddhadebkoner@gmail.com",
-        phone: "+91 1234567890",
-        initials: "BK",
-        orderCount: 12,
-        savedAddresses: 2,
-        avatar: null 
-      };
-
-      setUserData(data);
-      setIsLoading(false);
-    };
-
-    fetchUserData();
-  }, []);
-
-  // Navigation items with Lucide icons
-  const navItems = [
-    {
-      title: "Account Details",
-      path: "/profile/account-details",
-      icon: <User className="w-5 h-5" />
-    },
-    {
-      title: "Orders",
-      path: "/profile/orders",
-      icon: <ShoppingBag className="w-5 h-5" />
-    },
-    {
-      title: "Address",
-      path: "/profile/address",
-      icon: <MapPin className="w-5 h-5" />
-    }
-  ];
-
-  // Handle avatar selection - simulate API update
+  // Handle avatar selection - using proper error handling
   const handleAvatarSelect = async (avatarPath) => {
     setIsUpdating(true);
-
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Update local state to simulate successful API response
-    setUserData(prev => ({
-      ...prev,
-      avatar: avatarPath
-    }));
-
-    setSelectedAvatar(avatarPath);
-    setIsUpdating(false);
-    setShowAvatarSelector(false);
+    setUpdateError(null);
+    
+    try {
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (Math.random() > 0.05) {
+            resolve();
+          } else {
+            reject(new Error("Failed to update avatar"));
+          }
+        }, 1000);
+      });
+    } catch (error) {
+      setUpdateError("Failed to update avatar. Please try again.");
+      console.error("Avatar update error:", error);
+    } finally {
+      setIsUpdating(false);
+      setShowAvatarSelector(false);
+    }
   };
 
   // Render avatar (either custom or initials)
@@ -96,7 +78,7 @@ const Profile = () => {
       large: "text-4xl"
     };
 
-    if (!userData) {
+    if (isLoading || !currentUser) {
       return (
         <div className={`${sizeClasses[size]} rounded-full bg-gray-200 flex items-center justify-center`}>
           <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -104,11 +86,15 @@ const Profile = () => {
       );
     }
 
-    if (userData.avatar) {
+    const initials = currentUser.name 
+      ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+      : 'U';
+
+    if (currentUser.avatar) {
       return (
         <div className={`${sizeClasses[size]} rounded-full relative overflow-hidden`}>
           <img
-            src={userData.avatar}
+            src={currentUser.avatar}
             alt="User avatar"
             className="w-full h-full object-cover"
           />
@@ -117,7 +103,7 @@ const Profile = () => {
     } else {
       return (
         <div className={`${sizeClasses[size]} rounded-full bg-primary-600 flex items-center justify-center text-bg-white relative`}>
-          <span className={textSizeClasses[size]}>{userData.initials}</span>
+          <span className={textSizeClasses[size]}>{initials}</span>
         </div>
       );
     }
@@ -154,7 +140,23 @@ const Profile = () => {
 
           <nav className="">
             <div className="flex flex-col space-y-2">
-              {navItems.map((item) => (
+              {[
+                {
+                  title: "Account Details",
+                  path: "/profile/account-details",
+                  icon: <User className="w-5 h-5" />
+                },
+                {
+                  title: "Orders",
+                  path: "/profile/orders",
+                  icon: <ShoppingBag className="w-5 h-5" />
+                },
+                {
+                  title: "Address",
+                  path: "/profile/address",
+                  icon: <MapPin className="w-5 h-5" />
+                }
+              ].map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}
@@ -193,8 +195,27 @@ const Profile = () => {
                   <Loader2 className="w-12 h-12 animate-spin text-primary-500 mb-4" />
                   <p className="text-text-muted">Loading your profile...</p>
                 </div>
+              ) : error ? (
+                <div className="bg-accent-100 border-l-4 border-accent-500 p-4 mb-6 rounded">
+                  <div className="flex items-center">
+                    <AlertCircle className="h-6 w-6 text-accent-500 mr-3" />
+                    <p className="text-accent-700">
+                      {error || "An error occurred while loading your profile"}
+                    </p>
+                  </div>
+                </div>
               ) : (
                 <>
+                  {/* Display update error if any */}
+                  {updateError && (
+                    <div className="bg-accent-100 border-l-4 border-accent-500 p-4 mb-6 rounded">
+                      <div className="flex items-center">
+                        <AlertCircle className="h-5 w-5 text-accent-500 mr-3" />
+                        <p className="text-accent-700">{updateError}</p>
+                      </div>
+                    </div>
+                  )}
+                
                   <div className="bg-surface rounded-lg shadow-sm p-6 mb-6 border border-gray-800/20">
                     <div className="flex flex-col md:flex-row md:items-center">
                       {/* Avatar with change option */}
@@ -204,7 +225,7 @@ const Profile = () => {
                           onClick={() => setShowAvatarSelector(!showAvatarSelector)}
                           className="absolute bottom-0 right-0 bg-primary-600 p-2 rounded-full text-bg-white shadow-md"
                           title="Change avatar"
-                          disabled={isUpdating}
+                          disabled={isUpdating} 
                         >
                           {isUpdating ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -214,9 +235,9 @@ const Profile = () => {
                         </button>
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-text mb-1">{userData.name}</h2>
-                        <p className="text-text-muted mb-1">{userData.email}</p>
-                        <p className="text-text-muted">{userData.phone}</p>
+                        <h2 className="text-2xl font-bold text-text mb-1">{currentUser.fullName}</h2>
+                        <p className="text-text-muted mb-1">{currentUser.email}</p>
+                        <p className="text-text-muted">{currentUser.phone || 'No phone number'}</p>
                       </div>
                     </div>
                   </div>
@@ -229,10 +250,10 @@ const Profile = () => {
                         {/* Option to use initials */}
                         <div
                           onClick={() => handleAvatarSelect(null)}
-                          className={`cursor-pointer rounded-md p-2 flex flex-col items-center ${userData.avatar === null ? 'bg-primary-600/20 ring-2 ring-primary-600' : 'hover:bg-primary-600/20'}`}
+                          className={`cursor-pointer rounded-md p-2 flex flex-col items-center ${currentUser.avatar === null ? 'bg-primary-600/20 ring-2 ring-primary-600' : 'hover:bg-primary-600/20'}`}
                         >
                           <div className="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center text-xl font-semibold text-bg-white">
-                            {userData.initials}
+                            {currentUser.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || 'U'}
                           </div>
                           <span className="mt-2 text-sm">Initials</span>
                         </div>
@@ -242,7 +263,7 @@ const Profile = () => {
                           <div
                             key={index}
                             onClick={() => handleAvatarSelect(avatar.path)}
-                            className={`cursor-pointer rounded-md p-2 flex flex-col items-center ${userData.avatar === avatar.path ? 'bg-primary-600/20 ring-2 ring-primary-600' : 'hover:bg-primary-600/20'}`}
+                            className={`cursor-pointer rounded-md p-2 flex flex-col items-center ${currentUser.avatar === avatar.path ? 'bg-primary-600/20 ring-2 ring-primary-600' : 'hover:bg-primary-600/20'}`}
                           >
                             <div className="w-16 h-16 rounded-full overflow-hidden">
                               <img
@@ -258,13 +279,14 @@ const Profile = () => {
                     </div>
                   )}
 
+                  {/* Order and Address summary cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20">
                       <div className="flex items-center">
                         <ShoppingBag className="w-8 h-8 text-primary-400 mr-3" />
                         <div>
                           <h3 className="font-semibold text-text">Orders</h3>
-                          <p className="text-xl font-bold">{userData.orderCount}</p>
+                          <p className="text-xl font-bold">{currentUser.orderCount || 0}</p>
                           <p className="text-sm text-text-muted mt-1">View your order history</p>
                         </div>
                       </div>
@@ -274,17 +296,34 @@ const Profile = () => {
                         <MapPin className="w-8 h-8 text-primary-400 mr-3" />
                         <div>
                           <h3 className="font-semibold text-text">Saved Addresses</h3>
-                          <p className="text-xl font-bold">{userData.savedAddresses}</p>
+                          <p className="text-xl font-bold">{currentUser.savedAddresses || 0}</p>
                           <p className="text-sm text-text-muted mt-1">Manage your delivery addresses</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
+                  {/* Quick Actions */}
                   <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20">
                     <h3 className="font-semibold text-text mb-4">Quick Actions</h3>
                     <div className="flex flex-wrap gap-3">
-                      {navItems.map((item) => (
+                      {[
+                        {
+                          title: "Account Details",
+                          path: "/profile/account-details",
+                          icon: <User className="w-5 h-5" />
+                        },
+                        {
+                          title: "Orders",
+                          path: "/profile/orders",
+                          icon: <ShoppingBag className="w-5 h-5" />
+                        },
+                        {
+                          title: "Address",
+                          path: "/profile/address",
+                          icon: <MapPin className="w-5 h-5" />
+                        }
+                      ].map((item) => (
                         <NavLink
                           key={item.path}
                           to={item.path}

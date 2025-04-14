@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { isAuthenticated } from "../lib/api/auth.api";
+import { useUser } from '@clerk/clerk-react'
 
 const AuthContext = createContext();
 
@@ -8,6 +9,10 @@ export const AuthProvider = ({ children }) => {
    const [isLoading, setIsLoading] = useState(true);
    const [error, setError] = useState(null);
    const [isAuth, setIsAuth] = useState(false);
+
+   // fetch current user from clark
+   const { isLoaded, user } = useUser()
+
 
    // Function to fetch user data
    const fetchUserData = async () => {
@@ -35,9 +40,8 @@ export const AuthProvider = ({ children }) => {
    };
 
    useEffect(() => {
-      // Call isAuthenticated when the user first lands on the website
       fetchUserData();
-   }, []);
+   }, [user, isLoaded]);
 
    const refreshUserData = async () => {
       await fetchUserData();
@@ -47,6 +51,7 @@ export const AuthProvider = ({ children }) => {
    const cartItemsCount = currentUser?.cart?.length || 0;
    const wishlistItemsCount = currentUser?.wishlist?.length || 0;
    const hasNotifications = currentUser?.notifications?.length > 0;
+   const isAdmin = currentUser?.role === "admin";
 
    const authValues = {
       isAuthenticated: isAuth,
@@ -57,10 +62,8 @@ export const AuthProvider = ({ children }) => {
       wishlistItemsCount,
       hasNotifications,
       refreshUserData,
-      logout: () => {
-         setCurrentUser(null);
-         setIsAuth(false);
-      }
+      isAdmin,
+      user,
    };
 
    return <AuthContext.Provider value={authValues}>{children}</AuthContext.Provider>;

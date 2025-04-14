@@ -3,12 +3,18 @@ import { Route, Routes } from "react-router-dom";
 import SignIn from "./_auth/page/SignIn";
 import SignUp from "./_auth/page/SignUp";
 import ForgotPassword from "./_auth/page/ForgotPassword";
-import { AccountDetails, Address, Cart, Categories, Collections, Home, Offers, Orders, Product, Profile, Search, Wishlist } from "./_root/page";
 import AuthLayout from "./_auth/AuthLayout";
 import RootLayout from "./_root/RootLayout";
-import { useEffect, useRef, createContext, useContext } from "react";
+import { useEffect, useRef, createContext, useContext, useState } from "react";
 import Lenis from '@studio-freight/lenis';
 import { useAuth } from "./context/AuthContext";
+import FullPageLoader from "./components/loaders/FullPageLoader";
+import AdminLayout from "./_admin/AdminLayout";
+
+
+// pages
+import { AccountDetails, Address, Cart, Categories, Collections, Home, Offers, Orders, Product, Profile, Search, SosCallBack, Wishlist } from "./_root/page";
+import { AdminCategory, AdminCollection, AdminCustomers, AdminDashboard, AdminOffer, AdminOrders, AdminProduct, AdminReviews, AdminSettings } from "./_admin/page";
 
 export const SmoothScrollContext = createContext();
 
@@ -16,6 +22,8 @@ export const useSmoothScroll = () => useContext(SmoothScrollContext);
 
 const App = () => {
   const lenis = useRef(null);
+  // Add a new state for application readiness
+  const [appIsReady, setAppIsReady] = useState(false);
 
   useEffect(() => {
     lenis.current = new Lenis({
@@ -60,32 +68,56 @@ const App = () => {
     hasNotifications,
   } = useAuth();
 
-  if (!isLoading) {
-    console.log({
-      isAuthenticated,
-      error,
-      currentUser,
-      cartItemsCount,
-      wishlistItemsCount,
-      hasNotifications,
-    });
+  useEffect(() => {
+    const documentReady = document.readyState === 'complete';
+
+    const setReady = () => {
+      console.log({
+        isAuthenticated,
+        error,
+        currentUser,
+        cartItemsCount,
+        wishlistItemsCount,
+        hasNotifications,
+      });
+      setAppIsReady(true);
+    };
+
+    if (!isLoading && documentReady) {
+      const minLoadTimer = setTimeout(() => {
+        setReady();
+      }, 800);
+
+      return () => clearTimeout(minLoadTimer);
+    } else if (!documentReady) {
+      const handleLoad = () => {
+        if (!isLoading) {
+          const minLoadTimer = setTimeout(() => {
+            setReady();
+          }, 800);
+
+          return () => clearTimeout(minLoadTimer);
+        }
+      };
+
+      window.addEventListener('load', handleLoad);
+      return () => window.removeEventListener('load', handleLoad);
+    }
+  }, [isLoading, isAuthenticated, error, currentUser, cartItemsCount, wishlistItemsCount, hasNotifications]);
+
+  if (!appIsReady) {
+    return <FullPageLoader />;
   }
-
-
 
   return (
     <SmoothScrollContext.Provider value={{ scrollToSection }}>
-      <header
-        className='flex justify-center items-center bg-gray-900 p-3 text-gray-100 border-b border-gray-800'>
-        <p className="text-sm font-normal">Use code <span className="text-primary-300 font-semibold">SAVE350</span> & get ₹350/- off on order value of ₹3000</p>
-      </header>
-      <div class="star-dots"></div>
-      <div class="sparkle"></div>
-      <div class="sparkle"></div>
-      <div class="sparkle"></div>
-      <div class="sparkle"></div>
-      <div class="sparkle"></div>
-      <div class="sparkle"></div>
+      <div className="star-dots"></div>
+      <div className="sparkle"></div>
+      <div className="sparkle"></div>
+      <div className="sparkle"></div>
+      <div className="sparkle"></div>
+      <div className="sparkle"></div>
+      <div className="sparkle"></div>
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path='/sign-in' element={<SignIn />} />
@@ -107,6 +139,35 @@ const App = () => {
           <Route path="/search" element={<Search />} />
           <Route path="/product/:slug" element={<Product />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/sso-callback" element={<SosCallBack />} />
+        </Route>
+
+        <Route path="/admin" element={<AdminLayout />}>
+          {/*admin dashbord  */}
+          <Route index element={<AdminDashboard />} />
+          {/* product edit and update */}
+          <Route path="/admin/products" element={<AdminProduct />} /> 
+          <Route path="/admin/products/:slug" element={<AdminProduct />} />
+          {/* edit update collections */}
+          <Route path="/admin/collection" element={<AdminCollection />} /> 
+          <Route path="/admin/collection/:slug" element={<AdminCollection />} /> 
+          {/* edit update category */}
+          <Route path="/admin/category" element={<AdminCategory />} /> 
+          <Route path="/admin/category/:slug" element={<AdminCategory />} /> 
+          {/* add offer */}
+          <Route path="/admin/offer" element={<AdminOffer />} />
+          <Route path="/admin/offer/:slug" element={<AdminOffer />} />
+          {/* admin settings */}
+          <Route path="/admin/settings" element={<AdminSettings />} />
+          {/* orders */}
+          <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/orders/:slug" element={<AdminOrders />} />
+          {/* customers */}
+          <Route path="/admin/customers" element={<AdminCustomers />} />
+          <Route path="/admin/customers/:slug" element={<AdminCustomers />} />
+          {/* reviews */}
+          <Route path="/admin/reviews" element={<AdminReviews />} />
+          <Route path="/admin/reviews/:slug" element={<AdminReviews />} />
         </Route>
       </Routes>
       {/* Toast notifications */}

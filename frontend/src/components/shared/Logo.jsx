@@ -7,9 +7,9 @@ const Logo = () => {
     <div className="absolute inset-0 flex items-center justify-center flex-grow pointer-events-none z-50">
       <Link to={"/"} className="font-semibold hover:text-primary-300 transition-all duration-300 pointer-events-auto cursor-pointer">
         <img
-          src="/loadingLogo.gif"
+          src="/animateLogo.gif"
           alt="Loading..."
-          style={{ width: "150px" }}
+          className='w-13 object-contain'
         />
       </Link>
     </div>

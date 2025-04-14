@@ -5,12 +5,13 @@ import MobileMenuButton from "../shared/MobileMenuButton";
 import ProfileDropdown from "../shared/ProfileDropdown";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth } from "../../context/AuthContext";
 import CartIcon from "../shared/CartIcon";
+import ElementLoader from "../loaders/ElementLoader";
 
 const Navbar = ({ toggleSidebar }) => {
    const [scrolled, setScrolled] = useState(false);
-   const { isSignedIn } = useUser();
+   const { isAuthenticated, cartItemsCount, isLoading, error } = useAuth();
 
    // Detect scroll position to change navbar appearance 
    useEffect(() => {
@@ -52,9 +53,11 @@ const Navbar = ({ toggleSidebar }) => {
                   <Search size={20} />
                </Link>
 
-               <CartIcon itemCount={0} />
+               <CartIcon itemCount={cartItemsCount} />
 
-               {isSignedIn ? (
+               {isLoading ? (
+                  <ElementLoader />
+               ) : isAuthenticated ? (
                   <ProfileDropdown />
                ) : (
                   <Link to="/sign-in" className="hidden sm:block text-white hover:text-primary-300 transition-all duration-300 hover:scale-110 cursor-pointer">
