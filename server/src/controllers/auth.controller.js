@@ -1,29 +1,7 @@
 import { clerkClient } from "@clerk/express";
 import { User } from "../models/user.model.js";
+import { avatars } from "../constant.js";
 
-// Move avatars array outside the function for better efficiency
-export const avatars = [
-   {
-      id: 1,
-      name: 'IM',
-      url: 'https://res.cloudinary.com/db4jch8sj/image/upload/v1744524375/IM_tjtzqd.png',
-   },
-   {
-      id: 2,
-      name: 'BW',
-      url: 'https://res.cloudinary.com/db4jch8sj/image/upload/v1744524380/BW_z9m0rt.png',
-   },
-   {
-      id: 3,
-      name: 'CA',
-      url: 'https://res.cloudinary.com/db4jch8sj/image/upload/v1744524377/CA_ti8tsm.png',
-   },
-   {
-      id: 4,
-      name: 'SM',
-      url: 'https://res.cloudinary.com/db4jch8sj/image/upload/v1744524376/SM_m3yerj.png',
-   },
-];
 
 export const isAuthenticated = async (req, res) => {
    try {
@@ -67,7 +45,7 @@ export const isAuthenticated = async (req, res) => {
             fullName,
             email,
             role: isClerkAdmin ? "admin" : "user", 
-            avatar: randomAvatar.url,
+            avatar: randomAvatar.name,
          });
 
          // Save the new user

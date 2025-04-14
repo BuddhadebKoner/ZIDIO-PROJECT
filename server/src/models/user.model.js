@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
       trim: true,
       default: null,
    },
+   profileUpdates: {
+      type: [Date],
+      default: [],
+   },
    role: {
       type: String,
       enum: ['admin', 'user'],

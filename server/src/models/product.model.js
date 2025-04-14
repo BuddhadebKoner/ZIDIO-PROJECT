@@ -54,6 +54,14 @@ const productSchema = new mongoose.Schema({
       required: true,
       enum: ['S', 'M', 'L', 'XL', 'XXL'],
    },
+   tags: {
+      type: [String],
+      required: true,
+   },
+   technologyStack: {
+      type: [String],
+      required: true,
+   },
    // featured
    isExcusiveProducts: {
       type: Boolean,

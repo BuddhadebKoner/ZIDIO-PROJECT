@@ -1,4 +1,3 @@
-// src/routes/auth.route.js
 import express from 'express';
 import { isAuthenticated } from '../controllers/auth.controller.js';
 import { userAuth } from '../middlewares/userAuth.middleware.js';

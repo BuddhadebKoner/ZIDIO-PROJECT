@@ -5,6 +5,7 @@ import connectDB from "./src/config/db.js";
 // import "./src/utils/offerStatusUpdater.js";
 import { clerkMiddleware } from '@clerk/express'
 import authRouter from './src/routes/auth.route.js';
+import userRouter from './src/routes/user.route.js';
 
 dotenv.config();
 
@@ -47,6 +48,8 @@ app.get('/', (req, res) => {
 
 // auth route
 app.use('/api/auth', authRouter);
+// user route
+app.use('/api/user', userRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on PORT http://localhost:${port}/`);
