@@ -91,7 +91,7 @@ const ProfileDropdown = () => {
          >
             {currentUser?.avatar ? (
                <img
-                  src={getAvatarUrl(currentUser.avatar||"IM")} 
+                  src={getAvatarUrl(currentUser.avatar || "IM")}
                   alt={currentUser.avatar || "User Avatar"} // Use name for alt text
                   className="h-6 w-6 rounded-full object-cover border border-white/20"
                   onError={(e) => {
@@ -145,7 +145,7 @@ const ProfileMenu = ({ user, menuItems, onClose, onSignOut }) => {
 
    return (
       <div
-         className="absolute right-0 mt-2 w-48 bg-black/90 backdrop-blur-md border border-white/10 rounded-md shadow-lg py-1 z-50"
+         className="absolute right-0 mt-2 w-48  glass-morphism  rounded-md shadow-lg py-1 z-50"
          role="menu"
          aria-orientation="vertical"
          ref={menuRef}

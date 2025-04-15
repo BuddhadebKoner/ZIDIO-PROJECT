@@ -73,6 +73,28 @@ const Profile = () => {
     }));
   };
 
+  const maskPhoneNumber = (phoneNumber) => {
+    if (!phoneNumber) return 'No phone number';
+
+    const parts = phoneNumber.split(' ');
+    let countryCode = '';
+    let number = phoneNumber;
+
+    if (parts.length > 1) {
+      countryCode = parts[0] + ' ';
+      number = parts[1];
+    }
+
+    if (number.length <= 4) return phoneNumber;
+
+    const firstTwoDigits = number.substring(0, 2);
+    const lastTwoDigits = number.substring(number.length - 2);
+    const middleLength = number.length - 4;
+    const maskedMiddle = '*'.repeat(middleLength);
+
+    return `${countryCode}${firstTwoDigits}${maskedMiddle}${lastTwoDigits}`;
+  };
+
   if (!isLoading && !isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -92,17 +114,13 @@ const Profile = () => {
   }
 
   const handleAvatarSelect = async (avatarName) => {
-    // Clear previous errors
     dismissError('updateError');
 
-    // Use the existing updateAvatar mutation
     updateAvatar(avatarName, {
       onSuccess: () => {
-        // Use toast exactly as currently configured
         toast.success("Avatar updated successfully!")
       },
       onError: (error) => {
-        // Add error handling with existing toast implementation
         toast.error(error?.message || "Failed to update avatar")
       }
     });
@@ -168,7 +186,7 @@ const Profile = () => {
       </div>
 
       <div className="flex flex-col md:flex-row w-full">
-        <aside className={`${showMobileMenu ? 'block' : 'hidden'} md:block w-full md:w-72 shadow-md md:shadow-none rounded-lg bg-surface p-4`}>
+        <aside className={`${showMobileMenu ? 'block' : 'hidden'} md:block w-full md:w-72 shadow-md md:shadow-none rounded-lg p-4 glass-morphism `}>
           <div className="pb-6 border-b border-gray-800">
             <div className="flex items-center space-x-3">
               {renderAvatar("small")}
@@ -289,16 +307,17 @@ const Profile = () => {
                     </div>
                   )}
 
-                  <div className="bg-surface rounded-lg shadow-sm p-6 mb-6 border border-gray-800/20">
+                  {/* User profile information */}
+                  <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20 mb-6 glass-morphism">
                     <div className="flex flex-col md:flex-row md:items-center">
                       <div className="relative mb-4 md:mb-0 md:mr-6">
                         {renderAvatar("medium")}
                         <button
                           className="absolute bottom-0 right-0 bg-primary-600 p-2 rounded-full text-bg-white shadow-md"
                           title="Change avatar"
-                          disabled={isUpdating}
+                          disabled={isUpdating || isLoading}
                         >
-                          {isUpdating ? (
+                          {isUpdating || isLoading ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
                             <Camera className="w-4 h-4" />
@@ -308,12 +327,13 @@ const Profile = () => {
                       <div>
                         <h2 className="text-2xl font-bold text-text mb-1">{currentUser.fullName}</h2>
                         <p className="text-text-muted mb-1">{currentUser.email}</p>
-                        <p className="text-text-muted">{currentUser.phone || 'No phone number'}</p>
+                        <p className="text-text-muted">{maskPhoneNumber(currentUser.phone)}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-surface p-6 rounded-lg shadow-md border border-gray-800/20 mb-6">
+                  {/* Avatar selection */}
+                  <div className="bg-surface p-6 rounded-lg shadow-md border border-gray-800/20 mb-6 glass-morphism">
                     <h3 className="font-semibold text-text mb-4">Choose Avatar</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       {avatars.map((avatar) => (
@@ -321,8 +341,8 @@ const Profile = () => {
                           key={avatar.id}
                           onClick={() => handleAvatarSelect(avatar.name)}
                           className={`cursor-pointer rounded-md p-2 flex flex-col items-center ${currentUser.avatar === avatar.name
-                              ? 'bg-primary-600/20 ring-2 ring-primary-600'
-                              : 'hover:bg-primary-600/20'
+                            ? 'bg-primary-600/20 ring-2 ring-primary-600'
+                            : 'hover:bg-primary-600/20'
                             } ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}
                         >
                           <div className="w-16 h-16 rounded-full overflow-hidden">
@@ -338,8 +358,9 @@ const Profile = () => {
                     </div>
                   </div>
 
+                  {/* Stats cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20">
+                    <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20 glass-morphism">
                       <div className="flex items-center">
                         <ShoppingBag className="w-8 h-8 text-primary-400 mr-3" />
                         <div>
@@ -349,7 +370,7 @@ const Profile = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20">
+                    <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20 glass-morphism">
                       <div className="flex items-center">
                         <MapPin className="w-8 h-8 text-primary-400 mr-3" />
                         <div>
@@ -361,7 +382,8 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20">
+                  {/* Quick actions */}
+                  <div className="bg-surface p-6 rounded-lg shadow-sm border border-gray-800/20 glass-morphism">
                     <h3 className="font-semibold text-text mb-4">Quick Actions</h3>
                     <div className="flex flex-wrap gap-3">
                       {[

@@ -51,7 +51,7 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <aside className="w-64 h-screen bg-surface fixed left-0 top-0 shadow-lg overflow-y-auto">
+    <aside className="w-64 h-screen glass-morphism  fixed left-0 top-0 shadow-lg overflow-y-auto">
       {/* Header */}
       <Link to="/" className="flex justify-start items-center px-6 py-2 border-b border-gray-800">
         <img

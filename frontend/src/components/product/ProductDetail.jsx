@@ -209,7 +209,7 @@ const ProductDetail = ({ product }) => {
                </div>
 
                {/* Delivery Info */}
-               <div className="border border-gray-700 rounded p-4 mt-2">
+               <div className="glass-morphism border border-gray-700 rounded p-4 mt-2">
                   <div className="flex items-start gap-3">
                      <Truck className="text-primary-300 mt-1 flex-shrink-0" size={18} />
                      <div>

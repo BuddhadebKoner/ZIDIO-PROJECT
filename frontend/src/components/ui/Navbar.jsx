@@ -31,10 +31,15 @@ const Navbar = ({ toggleSidebar }) => {
    return (
       <section className="z-40 relative">
          <nav className={`${scrolled ? 'fixed' : 'absolute'} top-0 left-0 right-0 z-50 flex justify-between items-center px-4 md:px-8 lg:px-30 py-4 text-white 
-                       transition-all duration-300 ease-in-out hover:bg-black/80 cursor-pointer
+                       transition-all duration-300 ease-in-out 
                        ${scrolled
-               ? 'bg-black/80 backdrop-blur-md py-3 shadow-lg'
-               : 'bg-gradient-to-b from-black/40 to-transparent py-4'}`}>
+               ? 'glass-morphism py-3 shadow-lg border-b border-gray-800/20'
+               : 'bg-gradient-to-b from-black/30 to-transparent py-4 group'}`}>
+
+            {/* Add a pseudo-element overlay for hover effect when not scrolled */}
+            {!scrolled && 
+               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 glass-morphism border-b border-gray-800/20 pointer-events-none"></div>
+            }
 
             {/* Hamburger for mobile */}
             <MobileMenuButton toggleSidebar={toggleSidebar} />

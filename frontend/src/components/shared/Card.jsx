@@ -21,7 +21,7 @@ const Card = ({ children, className, radius = "md", shadow = "sm", slug }) => {
 
   return (
     <div
-      className={`bg-surface border border-gray-800 ${radiusClasses[radius] || ""} ${shadowClasses[shadow] || ""} ${className || ""}`}>
+      className={`glass-morphism  border-gray-800 ${radiusClasses[radius] || ""} ${shadowClasses[shadow] || ""} ${className || ""}`}>
       {children}
     </div>
   )

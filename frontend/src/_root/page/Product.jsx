@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import { useParams, Link } from 'react-router-dom'
 // Import components
 import ProductImageGallery from '../../components/product/ProductImageGallery'
 import ProductReviews from '../../components/product/ProductReviews'
-import { Heart, ShoppingCart, Minus, Plus, Truck } from 'lucide-react'
+import { Heart, ShoppingCart, Minus, Plus, Truck, X } from 'lucide-react'
+
+// Lazy load the SplineModel component
+const LazySplineModel = lazy(() => import('../../components/ui/SplineModel'));
 
 const Product = () => {
   // grab type from url
@@ -12,6 +15,7 @@ const Product = () => {
   const [selectedSize, setSelectedSize] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [isModelPopupOpen, setIsModelPopupOpen] = useState(false); // Add this state
 
   // Handle quantity changes
   const decreaseQuantity = () => {
@@ -60,7 +64,7 @@ const Product = () => {
     websiteAge: 65,
     technologyStack: ['100% Cotton', 'Water-based ink', 'Pre-shrunk'],
     tags: ['Cotton', 'Graphic Tee', 'Unisex', 'Sale'],
-    liveLink: 'https://example.com/demo/t-shirt-3d-view',
+    liveLink: 'https://prod.spline.design/EZUAfN-6EUmTLic0/scene.splinecode',
     reviews: [
       {
         userId: 'user1',
@@ -110,7 +114,7 @@ const Product = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Image Column - Made sticky */}
           <div className="w-full flex flex-col md:sticky md:top-24 md:self-start md:max-h-[calc(100vh-120px)]">
-          {/* Breadcrumb navigation */}
+            {/* Breadcrumb navigation */}
             <nav className="mb-6 text-xs sm:text-sm overflow-x-auto whitespace-nowrap">
               <ol className="flex items-center">
                 <li className="flex items-center">
@@ -332,14 +336,12 @@ const Product = () => {
 
                   {product.liveLink && (
                     <div className="mt-6">
-                      <a
-                        href={product.liveLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => setIsModelPopupOpen(true)}
                         className="bg-secondary-500 text-white px-4 py-2 rounded inline-flex items-center hover:bg-secondary-600 transition-all"
                       >
                         View 3D Model
-                      </a>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -395,6 +397,23 @@ const Product = () => {
           </div>
         </div>
       </div>
+
+      {/* 3D Model Popup */}
+      {isModelPopupOpen && (
+        <Suspense fallback={
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-75">
+            <div className="bg-surface p-8 rounded-lg flex flex-col items-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary-300"></div>
+              <p className="text-white mt-4 text-lg">Loading 3D Viewer...</p>
+            </div>
+          </div>
+        }>
+          <LazySplineModel
+            url={product.liveLink}
+            setIsModelPopupOpen={setIsModelPopupOpen}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }

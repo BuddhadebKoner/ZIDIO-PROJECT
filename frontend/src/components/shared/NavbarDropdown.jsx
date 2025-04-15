@@ -92,7 +92,7 @@ const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
    }
 
    return (
-      <div className='fixed top-25 left-0 right-0 w-full h-auto bg-black/90 backdrop-blur-md border-t border-white/10 py-8 z-30'>
+      <div className='fixed top-25 left-0 right-0 w-full h-auto glass-morphism   py-8 z-30'>
          <div className='container mx-auto px-8'>
             <div className='grid grid-cols-4 gap-8 max-w-6xl mx-auto'>
                {type === 'collection' ? (
