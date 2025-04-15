@@ -1,4 +1,5 @@
 import { avatars } from "../constant.js";
+import { Address } from "../models/address.model.js";
 import { User } from "../models/user.model.js";
 
 export const updateAvatar = async (req, res) => {
@@ -48,7 +49,6 @@ export const updateAvatar = async (req, res) => {
       });
    }
 };
-
 
 export const updateUserDetails = async (req, res) => {
    try {
@@ -104,6 +104,214 @@ export const updateUserDetails = async (req, res) => {
          success: false,
          message: "Internal server error",
          error: error.message
+      });
+   }
+}
+
+// add address 
+export const addAddress = async (req, res) => {``
+   try {
+      const userId = req.userId;
+      const { addressLine1, addressLine2, city, state, country, postalCode } = req.body;
+
+      // Validate required fields
+      const requiredFields = { addressLine1, city, state, country, postalCode };
+      const missingFields = Object.keys(requiredFields).filter(key => !requiredFields[key]);
+      
+      if (missingFields.length > 0) {
+         return res.status(400).json({
+            success: false,
+            message: `Missing required fields: ${missingFields.join(', ')}`
+         });
+      }
+
+      // Validate field formats
+      if (addressLine1.trim().length < 3) {
+         return res.status(400).json({
+            success: false,
+            message: "Address line 1 must be at least 3 characters"
+         });
+      }
+
+      if (city.trim().length < 2) {
+         return res.status(400).json({
+            success: false,
+            message: "City must be at least 2 characters"
+         });
+      }
+
+      if (state.trim().length < 2) {
+         return res.status(400).json({
+            success: false,
+            message: "State must be at least 2 characters"
+         });
+      }
+
+      // Postal code validation - basic pattern check
+      const postalCodeRegex = /^[a-zA-Z0-9\s-]{3,10}$/;
+      if (!postalCodeRegex.test(postalCode.trim())) {
+         return res.status(400).json({
+            success: false,
+            message: "Invalid postal code format"
+         });
+      }
+
+      let user = await User.findOne({ clerkId: userId });
+      if (!user) {
+         return res.status(404).json({
+            success: false,
+            message: "User not found"
+         });
+      }
+
+      // Check if user already has an address
+      if (user.address) {
+         return res.status(400).json({
+            success: false,
+            message: "User already has an address. Use update address instead."
+         });
+      }
+
+      // Sanitize inputs
+      const sanitizedData = {
+         userId: user._id,
+         addressLine1: addressLine1.trim(),
+         addressLine2: addressLine2 ? addressLine2.trim() : null,
+         city: city.trim(),
+         state: state.trim(),
+         country: country.trim(),
+         postalCode: postalCode.trim()
+      };
+
+      // Add address to user
+      const newAddress = await Address.create(sanitizedData);
+
+      // Update user with address
+      user.address = newAddress._id;
+      await user.save();
+
+      return res.status(201).json({
+         success: true,
+         message: "Address added successfully",
+         address: newAddress
+      });
+   } catch (error) {
+      console.error("Error adding address:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to add address",
+         error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+   }
+};
+
+// update address
+export const updateAddress = async (req, res) => {
+   try {
+      const userId = req.userId;
+      let user = await User.findOne({ clerkId: userId });
+      
+      if (!user) {
+         return res.status(404).json({
+            success: false,
+            message: "User not found"
+         });
+      }
+
+      // Check if user has an address
+      if (!user.address) {
+         return res.status(400).json({
+            success: false,
+            message: "No address found. Please add an address first."
+         });
+      }
+
+      const { addressLine1, addressLine2, city, state, country, postalCode } = req.body;
+
+      // Check if any update field is provided
+      if (!addressLine1 && !addressLine2 && !city && !state && !country && !postalCode) {
+         return res.status(400).json({
+            success: false,
+            message: "At least one field is required for update"
+         });
+      }
+
+      // Get existing address to handle partial updates
+      const existingAddress = await Address.findById(user.address);
+      if (!existingAddress) {
+         return res.status(404).json({
+            success: false,
+            message: "Address not found in database"
+         });
+      }
+
+      // Validate provided fields
+      if (addressLine1 && addressLine1.trim().length < 3) {
+         return res.status(400).json({
+            success: false,
+            message: "Address line 1 must be at least 3 characters"
+         });
+      }
+
+      if (city && city.trim().length < 2) {
+         return res.status(400).json({
+            success: false,
+            message: "City must be at least 2 characters"
+         });
+      }
+
+      if (state && state.trim().length < 2) {
+         return res.status(400).json({
+            success: false,
+            message: "State must be at least 2 characters"
+         });
+      }
+
+      if (postalCode) {
+         const postalCodeRegex = /^[a-zA-Z0-9\s-]{3,10}$/;
+         if (!postalCodeRegex.test(postalCode.trim())) {
+            return res.status(400).json({
+               success: false,
+               message: "Invalid postal code format"
+            });
+         }
+      }
+
+      // Create update object with sanitized data
+      const updateData = {};
+      if (addressLine1) updateData.addressLine1 = addressLine1.trim();
+      if (addressLine2 !== undefined) updateData.addressLine2 = addressLine2 ? addressLine2.trim() : null;
+      if (city) updateData.city = city.trim();
+      if (state) updateData.state = state.trim();
+      if (country) updateData.country = country.trim();
+      if (postalCode) updateData.postalCode = postalCode.trim();
+
+      // Update address
+      const updatedAddress = await Address.findByIdAndUpdate(
+         user.address,
+         updateData,
+         { new: true }
+      );
+
+      if (!updatedAddress) {
+         return res.status(400).json({
+            success: false,
+            message: "Failed to update address"
+         });
+      }
+
+      return res.status(200).json({
+         success: true,
+         message: "Address updated successfully",
+         address: updatedAddress
+      });
+
+   } catch (error) {
+      console.error("Error updating address:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to update address",
+         error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
    }
 }

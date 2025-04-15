@@ -62,6 +62,9 @@ const productSchema = new mongoose.Schema({
       type: [String],
       required: true,
    },
+   productModelLink: {
+      type: String,
+   },
    // featured
    isExcusiveProducts: {
       type: Boolean,

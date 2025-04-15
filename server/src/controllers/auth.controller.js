@@ -7,19 +7,106 @@ export const isAuthenticated = async (req, res) => {
    try {
       const userId = req.userId;
 
-      let user = await User.findOne({ clerkId: userId });
+      // Using aggregation pipeline to fetch user with related collections
+      const userArray = await User.aggregate([
+         // Match the user by clerkId
+         { $match: { clerkId: userId } },
+
+         // Lookup address collection if not empty
+         {
+            $lookup: {
+               from: "addresses",
+               localField: "address",
+               foreignField: "_id",
+               as: "addressDetails"
+            }
+         },
+
+         // Lookup orders collection if not empty
+         {
+            $lookup: {
+               from: "orders",
+               let: { orderIds: "$orders" },
+               pipeline: [
+                  { $match: { $expr: { $in: ["$_id", "$$orderIds"] } } }
+               ],
+               as: "ordersDetails"
+            }
+         },
+
+         // Lookup products for cart if not empty
+         {
+            $lookup: {
+               from: "products",
+               let: { cartIds: "$cart" },
+               pipeline: [
+                  { $match: { $expr: { $in: ["$_id", "$$cartIds"] } } }
+               ],
+               as: "cartDetails"
+            }
+         },
+
+         // Lookup products for wishlist if not empty
+         {
+            $lookup: {
+               from: "products",
+               let: { wishlistIds: "$wishlist" },
+               pipeline: [
+                  { $match: { $expr: { $in: ["$_id", "$$wishlistIds"] } } }
+               ],
+               as: "wishlistDetails"
+            }
+         },
+
+         // Lookup notifications collection if not empty
+         {
+            $lookup: {
+               from: "notifications",
+               let: { notificationIds: "$notifications" },
+               pipeline: [
+                  { $match: { $expr: { $in: ["$_id", "$$notificationIds"] } } }
+               ],
+               as: "notificationsDetails"
+            }
+         },
+
+         // Replace fields with populated data only if they exist
+         {
+            $addFields: {
+               address: { $cond: [{ $gt: [{ $size: "$addressDetails" }, 0] }, { $arrayElemAt: ["$addressDetails", 0] }, "$address"] },
+               orders: { $cond: [{ $gt: [{ $size: "$ordersDetails" }, 0] }, "$ordersDetails", "$orders"] },
+               cart: { $cond: [{ $gt: [{ $size: "$cartDetails" }, 0] }, "$cartDetails", "$cart"] },
+               wishlist: { $cond: [{ $gt: [{ $size: "$wishlistDetails" }, 0] }, "$wishlistDetails", "$wishlist"] },
+               notifications: { $cond: [{ $gt: [{ $size: "$notificationsDetails" }, 0] }, "$notificationsDetails", "$notifications"] }
+            }
+         },
+
+         // Remove temporary fields
+         {
+            $project: {
+               addressDetails: 0,
+               ordersDetails: 0,
+               cartDetails: 0,
+               wishlistDetails: 0,
+               notificationsDetails: 0
+            }
+         }
+      ]);
+
+      let user = userArray.length > 0 ? userArray[0] : null;
 
       const clerkUser = await clerkClient.users.getUser(userId);
-      
+
       // console.log("Clerk User:", clerkUser.publicMetadata);
       const isClerkAdmin = clerkUser.publicMetadata && clerkUser.publicMetadata.role === 'admin';
 
       if (user) {
          if (isClerkAdmin && user.role !== 'admin') {
+            // For direct model update after aggregation
+            await User.updateOne({ clerkId: userId }, { role: 'admin' });
             user.role = 'admin';
-            await user.save();
          }
-         
+
          // User exists, return user data
          return res.status(200).json({
             success: true,
@@ -44,7 +131,7 @@ export const isAuthenticated = async (req, res) => {
             clerkId: userId,
             fullName,
             email,
-            role: isClerkAdmin ? "admin" : "user", 
+            role: isClerkAdmin ? "admin" : "user",
             avatar: randomAvatar.name,
          });
 

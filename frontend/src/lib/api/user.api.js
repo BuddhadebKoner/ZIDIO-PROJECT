@@ -72,3 +72,51 @@ export const getUpdateUser = async (updateProfile) => {
       };
    }
 };
+
+// add address
+export const getAddAddress = async (address) => { 
+   try {
+      const response = await axiosInstance.post('/user/add-address',
+         { ...address },
+         {
+            headers: {
+               'Content-Type': 'application/json',
+            },
+         }
+      );
+
+      console.log('Address Added', response);
+
+      return {
+         success: true,
+         message: 'Address added successfully',
+      };
+   } catch (error) {
+      console.error('Error Adding Address', error);
+      throw error;
+   }
+};
+
+// update address
+export const getUpdateAddress = async (address) => {
+   try {
+      const response = await axiosInstance.patch('/user/update-address',
+         { ...address },
+         {
+            headers: {
+               'Content-Type': 'application/json',
+            },
+         }
+      );
+
+      console.log('Address Updated', response);
+
+      return {
+         success: true,
+         message: 'Address updated successfully',
+      };
+   } catch (error) {
+      console.error('Error Updating Address', error);
+      throw error;
+   }
+};
