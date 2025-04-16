@@ -1,10 +1,28 @@
 import { Outlet, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import AdminSidebar from '../components/admin/AdminSidebar'
 import { useAuth } from '../context/AuthContext';
 import { LoaderCircle } from 'lucide-react';
 
 const AdminLayout = () => {
    const { isAuthenticated, isAdmin, isLoading } = useAuth();
+   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+   
+   // Track sidebar state for responsive layout
+   useEffect(() => {
+      const handleResize = () => {
+        setIsSidebarOpen(window.innerWidth >= 768);
+      };
+      
+      handleResize();
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+   }, []);
+   
+   // Function to handle sidebar toggle from child component
+   const handleSidebarToggle = (isOpen) => {
+      setIsSidebarOpen(isOpen);
+   };
 
    if (isLoading) {
       return (
@@ -25,10 +43,12 @@ const AdminLayout = () => {
    return (
       <div className="w-full flex min-h-screen">
          {/* Sidebar */}
-         <AdminSidebar />
+         <AdminSidebar onToggle={handleSidebarToggle} />
 
          {/* Main content */}
-         <main className="flex-1 ml-64 p-6 z-30">
+         <main className={`flex-1 transition-all duration-300 ${
+            isSidebarOpen ? 'md:ml-64' : 'ml-0'
+         } p-6 z-30`}>
             <Outlet />
          </main>
       </div>

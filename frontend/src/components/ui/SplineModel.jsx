@@ -9,13 +9,27 @@ const SplineModel = ({
 }) => {
    const [isLoading, setIsLoading] = useState(true);
 
-   // disable scroll when modal is open
+   // improved scroll lock when modal is open
    useEffect(() => {
-      document.body.style.overflow = 'hidden'
+      // Store original body style and scroll position
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      const scrollY = window.scrollY;
+      
+      // Apply scroll lock
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      
       return () => {
-         document.body.style.overflow = 'auto'
+         // Restore original style and position
+         document.body.style.overflow = originalStyle;
+         document.body.style.position = '';
+         document.body.style.top = '';
+         document.body.style.width = '';
+         window.scrollTo(0, scrollY);
       }
-   }, [])
+   }, []);
 
    // close modal when escape key is pressed
    useEffect(() => {
@@ -40,14 +54,13 @@ const SplineModel = ({
          >
             <div
                className="absolute inset-0  bg-opacity-75"
-               onClick={() => setIsModelPopupOpen(false)}
             />
             <div className="relative rounded-lg w-full max-w-4xl h-[80vh] z-10 overflow-hidden mt-20">
                <button
                   className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 rounded-full hover:bg-opacity-70 transition-all text-white z-20"
                   onClick={() => setIsModelPopupOpen(false)}
                >
-                  <X size={20} />
+                  <X size={20} className='cursor-pointer' />
                </button>
 
                <div className="w-full h-full flex items-center justify-center">
@@ -66,7 +79,7 @@ const SplineModel = ({
                         </div>
                      )}
                      <LazySpline
-                        scene={url}
+                        scene="https://prod.spline.design/EZUAfN-6EUmTLic0/scene.splinecode"
                         onLoad={() => setIsLoading(false)}
                         className={isLoading ? "opacity-0" : "opacity-100"}
                      />
