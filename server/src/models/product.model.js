@@ -66,6 +66,10 @@ const productSchema = new mongoose.Schema({
       type: String,
    },
    // featured
+   isUnderPremium: {
+      type: Boolean,
+      default: false,
+   },
    isExcusiveProducts: {
       type: Boolean,
       default: false,
