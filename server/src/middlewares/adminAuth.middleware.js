@@ -14,6 +14,8 @@ export const adminAuth = async (req, res, next) => {
          return res.status(403).json({ success: false, message: "You are not authorized" });
       }
 
+      // Store userId in request for use in controllers
+      req.userId = userId;
       next();
 
    } catch (error) {

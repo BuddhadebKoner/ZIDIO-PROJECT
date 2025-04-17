@@ -11,7 +11,7 @@ export const userAuth = async (req, res, next) => {
          });
       }
 
-      // Store userId in request for use in controllers
+      // Store userId in request for use in controllers  
       req.userId = userId;
       next();
    } catch (error) {

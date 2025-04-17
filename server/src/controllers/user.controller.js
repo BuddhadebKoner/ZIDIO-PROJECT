@@ -109,7 +109,7 @@ export const updateUserDetails = async (req, res) => {
 }
 
 // add address 
-export const addAddress = async (req, res) => {``
+export const addAddress = async (req, res) => {
    try {
       const userId = req.userId;
       const { addressLine1, addressLine2, city, state, country, postalCode } = req.body;
