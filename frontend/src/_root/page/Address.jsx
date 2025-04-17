@@ -118,7 +118,7 @@ const Address = () => {
           />
         </div>
       ) : (
-        <div className="bg-dark-2 rounded-lg flex flex-col items-center justify-center p-10 min-h-[300px] comic-border">
+        <div className="bg-dark-2 rounded-lg flex flex-col items-center justify-center p-10 min-h-[300px]">
           <MapPin className="h-16 w-16 text-primary-500/30 mb-4" />
           <h3 className="heading4 text-light-2 mb-6">No address information found</h3>
           <button

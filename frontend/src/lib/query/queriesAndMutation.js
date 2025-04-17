@@ -4,6 +4,7 @@ import { QUERY_KEYS } from "./queryKeys";
 import { useUser } from "@clerk/clerk-react";
 import { getAddAddress, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
+import { addProduct } from "../api/admin.api";
 
 export const useIsAuthenticated = () => {
    const { user } = useUser();
@@ -78,6 +79,25 @@ export const useUpdateAddress = () => {
       },
       onError: (error) => {
          const errorMessage = error?.response?.data?.message || "Error updating address";
+         toast.error(errorMessage, {
+            position: toast.POSITION.TOP_RIGHT,
+         });
+      },
+   });
+}
+
+
+// add prodct
+export const useAddProduct = () => {
+   const queryClient = useQueryClient();
+
+   return useMutation({
+      mutationFn: (product) => addProduct(product),
+      onSuccess: () => {
+         queryClient.invalidateQueries([QUERY_KEYS.PRODUCTS.GET_PRODUCTS]);
+      },
+      onError: (error) => {
+         const errorMessage = error?.response?.data?.message || "Error adding product";
          toast.error(errorMessage, {
             position: toast.POSITION.TOP_RIGHT,
          });

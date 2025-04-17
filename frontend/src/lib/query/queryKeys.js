@@ -5,4 +5,7 @@ export const QUERY_KEYS = {
    USER: {
       UPDATE_AVATAR: 'updateAvatar',
    },
+   PRODUCTS: {
+      GET_PRODUCTS: 'getProducts',
+   },
 };

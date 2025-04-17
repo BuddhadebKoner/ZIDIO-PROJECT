@@ -14,7 +14,7 @@ import AdminLayout from "./_admin/AdminLayout";
 
 // pages
 import { AccountDetails, Address, Cart, Categories, Collections, Home, Offers, Orders, Product, Profile, Search, SosCallBack, Wishlist } from "./_root/page";
-import { AdminAddCollection, AdminAddProduct, AdminCategory, AdminCollection, AdminCustomers, AdminDashboard, AdminOffer, AdminOrders, AdminProduct, AdminReviews, AdminSettings, AdminUpdateCollection, AdminUpdateProduct } from "./_admin/page";
+import { AdminAddCollection, AdminAddOffer, AdminAddProduct, AdminCategory, AdminCollection, AdminCustomers, AdminDashboard, AdminOffer, AdminOrders, AdminProduct, AdminReviews, AdminSettings, AdminUpdateCollection, AdminUpdateOffer, AdminUpdateProduct } from "./_admin/page";
 
 export const SmoothScrollContext = createContext();
 
@@ -174,6 +174,9 @@ const App = () => {
           {/* add and update collection */}
           <Route path="/admin/add-collection" element={<AdminAddCollection />} />
           <Route path="/admin/update-collection/:slug" element={<AdminUpdateCollection />} />
+          {/* offers add and update */}
+          <Route path="/admin/add-offer" element={<AdminAddOffer />} />
+          <Route path="/admin/update-offer/:slug" element={<AdminUpdateOffer />} />
         </Route>
       </Routes>
       {/* Toast notifications */}

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SingleImageUploader from '../../components/shared/SingleImageUploader';
 import { toast } from 'react-toastify';
+import { addProduct } from '../../lib/api/admin.api';
 
 const AdminAddProduct = () => {
   const [formData, setFormData] = useState({
@@ -11,10 +12,12 @@ const AdminAddProduct = () => {
     subTitle: '',
     description: '',
     price: '',
-    images: [], // Will hold array of {imageUrl, imageId}
+    images: [
+      { imageUrl: '', imageId: '' },
+    ],
     bannerImageUrl: '',
     bannerImageId: '',
-    sizes: [], // Changed to array for multiple sizes
+    sizes: [],
     tags: '',
     technologyStack: '',
     productModelLink: '',
@@ -57,10 +60,12 @@ const AdminAddProduct = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    console.log("Form data before submission:", formData.bannerImageUrl);
 
     // Validate required fields
     if (!formData.bannerImageUrl || !formData.bannerImageId) {
@@ -87,25 +92,42 @@ const AdminAddProduct = () => {
     // Continue with form submission
     console.log("Form data:", formData);
     // Here you would typically send data to API
+    const res = await addProduct(formData);
+    console.log("Response from API:", res);
     toast.success("Product created successfully!");
     setLoading(false);
   };
 
   // Add image to the product images array
   const addProductImage = (imageUrl, imageId, index) => {
-    const updatedImages = [...formData.images];
+    setFormData(prevState => {
+      const updatedImages = [...prevState.images];
 
-    // If index exists, update that specific image
-    if (index !== undefined && updatedImages[index]) {
-      updatedImages[index] = { imageUrl, imageId };
-    } else {
-      // Otherwise add new image
-      updatedImages.push({ imageUrl, imageId });
-    }
+      // If index exists, update that specific image
+      if (index !== undefined && updatedImages[index]) {
+        // If we're updating the URL, keep the existing ID
+        if (imageUrl) {
+          updatedImages[index] = {
+            ...updatedImages[index],
+            imageUrl: imageUrl
+          };
+        }
+        // If we're updating the ID, keep the existing URL
+        if (imageId) {
+          updatedImages[index] = {
+            ...updatedImages[index],
+            imageId: imageId
+          };
+        }
+      } else {
+        // Otherwise add new image
+        updatedImages.push({ imageUrl, imageId });
+      }
 
-    setFormData({
-      ...formData,
-      images: updatedImages
+      return {
+        ...prevState,
+        images: updatedImages
+      };
     });
   };
 
@@ -213,7 +235,13 @@ const AdminAddProduct = () => {
             <h2 className="text-xl font-semibold mb-4 text-primary-300">Banner Image</h2>
             <SingleImageUploader
               setImageUrl={(url) => setFormData({ ...formData, bannerImageUrl: url })}
-              setImageId={(id) => setFormData({ ...formData, bannerImageId: id })}
+              setImageId={(id) => {
+                console.log("Setting banner ID:", id);
+                setFormData(prevState => ({
+                  ...prevState,
+                  bannerImageId: id
+                }));
+              }}
               label="Banner Image"
               currentImageUrl={formData.bannerImageUrl}
               disabled={loading}
