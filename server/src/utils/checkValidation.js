@@ -213,3 +213,127 @@ export const sanitizedProduct = (product) => {
       };
    }
 };
+
+export const sanitizedCollection = (collection) => {
+   try {
+      // Initialize result object
+      const result = {
+         valid: true,
+         data: {},
+         errors: {},
+         exception: null
+      };
+
+      // Check required fields
+      const requiredFields = ['name', 'slug', 'subtitle', 'bannerImageUrl', 'bannerImageId'];
+      for (const field of requiredFields) {
+         if (!collection[field] || typeof collection[field] !== 'string' || !collection[field].trim()) {
+            result.valid = false;
+            result.errors[field] = `${field} is required and must be a non-empty string`;
+         }
+      }
+
+      // Validate name (trim and check length)
+      if (collection.name && typeof collection.name === 'string') {
+         const trimmedName = collection.name.trim();
+         if (trimmedName.length < 2 || trimmedName.length > 100) {
+            result.valid = false;
+            result.errors.name = 'Collection name must be between 2 and 100 characters';
+         } else {
+            result.data.name = trimmedName;
+         }
+      }
+
+      // Validate slug (alphanumeric, hyphens, no spaces)
+      if (collection.slug && typeof collection.slug === 'string') {
+         const trimmedSlug = collection.slug.trim().toLowerCase();
+         const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+         if (!slugRegex.test(trimmedSlug)) {
+            result.valid = false;
+            result.errors.slug = 'Slug must contain only lowercase letters, numbers, and hyphens';
+         } else if (trimmedSlug.length < 2 || trimmedSlug.length > 100) {
+            result.valid = false;
+            result.errors.slug = 'Slug must be between 2 and 100 characters';
+         } else {
+            result.data.slug = trimmedSlug;
+         }
+      }
+
+      // Validate subtitle
+      if (collection.subtitle && typeof collection.subtitle === 'string') {
+         const trimmedSubtitle = collection.subtitle.trim();
+         if (trimmedSubtitle.length < 3 || trimmedSubtitle.length > 200) {
+            result.valid = false;
+            result.errors.subtitle = 'Subtitle must be between 3 and 200 characters';
+         } else {
+            result.data.subtitle = trimmedSubtitle;
+         }
+      }
+
+      // Validate banner image URL
+      if (collection.bannerImageUrl && typeof collection.bannerImageUrl === 'string') {
+         const trimmedUrl = collection.bannerImageUrl.trim();
+         // Simple URL validation - can be enhanced with more specific checks
+         const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,})([\/\w \.-]*)*\/?$/;
+
+         if (!urlRegex.test(trimmedUrl)) {
+            result.valid = false;
+            result.errors.bannerImageUrl = 'Banner image URL is not valid';
+         } else {
+            result.data.bannerImageUrl = trimmedUrl;
+         }
+      }
+
+      // Validate banner image ID
+      if (collection.bannerImageId && typeof collection.bannerImageId === 'string') {
+         const trimmedImageId = collection.bannerImageId.trim();
+         if (trimmedImageId.length < 1) {
+            result.valid = false;
+            result.errors.bannerImageId = 'Banner image ID is required';
+         } else {
+            result.data.bannerImageId = trimmedImageId;
+         }
+      }
+
+      // Validate featured flag (boolean)
+      if (collection.isFeatured !== undefined) {
+         result.data.isFeatured = Boolean(collection.isFeatured);
+      } else {
+         result.data.isFeatured = false; // Default value
+      }
+
+      // Validate product IDs
+      if (collection.productIds && Array.isArray(collection.productIds)) {
+         // Filter out empty strings and validate MongoDB ObjectIDs
+         const validProductIds = collection.productIds
+            .filter(id => id && typeof id === 'string' && id.trim() !== '')
+            .filter(id => {
+               // Check if valid MongoDB ObjectId
+               const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+               return objectIdRegex.test(id.trim());
+            })
+            .map(id => id.trim());
+
+         if (validProductIds.length === 0) {
+            result.valid = false;
+            result.errors.productIds = 'At least one valid product ID is required';
+         } else {
+            // Convert to products array as per schema
+            result.data.products = validProductIds;
+         }
+      } else {
+         result.valid = false;
+         result.errors.productIds = 'Product IDs must be an array';
+      }
+
+      return result;
+   } catch (error) {
+      return {
+         valid: false,
+         data: {},
+         errors: { general: 'Failed to validate collection data' },
+         exception: error.message
+      };
+   }
+};

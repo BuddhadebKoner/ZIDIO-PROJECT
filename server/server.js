@@ -7,6 +7,7 @@ import { clerkMiddleware } from '@clerk/express'
 import authRouter from './src/routes/auth.route.js';
 import userRouter from './src/routes/user.route.js';
 import adminRouter from './src/routes/admin.route.js';
+import collectionRouter from './src/routes/collection.route.js';
 
 dotenv.config();
 
@@ -53,6 +54,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
 // admin route
 app.use('/api/admin', adminRouter);
+// collections
+app.use('/api/collections', collectionRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on PORT http://localhost:${port}/`);

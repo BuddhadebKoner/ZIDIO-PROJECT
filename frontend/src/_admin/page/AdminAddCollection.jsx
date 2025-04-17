@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { X,  Plus, Trash2, ChevronLeft } from 'lucide-react'
+import { X, Plus, Trash2, ChevronLeft } from 'lucide-react'
 import { toast } from "react-toastify";
 import SingleImageUploader from '../../components/shared/SingleImageUploader';
+import { addCollection } from '../../lib/api/admin.api';
 
 const AdminAddCollection = () => {
    const navigate = useNavigate()
@@ -16,10 +17,35 @@ const AdminAddCollection = () => {
       productIds: ['']
    })
    const [loading, setLoading] = useState(false)
-   const [error, setError] = useState('')
+   const [errors, setErrors] = useState({})
+   const [generalError, setGeneralError] = useState('')
+
+   // Generate slug from name
+   useEffect(() => {
+      if (formData.name && !formData.slug) {
+         const generatedSlug = formData.name
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '') // Remove special chars
+            .replace(/\s+/g, '-') // Replace spaces with hyphens
+            .replace(/-+/g, '-'); // Remove consecutive hyphens
+
+         setFormData(prev => ({ ...prev, slug: generatedSlug }));
+      }
+   }, [formData.name]);
 
    const handleChange = (e) => {
       const { name, value, type, checked } = e.target
+
+      // Clear field-specific error when user changes the value
+      if (errors[name]) {
+         setErrors(prev => {
+            const updated = { ...prev };
+            delete updated[name];
+            return updated;
+         });
+      }
+
       setFormData({
          ...formData,
          [name]: type === 'checkbox' ? checked : value
@@ -29,6 +55,16 @@ const AdminAddCollection = () => {
    const handleProductIdChange = (index, value) => {
       const updatedProductIds = [...formData.productIds]
       updatedProductIds[index] = value
+
+      // Clear product ID errors
+      if (errors.productIds) {
+         setErrors(prev => {
+            const updated = { ...prev };
+            delete updated.productIds;
+            return updated;
+         });
+      }
+
       setFormData({
          ...formData,
          productIds: updatedProductIds
@@ -49,26 +85,47 @@ const AdminAddCollection = () => {
          productIds: updatedProductIds
       })
    }
+
    const handleSubmit = async (e) => {
       e.preventDefault()
       setLoading(true)
-      setError('')
+      setGeneralError('')
+      setErrors({})
+
+      // Basic client-side validation
+      const clientErrors = {};
+
+      if (!formData.name.trim()) {
+         clientErrors.name = 'Collection name is required';
+      }
+
+      if (!formData.slug.trim()) {
+         clientErrors.slug = 'Slug is required';
+      } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(formData.slug.trim())) {
+         clientErrors.slug = 'Slug must contain only lowercase letters, numbers, and hyphens';
+      }
+
+      if (!formData.subtitle.trim()) {
+         clientErrors.subtitle = 'Subtitle is required';
+      }
 
       if (!formData.bannerImageUrl || !formData.bannerImageId) {
-         setError('Please upload a banner image')
-         toast.error('Banner image is required')
-         setLoading(false)
-         return
+         clientErrors.bannerImageUrl = 'Banner image is required';
       }
 
       // Filter out empty product IDs
       const validProductIds = formData.productIds.filter(id => id.trim() !== '')
 
       if (validProductIds.length === 0) {
-         setError('At least one product ID is required')
-         toast.error('At least one product ID is required')
-         setLoading(false)
-         return
+         clientErrors.productIds = 'At least one product ID is required';
+      }
+
+      // If client-side validation fails, show errors and return
+      if (Object.keys(clientErrors).length > 0) {
+         setErrors(clientErrors);
+         setLoading(false);
+         toast.error('Please fix the form errors');
+         return;
       }
 
       try {
@@ -79,22 +136,29 @@ const AdminAddCollection = () => {
          }
 
          // Submit to API endpoint
-         // const response = await axios.post('/api/collections', dataToSubmit)
+         const response = await addCollection(dataToSubmit);
 
-         // For now, just log the form data
-         console.log("Form submitted:", dataToSubmit)
+         if (!response.success) {
+            // Handle field-specific errors from API
+            if (response.fieldErrors) {
+               setErrors(response.fieldErrors);
+               toast.error('Please fix the form errors');
+            } else {
+               setGeneralError(response.message || 'Failed to add collection');
+               toast.error(response.message || 'Failed to add collection');
+            }
+            setLoading(false);
+            return;
+         }
 
-         // Redirect back to collection list
-         // navigate('/admin/collections')
-         toast.success('Collection added successfully!')
-         alert('Collection added successfully!')
+         // Success case
+         toast.success('Collection added successfully!');
       } catch (error) {
-         console.error('Error submitting form:', error)
-         const errorMessage = error.response?.data?.message || 'Failed to add collection';
-         setError(errorMessage)
-         toast.error(errorMessage)
+         console.error('Error submitting form:', error);
+         setGeneralError('An unexpected error occurred');
+         toast.error('An unexpected error occurred');
       } finally {
-         setLoading(false)
+         setLoading(false);
       }
    }
 
@@ -105,15 +169,14 @@ const AdminAddCollection = () => {
                <Link to="/admin/collection" className="text-gray-400 hover:text-primary-500">
                   <ChevronLeft className="w-8 h-8" />
                </Link>
-               <h1 className="text-2xl font-bold">Add New Product</h1>
+               <h1 className="text-2xl font-bold">Add New Collection</h1>
             </div>
-            {
-               error && (
-                  <div className="p-4 mb-6 text-red-800 bg-red-100 rounded-md border border-red-300">
-                     {error}
-                  </div>
-               )
-            }
+
+            {generalError && (
+               <div className="p-4 mb-6 text-red-800 bg-red-100 rounded-md border border-red-300">
+                  {generalError}
+               </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6 rounded-lg">
                <div className="space-y-4 p-4 rounded-lg border border-gray-700">
@@ -130,10 +193,13 @@ const AdminAddCollection = () => {
                            name="name"
                            value={formData.name}
                            onChange={handleChange}
-                           className="w-full px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted"
+                           className={`w-full px-4 py-3 bg-surface border ${errors.name ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted`}
                            placeholder="Enter collection name"
                            required
                         />
+                        {errors.name && (
+                           <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                        )}
                      </div>
 
                      {/* Collection Slug Field */}
@@ -148,11 +214,14 @@ const AdminAddCollection = () => {
                               name="slug"
                               value={formData.slug}
                               onChange={handleChange}
-                              className="w-full px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted"
+                              className={`w-full px-4 py-3 bg-surface border ${errors.slug ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted`}
                               placeholder="collection-slug"
                               required
                            />
                         </div>
+                        {errors.slug && (
+                           <p className="text-red-500 text-xs mt-1">{errors.slug}</p>
+                        )}
                      </div>
                   </div>
 
@@ -168,9 +237,12 @@ const AdminAddCollection = () => {
                         onChange={handleChange}
                         rows={2}
                         placeholder="Enter collection subtitle"
-                        className="w-full px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted"
+                        className={`w-full px-4 py-3 bg-surface border ${errors.subtitle ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted`}
                         required
                      ></textarea>
+                     {errors.subtitle && (
+                        <p className="text-red-500 text-xs mt-1">{errors.subtitle}</p>
+                     )}
                   </div>
                </div>
 
@@ -178,15 +250,27 @@ const AdminAddCollection = () => {
                <div className="space-y-4 p-4 rounded-lg border border-gray-700">
                   <h2 className="text-xl font-semibold mb-4 text-primary-300">Banner Information</h2>
 
-                  <SingleImageUploader 
-                     setImageUrl={(url) => setFormData({...formData, bannerImageUrl: url})}
-                     setImageId={(id) => setFormData({...formData, bannerImageId: id})}
+                  <SingleImageUploader
+                     setImageUrl={(url) => {
+                        setFormData(prevData => ({ ...prevData, bannerImageUrl: url }));
+                        if (errors.bannerImageUrl) {
+                           setErrors(prev => {
+                              const updated = { ...prev };
+                              delete updated.bannerImageUrl;
+                              return updated;
+                           });
+                        }
+                     }}
+                     setImageId={(id) => setFormData(prevData => ({ ...prevData, bannerImageId: id }))}
                      label="Banner Image"
                      currentImageUrl={formData.bannerImageUrl}
                      disabled={loading}
                      path="collections"
                   />
-                  
+                  {errors.bannerImageUrl && (
+                     <p className="text-red-500 text-xs mt-1">{errors.bannerImageUrl}</p>
+                  )}
+
                   {/* Image Preview - only show if image URL exists but not from SingleImageUploader */}
                   {formData.bannerImageUrl && !formData.bannerImageUrl.includes('cloudinary') && (
                      <div className="mt-4 rounded-md overflow-hidden border border-gray-700">
@@ -229,7 +313,7 @@ const AdminAddCollection = () => {
                               value={productId}
                               onChange={(e) => handleProductIdChange(index, e.target.value)}
                               placeholder="Enter product ID"
-                              className="flex-1 px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted"
+                              className={`flex-1 px-4 py-3 bg-surface border ${errors.productIds ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted`}
                               required
                            />
                            {formData.productIds.length > 1 && (
@@ -244,6 +328,9 @@ const AdminAddCollection = () => {
                         </div>
                      ))}
                   </div>
+                  {errors.productIds && (
+                     <p className="text-red-500 text-xs mt-1">{errors.productIds}</p>
+                  )}
 
                   <p className="text-xs text-gray-400">
                      Add all product IDs that should be included in this collection

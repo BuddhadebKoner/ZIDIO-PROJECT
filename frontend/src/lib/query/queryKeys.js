@@ -8,4 +8,7 @@ export const QUERY_KEYS = {
    PRODUCTS: {
       GET_PRODUCTS: 'getProducts',
    },
+   COLLECTIONS: {
+      GET_ALL_COLLECTIONS: 'getCollections',
+   },
 };

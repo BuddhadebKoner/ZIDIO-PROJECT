@@ -5,6 +5,7 @@ import { useUser } from "@clerk/clerk-react";
 import { getAddAddress, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
 import { addProduct } from "../api/admin.api";
+import { getAllCollections } from "../api/collection.api";
 
 export const useIsAuthenticated = () => {
    const { user } = useUser();
@@ -102,5 +103,20 @@ export const useAddProduct = () => {
             position: toast.POSITION.TOP_RIGHT,
          });
       },
+   });
+}
+
+// get all collections
+export const useGetAllCollections = (limit = 5) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.COLLECTIONS.GET_ALL_COLLECTIONS],
+      queryFn: ({ pageParam = 1 }) => getAllCollections(pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      refetchOnWindowFocus: false,
    });
 }
