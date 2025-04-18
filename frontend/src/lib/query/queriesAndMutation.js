@@ -6,6 +6,7 @@ import { getAddAddress, getUpdateAddress, getUpdateAvatar, getUpdateUser } from 
 import { toast } from "react-toastify";
 import { addProduct } from "../api/admin.api";
 import { getAllCollections, searchCollections } from "../api/collection.api";
+import { getAllProducts, searchProducts } from "../api/product.api";
 
 export const useIsAuthenticated = () => {
    const { user } = useUser();
@@ -136,3 +137,32 @@ export const useSearchCollections = (searchTerm = '', limit = 5) => {
    });
 };
 
+// get all products 
+export const useGetAllProducts = (limit = 5) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.PRODUCTS.GET_ALL_PRODUCTS, limit],
+      queryFn: ({ pageParam = 1 }) => getAllProducts(pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      refetchOnWindowFocus: false,
+   });
+};
+// search products
+export const useSearchProducts = (searchTerm = '', limit = 5) => { 
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.PRODUCTS.SEARCH_PRODUCTS, searchTerm, limit],
+      queryFn: ({ pageParam = 1 }) => searchProducts(searchTerm, pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      enabled: searchTerm.length > 0,
+      refetchOnWindowFocus: false,
+   });
+}

@@ -17,7 +17,6 @@ export const getCollections = async (req, res) => {
 
       // fetch collections with pagination and populate necessary fields
       const collections = await Collection.find()
-         .select('_id name subtitle slug bannerImageUrl isFeatured')
          .skip(skip)
          .limit(limit)
          .sort({ createdAt: -1 })
@@ -69,7 +68,6 @@ export const searchCollections = async (req, res) => {
 
       // Find collections matching the search term
       const collections = await Collection.find(searchQuery)
-         .select('_id name subtitle slug bannerImageUrl')
          .skip(skip)
          .limit(limitNum)
          .sort({ createdAt: -1 })

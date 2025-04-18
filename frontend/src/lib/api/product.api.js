@@ -1,15 +1,15 @@
 import axiosInstance from "../../config/config";
 
-export const getAllCollections = async (page = 1, limit = 5) => {
+export const getAllProducts = async (page = 1, limit = 5) => {
    try {
       const response = await axiosInstance.get(
-         `/collections/get-collections?page=${page}&limit=${limit}`
+         `/products/get-products?page=${page}&limit=${limit}`
       );
 
       if (response.data && response.data.success) {
          return response.data;
       } else {
-         throw new Error(response.data?.message || "Failed to fetch collections");
+         throw new Error(response.data?.message || "Failed to fetch products");
       }
    } catch (error) {
       console.error("Error fetching collections:", error);
@@ -17,8 +17,7 @@ export const getAllCollections = async (page = 1, limit = 5) => {
    }
 };
 
-
-export const searchCollections = async (searchTerm = '', page = 1, limit = 5) => {
+export const searchProducts = async (searchTerm = '', page = 1, limit = 5) => {
    try {
       const queryParams = new URLSearchParams({
          searchTerm,
@@ -27,13 +26,12 @@ export const searchCollections = async (searchTerm = '', page = 1, limit = 5) =>
       });
 
       const response = await axiosInstance.get(
-         `/collections/search?${queryParams.toString()}`
+         `/products/search?${queryParams.toString()}`
       );
-
       if (response.data && response.data.success) {
          return response.data;
       } else {
-         throw new Error(response.data?.message || "Failed to search collections");
+         throw new Error(response.data?.message || "Failed to search products");
       }
    } catch (error) {
       console.error("Error searching collections:", error);

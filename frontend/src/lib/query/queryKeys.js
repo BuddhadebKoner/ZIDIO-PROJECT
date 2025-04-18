@@ -7,6 +7,7 @@ export const QUERY_KEYS = {
    },
    PRODUCTS: {
       GET_PRODUCTS: 'getProducts',
+      GET_ALL_PRODUCTS: 'getAllProducts',
    },
    COLLECTIONS: {
       GET_ALL_COLLECTIONS: 'getCollections',

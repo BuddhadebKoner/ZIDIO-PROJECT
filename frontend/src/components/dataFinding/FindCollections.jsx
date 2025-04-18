@@ -3,11 +3,19 @@ import { Search } from 'lucide-react';
 import { useGetAllCollections, useSearchCollections } from '../../lib/query/queriesAndMutation';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
+import { useInView } from 'react-intersection-observer';
+import CollectionDataLabel from '../common/CollectionDataLabel';
 
 const FindCollections = ({ onSelectCollection, selectedCollectionId }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef(null);
   const debouncedSearchTerm = useDebounce(searchQuery, 500);
+  
+  // Setup intersection observer for infinite scrolling
+  const { ref: loadMoreRef, inView } = useInView({
+    threshold: 0.1,
+    rootMargin: '100px',
+  });
 
   // Fetch all collections when no search query
   const {
@@ -50,24 +58,12 @@ const FindCollections = ({ onSelectCollection, selectedCollectionId }) => {
     setSearchQuery('');
   };
 
-  // Load more collections when scrolling
-  const handleScroll = () => {
-    if (!containerRef.current) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-    if (scrollHeight - scrollTop <= clientHeight + 5 && !isFetchingNextPage && hasNextPage) {
+  // Load more when intersection observer detects the element is in view
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  };
-
-  // Add scroll event listener
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
-    }
-  }, [isFetchingNextPage, hasNextPage]);
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Handle search errors specifically
   useEffect(() => {
@@ -78,9 +74,6 @@ const FindCollections = ({ onSelectCollection, selectedCollectionId }) => {
       });
     }
   }, [isErrorSearchCollections, debouncedSearchTerm]);
-
-  // Add a loading indicator for the initial search
-  const isInitialSearchLoading = debouncedSearchTerm && isLoadingSearchCollections && !searchCollectionsData;
 
   return (
     <div className="w-full">
@@ -124,8 +117,10 @@ const FindCollections = ({ onSelectCollection, selectedCollectionId }) => {
 
       <div
         ref={containerRef}
-        className="mt-4 max-h-60 overflow-y-auto pr-2 space-y-2 border border-gray-700 rounded-md p-2"
+        className="mt-4 max-h-60 overflow-y-auto pr-2 space-y-2 border border-gray-700 rounded-md p-2 scroll-smooth"
         style={{ scrollBehavior: 'smooth' }}
+        aria-live="polite"
+        aria-busy={isLoading || isFetchingNextPage}
       >
         {isError ? (
           <div className="text-center py-4 text-red-400">
@@ -133,6 +128,7 @@ const FindCollections = ({ onSelectCollection, selectedCollectionId }) => {
             <button 
               onClick={() => debouncedSearchTerm ? fetchNextSearchCollections() : fetchNextAllCollections()}
               className="mt-2 px-4 py-2 bg-surface hover:bg-surface/70 rounded-md text-sm"
+              aria-label="Retry loading collections"
             >
               Retry
             </button>
@@ -153,43 +149,42 @@ const FindCollections = ({ onSelectCollection, selectedCollectionId }) => {
         ) : (
           <>
             {collections.map(collection => (
-              <div
+              <CollectionDataLabel
                 key={collection._id}
-                className={`p-3 border ${selectedCollectionId === collection._id ? 'border-primary-500' : 'border-gray-700'} 
-                  rounded-md cursor-pointer hover:bg-surface/70 transition-all ${selectedCollectionId === collection._id ? 'ring-2 ring-primary-500 bg-surface/70' : ''
-                  }`}
-                onClick={() => onSelectCollection(collection._id, collection.name)}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gray-800 rounded-md overflow-hidden flex-shrink-0">
-                    <img
-                      src={collection.bannerImageUrl}
-                      alt={collection.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/100?text=Collection';
-                      }}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-medium truncate">{collection.name}</h3>
-                    <p className="text-xs text-text-muted truncate">{collection.subtitle}</p>
-                  </div>
-                </div>
-              </div>
+                collection={collection}
+                isSelected={selectedCollectionId === collection._id}
+                onClick={onSelectCollection}
+              />
             ))}
 
+            {/* Loading indicator */}
             {isFetchingNextPage && (
               <div className="text-center py-2">
-                <div className="inline-block w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                <div 
+                  className="inline-block w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"
+                  role="status"
+                >
+                  <span className="sr-only">Loading more collections...</span>
+                </div>
               </div>
             )}
 
-            {hasNextPage && !isFetchingNextPage && (
+            {/* Intersection observer target element */}
+            {hasNextPage && (
+              <div 
+                ref={loadMoreRef}
+                className="h-4 w-full"
+                aria-hidden="true"
+              />
+            )}
+
+            {/* Manual load more button as fallback */}
+            {hasNextPage && !isFetchingNextPage && collections.length >= 10 && (
               <button
                 className="w-full text-center py-2 text-sm text-primary-400 hover:text-primary-300"
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
+                aria-label="Load more collections"
               >
                 Load more
               </button>

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { X, Plus, Trash2, ChevronLeft } from 'lucide-react'
+import { X, Trash2, ChevronLeft } from 'lucide-react'
 import { toast } from "react-toastify";
 import SingleImageUploader from '../../components/shared/SingleImageUploader';
 import { addCollection } from '../../lib/api/admin.api';
+import FindProducts from '../../components/dataFinding/FindProducts';
 
 const AdminAddCollection = () => {
    const navigate = useNavigate()
@@ -14,7 +15,7 @@ const AdminAddCollection = () => {
       isFeatured: false,
       bannerImageUrl: '',
       bannerImageId: '',
-      productIds: ['']
+      productIds: []
    })
    const [loading, setLoading] = useState(false)
    const [errors, setErrors] = useState({})
@@ -52,10 +53,12 @@ const AdminAddCollection = () => {
       })
    }
 
-   const handleProductIdChange = (index, value) => {
-      const updatedProductIds = [...formData.productIds]
-      updatedProductIds[index] = value
-
+   const handleProductSelection = (selectedProductIds) => {
+      setFormData({
+         ...formData,
+         productIds: selectedProductIds
+      });
+      
       // Clear product ID errors
       if (errors.productIds) {
          setErrors(prev => {
@@ -64,26 +67,6 @@ const AdminAddCollection = () => {
             return updated;
          });
       }
-
-      setFormData({
-         ...formData,
-         productIds: updatedProductIds
-      })
-   }
-
-   const addProductIdField = () => {
-      setFormData({
-         ...formData,
-         productIds: [...formData.productIds, '']
-      })
-   }
-
-   const removeProductIdField = (index) => {
-      const updatedProductIds = formData.productIds.filter((_, i) => i !== index)
-      setFormData({
-         ...formData,
-         productIds: updatedProductIds
-      })
    }
 
    const handleSubmit = async (e) => {
@@ -113,11 +96,8 @@ const AdminAddCollection = () => {
          clientErrors.bannerImageUrl = 'Banner image is required';
       }
 
-      // Filter out empty product IDs
-      const validProductIds = formData.productIds.filter(id => id.trim() !== '')
-
-      if (validProductIds.length === 0) {
-         clientErrors.productIds = 'At least one product ID is required';
+      if (formData.productIds.length === 0) {
+         clientErrors.productIds = 'At least one product is required';
       }
 
       // If client-side validation fails, show errors and return
@@ -132,7 +112,6 @@ const AdminAddCollection = () => {
          // Create submission data
          const dataToSubmit = {
             ...formData,
-            productIds: validProductIds
          }
 
          // Submit to API endpoint
@@ -293,47 +272,19 @@ const AdminAddCollection = () => {
                <div className="space-y-4 bg-gray-850 p-4 rounded-lg border border-gray-700">
                   <h2 className="text-xl font-semibold mb-4 text-primary-300">Add Products</h2>
 
-                  <div className="flex justify-between items-center">
-                     <h3 className="text-lg font-medium">Products</h3>
-                     <button
-                        type="button"
-                        onClick={addProductIdField}
-                        className="flex items-center text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-md transition-colors"
-                     >
-                        <Plus size={16} className="mr-1" />
-                        Add Product
-                     </button>
-                  </div>
-
                   <div className="space-y-3">
-                     {formData.productIds.map((productId, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                           <input
-                              type="text"
-                              value={productId}
-                              onChange={(e) => handleProductIdChange(index, e.target.value)}
-                              placeholder="Enter product ID"
-                              className={`flex-1 px-4 py-3 bg-surface border ${errors.productIds ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted`}
-                              required
-                           />
-                           {formData.productIds.length > 1 && (
-                              <button
-                                 type="button"
-                                 onClick={() => removeProductIdField(index)}
-                                 className="p-2 text-red-400 hover:text-red-300 hover:bg-gray-700 rounded-md"
-                              >
-                                 <Trash2 size={18} />
-                              </button>
-                           )}
-                        </div>
-                     ))}
+                     <FindProducts 
+                        onSelectProducts={handleProductSelection}
+                        selectedProductIds={formData.productIds}
+                     />
                   </div>
+                  
                   {errors.productIds && (
                      <p className="text-red-500 text-xs mt-1">{errors.productIds}</p>
                   )}
 
                   <p className="text-xs text-gray-400">
-                     Add all product IDs that should be included in this collection
+                     Select all products that should be included in this collection
                   </p>
                </div>
 

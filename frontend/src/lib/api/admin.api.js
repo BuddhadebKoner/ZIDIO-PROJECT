@@ -2,9 +2,6 @@ import axiosInstance from "../../config/config";
 
 export const addProduct = async (productData) => {
    try {
-      // Log the product data being sent to the server (optional)
-      console.log("Sending product data:", productData);
-
       const response = await axiosInstance.post('/admin/add-product', productData, {
          headers: {
             'Content-Type': 'application/json',
@@ -40,9 +37,6 @@ export const addProduct = async (productData) => {
 
 export const addCollection = async (collectionData) => {
    try {
-      // Log the product data being sent to the server (optional)
-      console.log("Sending product data:", collectionData);
-
       const response = await axiosInstance.post('/admin/add-collection', collectionData, {
          headers: {
             'Content-Type': 'application/json',

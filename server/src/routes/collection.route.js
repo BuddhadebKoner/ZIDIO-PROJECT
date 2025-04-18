@@ -7,5 +7,4 @@ collectionRouter.get('/get-collections', getCollections);
 // Route to search collections by name or subtitle
 collectionRouter.get('/search', searchCollections);
 
-
 export default collectionRouter

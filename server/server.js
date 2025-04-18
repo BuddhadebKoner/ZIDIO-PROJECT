@@ -8,6 +8,7 @@ import authRouter from './src/routes/auth.route.js';
 import userRouter from './src/routes/user.route.js';
 import adminRouter from './src/routes/admin.route.js';
 import collectionRouter from './src/routes/collection.route.js';
+import productRouter from './src/routes/product.route.js';
 
 dotenv.config();
 
@@ -45,7 +46,7 @@ app.use(cors({
 
 // testing
 app.get('/', (req, res) => {
-  res.json({ message: "Hello World" });
+  res.json({ message: "Hey i think you testing server , yes i am alive" });
 })
 
 // auth route
@@ -56,6 +57,8 @@ app.use('/api/user', userRouter);
 app.use('/api/admin', adminRouter);
 // collections
 app.use('/api/collections', collectionRouter);
+// products
+app.use('/api/products', productRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on PORT http://localhost:${port}/`);
