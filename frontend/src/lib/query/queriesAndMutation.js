@@ -1,11 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { isAuthenticated } from "../api/auth.api";
 import { QUERY_KEYS } from "./queryKeys";
 import { useUser } from "@clerk/clerk-react";
 import { getAddAddress, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
 import { addProduct } from "../api/admin.api";
-import { getAllCollections } from "../api/collection.api";
+import { getAllCollections, searchCollections } from "../api/collection.api";
 
 export const useIsAuthenticated = () => {
    const { user } = useUser();
@@ -109,14 +109,30 @@ export const useAddProduct = () => {
 // get all collections
 export const useGetAllCollections = (limit = 5) => {
    return useInfiniteQuery({
-      queryKey: [QUERY_KEYS.COLLECTIONS.GET_ALL_COLLECTIONS],
+      queryKey: [QUERY_KEYS.COLLECTIONS.GET_ALL_COLLECTIONS, limit],
       queryFn: ({ pageParam = 1 }) => getAllCollections(pageParam, limit),
       getNextPageParam: (lastPage) => {
-         if (lastPage.currentPage < lastPage.totalPages) {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
             return lastPage.currentPage + 1;
          }
          return undefined;
       },
       refetchOnWindowFocus: false,
    });
-}
+};
+// search collections
+export const useSearchCollections = (searchTerm = '', limit = 5) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.COLLECTIONS.SEARCH_COLLECTIONS, searchTerm, limit],
+      queryFn: ({ pageParam = 1 }) => searchCollections(searchTerm, pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      enabled: searchTerm.length > 0,
+      refetchOnWindowFocus: false,
+   });
+};
+

@@ -10,5 +10,6 @@ export const QUERY_KEYS = {
    },
    COLLECTIONS: {
       GET_ALL_COLLECTIONS: 'getCollections',
+      SEARCH_COLLECTIONS: 'searchCollections',
    },
 };

@@ -1,9 +1,11 @@
 import express from 'express'
-import { getCollections } from '../controllers/collection.controller.js'
+import { getCollections, searchCollections } from '../controllers/collection.controller.js'
 
 const collectionRouter = express.Router()
 
-// get infinity collections
 collectionRouter.get('/get-collections', getCollections);
+// Route to search collections by name or subtitle
+collectionRouter.get('/search', searchCollections);
+
 
 export default collectionRouter
