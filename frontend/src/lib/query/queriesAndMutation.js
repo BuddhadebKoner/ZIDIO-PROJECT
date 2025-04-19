@@ -6,7 +6,7 @@ import { getAddAddress, getUpdateAddress, getUpdateAvatar, getUpdateUser } from 
 import { toast } from "react-toastify";
 import { addProduct } from "../api/admin.api";
 import { getAllCollections, searchCollections } from "../api/collection.api";
-import { getAllProducts, searchProducts } from "../api/product.api";
+import { filterProducts, getAllProducts, searchProducts } from "../api/product.api";
 
 export const useIsAuthenticated = () => {
    const { user } = useUser();
@@ -88,7 +88,6 @@ export const useUpdateAddress = () => {
    });
 }
 
-
 // add prodct
 export const useAddProduct = () => {
    const queryClient = useQueryClient();
@@ -151,8 +150,9 @@ export const useGetAllProducts = (limit = 5) => {
       refetchOnWindowFocus: false,
    });
 };
+
 // search products
-export const useSearchProducts = (searchTerm = '', limit = 5) => { 
+export const useSearchProducts = (searchTerm = '', limit = 5) => {
    return useInfiniteQuery({
       queryKey: [QUERY_KEYS.PRODUCTS.SEARCH_PRODUCTS, searchTerm, limit],
       queryFn: ({ pageParam = 1 }) => searchProducts(searchTerm, pageParam, limit),
@@ -163,6 +163,21 @@ export const useSearchProducts = (searchTerm = '', limit = 5) => {
          return undefined;
       },
       enabled: searchTerm.length > 0,
+      refetchOnWindowFocus: false,
+   });
+}
+
+// filter products
+export const useFilterProducts = (filterParams) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.PRODUCTS.FILTER_PRODUCTS, filterParams],
+      queryFn: () => filterProducts(filterParams),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
       refetchOnWindowFocus: false,
    });
 }

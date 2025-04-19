@@ -38,3 +38,20 @@ export const searchProducts = async (searchTerm = '', page = 1, limit = 5) => {
       throw error;
    }
 };
+
+export const filterProducts = async (filterParams) => {
+   try {
+      const response = await axiosInstance.get(
+         `/products/filter?${new URLSearchParams(filterParams).toString()}`
+      );
+
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to filter products");
+      }
+   } catch (error) {
+      console.error("Error filtering products:", error);
+      throw error;
+   }
+}

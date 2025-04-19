@@ -1,5 +1,5 @@
 import express from 'express';
-import { getProducts, searchProducts } from '../controllers/product.controller.js';
+import { filterProducts, getProducts, searchProducts } from '../controllers/product.controller.js';
 
 const productRouter = express.Router();
 
@@ -7,5 +7,7 @@ const productRouter = express.Router();
 productRouter.get('/get-products', getProducts);
 // Route to search products
 productRouter.get('/search', searchProducts);
+// Route to get a single product 
+productRouter.get('/filter', filterProducts);
 
 export default productRouter;
