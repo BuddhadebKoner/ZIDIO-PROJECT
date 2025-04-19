@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, Trash2 } from 'lucide-react'
+import { ChevronLeft, LoaderCircle, Plus, Trash2, AlertCircle } from 'lucide-react'
 import { toast } from "react-toastify"
+import { addOffer } from '../../lib/api/admin.api'
+import FindProducts from '../../components/dataFinding/FindProducts'
 
 const AdminAddOffer = () => {
    const navigate = useNavigate()
@@ -14,11 +16,27 @@ const AdminAddOffer = () => {
       endDate: '',
       products: ['']
    })
+
    const [loading, setLoading] = useState(false)
    const [error, setError] = useState('')
+   const [fieldErrors, setFieldErrors] = useState({
+      offerName: '',
+      offerCode: '',
+      discountValue: '',
+      startDate: '',
+      endDate: '',
+      products: ''
+   })
 
    const handleChange = (e) => {
       const { name, value, type, checked } = e.target
+
+      // Clear field error when user starts typing
+      setFieldErrors({
+         ...fieldErrors,
+         [name]: ''
+      })
+
       setFormData({
          ...formData,
          [name]: type === 'checkbox' ? checked : value
@@ -31,6 +49,12 @@ const AdminAddOffer = () => {
       setFormData({
          ...formData,
          products: updatedProducts
+      })
+
+      // Clear products field error when user edits
+      setFieldErrors({
+         ...fieldErrors,
+         products: ''
       })
    }
 
@@ -49,18 +73,98 @@ const AdminAddOffer = () => {
       })
    }
 
+   // Validate the form before submission
+   const validateForm = () => {
+      let isValid = true
+      const errors = {
+         offerName: '',
+         offerCode: '',
+         discountValue: '',
+         startDate: '',
+         endDate: '',
+         products: ''
+      }
+
+      // Offer name validation
+      if (!formData.offerName.trim()) {
+         errors.offerName = 'Offer name is required'
+         isValid = false
+      } else if (formData.offerName.trim().length < 3) {
+         errors.offerName = 'Offer name must be at least 3 characters'
+         isValid = false
+      }
+
+      // Offer code validation
+      if (!formData.offerCode.trim()) {
+         errors.offerCode = 'Offer code is required'
+         isValid = false
+      } else {
+         const codePattern = /^[A-Z0-9_-]+$/
+         if (!codePattern.test(formData.offerCode)) {
+            errors.offerCode = 'Code should be uppercase letters, numbers, underscores or hyphens'
+            isValid = false
+         }
+      }
+
+      // Discount value validation
+      if (!formData.discountValue) {
+         errors.discountValue = 'Discount value is required'
+         isValid = false
+      } else {
+         const discountValue = parseFloat(formData.discountValue)
+         if (isNaN(discountValue) || discountValue <= 0) {
+            errors.discountValue = 'Discount must be a positive number'
+            isValid = false
+         } else if (discountValue > 100) {
+            errors.discountValue = 'Discount cannot exceed 100%'
+            isValid = false
+         }
+      }
+
+      // Date validation
+      if (!formData.startDate) {
+         errors.startDate = 'Start date is required'
+         isValid = false
+      }
+
+      if (!formData.endDate) {
+         errors.endDate = 'End date is required'
+         isValid = false
+      }
+
+      if (formData.startDate && formData.endDate) {
+         const startDate = new Date(formData.startDate)
+         const endDate = new Date(formData.endDate)
+         const now = new Date()
+
+         if (startDate < now) {
+            errors.startDate = 'Start date cannot be in the past'
+            isValid = false
+         }
+
+         if (startDate >= endDate) {
+            errors.endDate = 'End date must be after start date'
+            isValid = false
+         }
+      }
+
+      setFieldErrors(errors)
+      return isValid
+   }
+
    const handleSubmit = async (e) => {
       e.preventDefault()
-      setLoading(true)
+
+      // Reset errors
       setError('')
 
-      // Validate dates
-      if (new Date(formData.startDate) > new Date(formData.endDate)) {
-         setError('End date must be after start date')
-         toast.error('End date must be after start date')
-         setLoading(false)
+      // Validate form
+      if (!validateForm()) {
+         toast.error('Please fix the form errors')
          return
       }
+
+      setLoading(true)
 
       // Filter out empty product IDs
       const validProducts = formData.products.filter(id => id.trim() !== '')
@@ -69,19 +173,30 @@ const AdminAddOffer = () => {
          // Create submission data
          const dataToSubmit = {
             ...formData,
-            products: validProducts
+            products: validProducts,
+            discountValue: parseFloat(formData.discountValue)
          }
 
-         // Submit to API endpoint
-         // const response = await axios.post('/api/offers', dataToSubmit)
-
-         // For now, just log the form data
          console.log("Offer form submitted:", dataToSubmit)
+         const response = await addOffer(dataToSubmit)
 
-         // Redirect back to offer list
-         toast.success('Offer added successfully!')
-         alert('Offer added successfully!')
-         // navigate('/admin/offer')
+         if (response.success) {
+            // Redirect back to offer list
+            toast.success('Offer added successfully!')
+            navigate('/admin/offer')
+         } else {
+            // Handle API validation errors
+            if (response.fieldErrors) {
+               setFieldErrors({
+                  ...fieldErrors,
+                  ...response.fieldErrors
+               })
+               toast.error('Please fix the form errors')
+            } else {
+               setError(response.message || 'Failed to add offer')
+               toast.error(response.message || 'Failed to add offer')
+            }
+         }
       } catch (error) {
          console.error('Error submitting form:', error)
          const errorMessage = error.response?.data?.message || 'Failed to add offer'
@@ -90,6 +205,26 @@ const AdminAddOffer = () => {
       } finally {
          setLoading(false)
       }
+   }
+
+   // Helper function to render field error message
+   const renderFieldError = (fieldName) => {
+      if (!fieldErrors[fieldName]) return null;
+
+      return (
+         <div className="text-red-500 text-sm mt-1 flex items-start">
+            <AlertCircle size={14} className="mr-1 flex-shrink-0 mt-0.5" />
+            <span>{fieldErrors[fieldName]}</span>
+         </div>
+      );
+   }
+
+   //  handleProductSelection
+   const handleProductSelection = (selectedProductIds) => {
+      setFormData({
+         ...formData,
+         products: selectedProductIds
+      })
    }
 
    return (
@@ -125,12 +260,13 @@ const AdminAddOffer = () => {
                            name="offerName"
                            value={formData.offerName}
                            onChange={handleChange}
-                           className="w-full px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted"
+                           className={`w-full px-4 py-3 bg-surface border ${fieldErrors.offerName ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted`}
                            placeholder="Enter offer name"
                            required
                            minLength={3}
                            maxLength={50}
                         />
+                        {renderFieldError('offerName')}
                      </div>
 
                      {/* Offer Code Field */}
@@ -144,12 +280,13 @@ const AdminAddOffer = () => {
                            name="offerCode"
                            value={formData.offerCode}
                            onChange={handleChange}
-                           className="w-full px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted"
+                           className={`w-full px-4 py-3 bg-surface border ${fieldErrors.offerCode ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted`}
                            placeholder="e.g., SUMMER2025"
                            required
                         />
+                        {renderFieldError('offerCode')}
                         <p className="text-xs text-gray-400">
-                           This code will be used by customers during checkout
+                           This code will be used by customers during checkout (uppercase letters and numbers only)
                         </p>
                      </div>
                   </div>
@@ -166,14 +303,16 @@ const AdminAddOffer = () => {
                            name="discountValue"
                            value={formData.discountValue}
                            onChange={handleChange}
-                           className="w-full px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted"
+                           className={`w-full px-4 py-3 bg-surface border ${fieldErrors.discountValue ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted`}
                            placeholder="Enter discount amount"
                            required
-                           min="0"
+                           min="0.1"
+                           max="100"
                            step="0.01"
                         />
                         <span className="ml-2">%</span>
                      </div>
+                     {renderFieldError('discountValue')}
                   </div>
                </div>
 
@@ -193,9 +332,10 @@ const AdminAddOffer = () => {
                            name="startDate"
                            value={formData.startDate}
                            onChange={handleChange}
-                           className="w-full px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text"
+                           className={`w-full px-4 py-3 bg-surface border ${fieldErrors.startDate ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text`}
                            required
                         />
+                        {renderFieldError('startDate')}
                      </div>
 
                      {/* End Date Field */}
@@ -209,55 +349,29 @@ const AdminAddOffer = () => {
                            name="endDate"
                            value={formData.endDate}
                            onChange={handleChange}
-                           className="w-full px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text"
+                           className={`w-full px-4 py-3 bg-surface border ${fieldErrors.endDate ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text`}
                            required
                         />
+                        {renderFieldError('endDate')}
                      </div>
                   </div>
                </div>
 
                {/* Products Section */}
-               <div className="space-y-4 bg-gray-850 p-4 rounded-lg border border-gray-700">
+               <div className="space-y-4 p-4 rounded-lg border border-gray-700">
                   <h2 className="text-xl font-semibold mb-4 text-primary-300">Applicable Products</h2>
-
-                  <div className="flex justify-between items-center">
-                     <h3 className="text-lg font-medium">Products</h3>
-                     <button
-                        type="button"
-                        onClick={addProductIdField}
-                        className="flex items-center text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-md transition-colors"
-                     >
-                        <Plus size={16} className="mr-1" />
-                        Add Product
-                     </button>
+                  
+                  <div className="space-y-2">
+                     <label className="block text-sm font-medium">
+                        Select Products <span className="text-red-500">*</span>
+                     </label>       
+                     <FindProducts
+                        onSelectProducts={handleProductSelection}
+                        selectedProductIds={formData.products}
+                     />
+                     
+                     {renderFieldError('products')}
                   </div>
-
-                  <div className="space-y-3">
-                     {formData.products.map((productId, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                           <input
-                              type="text"
-                              value={productId}
-                              onChange={(e) => handleProductIdChange(index, e.target.value)}
-                              placeholder="Enter product ID"
-                              className="flex-1 px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted"
-                           />
-                           {formData.products.length > 1 && (
-                              <button
-                                 type="button"
-                                 onClick={() => removeProductIdField(index)}
-                                 className="p-2 text-red-400 hover:text-red-300 hover:bg-gray-700 rounded-md"
-                              >
-                                 <Trash2 size={18} />
-                              </button>
-                           )}
-                        </div>
-                     ))}
-                  </div>
-
-                  <p className="text-xs text-gray-400">
-                     Add product IDs that this offer applies to. Leave empty to apply to all products.
-                  </p>
                </div>
 
                {/* Offer Status Checkbox */}
@@ -280,14 +394,11 @@ const AdminAddOffer = () => {
                   <button
                      type="submit"
                      disabled={loading}
-                     className="btn-primary flex items-center justify-center min-w-32"
+                     className="btn-primary flex items-center justify-center min-w-32 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                      {loading ? (
                         <>
-                           <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                           </svg>
+                           <LoaderCircle className="animate-spin mr-2" />
                            Adding Offer...
                         </>
                      ) : 'Add Offer'}

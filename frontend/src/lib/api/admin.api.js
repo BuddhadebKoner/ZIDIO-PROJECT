@@ -69,3 +69,35 @@ export const addCollection = async (collectionData) => {
       };
    }
 };
+
+export const addOffer = async (offerData) => { 
+   try {
+      const response = await axiosInstance.post('/admin/add-offer', offerData, {
+         headers: {
+            'Content-Type': 'application/json',
+         },
+      });
+
+      return {
+         success: true,
+         message: response.data.message || "Offer added successfully",
+         product: response.data.offer,
+      };
+   } catch (error) {
+      console.error('Error adding offer:', error);
+
+      if (error.response?.data?.fieldErrors) {
+         return {
+            success: false,
+            message: error.response.data.message || "Product validation failed",
+            fieldErrors: error.response.data.fieldErrors
+         };
+      }
+
+      return {
+         success: false,
+         message: error.response?.data?.message || "Failed to add offer",
+         error: error.response?.data?.error || error.message
+      };
+   }
+}

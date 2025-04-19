@@ -1,6 +1,6 @@
 import { Edit, Plus, Search, X } from 'lucide-react'
 import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useGetAllCollections, useSearchCollections } from '../../lib/query/queriesAndMutation';
 import CollectionDataTable from '../../components/common/CollectionDataTable';
 
@@ -10,6 +10,9 @@ const AdminCollection = () => {
   const searchInputRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  // catch params
+  const params = useParams();
+  const { slug } = params;
 
   // Focus search input on component mount and keyboard shortcut
   useEffect(() => {
@@ -156,7 +159,7 @@ const AdminCollection = () => {
         </div>
 
         <div className="glass-morphism rounded-lg shadow-lg p-4 mb-4">
-          <div className="relative">
+          <div className="relative flex justify-center items-center">
             <input
               ref={searchInputRef}
               type="text"
@@ -167,8 +170,7 @@ const AdminCollection = () => {
               aria-label="Search collections"
               disabled={currentIsLoading && !allCollections.length}
             />
-            <Search className="absolute top-3 left-3 w-5 h-5 text-text-muted" />
-
+            <Search className="absolute left-3 w-5 h-5 text-text-muted" />
             {searchQuery && (
               <button
                 onClick={handleClearSearch}

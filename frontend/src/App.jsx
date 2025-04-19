@@ -147,13 +147,13 @@ const App = () => {
           <Route index element={<AdminDashboard />} />
           {/* product edit and update */}
           <Route path="/admin/products" element={<AdminProduct />} /> 
-          <Route path="/admin/products/:slug" element={<AdminProduct />} />
+          <Route path="/admin/products/:slug" element={<AdminUpdateProduct />} />
           {/* edit update collections */}
           <Route path="/admin/collection" element={<AdminCollection />} /> 
-          <Route path="/admin/collection/:slug" element={<AdminCollection />} /> 
+          <Route path="/admin/collection/:slug" element={<AdminUpdateCollection />} /> 
           {/* edit update category */}
           <Route path="/admin/category" element={<AdminCategory />} /> 
-          <Route path="/admin/category/:slug" element={<AdminCategory />} /> 
+          <Route path="/admin/category/:slug" element={<AdminCategory />} />
           {/* add offer */}
           <Route path="/admin/offer" element={<AdminOffer />} />
           <Route path="/admin/offer/:slug" element={<AdminOffer />} />

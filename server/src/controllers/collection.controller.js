@@ -15,7 +15,6 @@ export const getCollections = async (req, res) => {
 
       const skip = (page - 1) * limit;
 
-      // fetch collections with pagination and populate necessary fields
       const collections = await Collection.find()
          .skip(skip)
          .limit(limit)
@@ -54,7 +53,6 @@ export const searchCollections = async (req, res) => {
          });
       }
 
-      // Build search query
       const searchQuery = searchTerm
          ? {
             $or: [
@@ -66,14 +64,12 @@ export const searchCollections = async (req, res) => {
 
       const skip = (pageNum - 1) * limitNum;
 
-      // Find collections matching the search term
       const collections = await Collection.find(searchQuery)
          .skip(skip)
          .limit(limitNum)
          .sort({ createdAt: -1 })
          .lean();
 
-      // Count total matching collections
       const totalCollections = await Collection.countDocuments(searchQuery);
 
       return res.status(200).json({

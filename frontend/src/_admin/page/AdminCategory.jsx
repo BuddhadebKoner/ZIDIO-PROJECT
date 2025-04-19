@@ -9,7 +9,6 @@ const AdminCategory = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Define categories and subcategories in a structured way
   const categoryMap = {
     "T-shirt": [
       "Oversized", "Acid Wash", "Graphic Printed", "Solid Color",
@@ -25,18 +24,16 @@ const AdminCategory = () => {
     ]
   };
 
-  // Get query parameters from URL - handle case-insensitive slug matching
   const getInitialFilters = () => {
     const queryParams = new URLSearchParams(location.search);
 
-    // Find the matching category in a case-insensitive way
     let mainCategory = '';
     if (slug) {
       const categoryKey = Object.keys(categoryMap).find(
         cat => cat.toLowerCase() === slug.toLowerCase()
       );
       if (categoryKey) {
-        mainCategory = categoryKey; // Use the properly cased version from our map
+        mainCategory = categoryKey;
       }
     }
 
@@ -52,44 +49,35 @@ const AdminCategory = () => {
 
   const [filters, setFilters] = useState(getInitialFilters);
 
-  // Update URL when filters change - use lowercase for URL parts
   const updateUrlWithFilters = (newFilters) => {
     const queryParams = new URLSearchParams();
 
-    // Don't add page=1 to URL as it's the default
     if (newFilters.page > 1) {
       queryParams.set('page', newFilters.page);
     }
 
-    // Only add non-empty filters to query params
     if (newFilters.priceOrder) queryParams.set('priceOrder', newFilters.priceOrder);
     if (newFilters.size) queryParams.set('size', newFilters.size);
     if (newFilters.subCategory) queryParams.set('subCategory', newFilters.subCategory);
 
-    // For main category, we use the URL path segment instead of a query parameter
-    // Convert to lowercase for the URL
     const basePath = '/admin/category';
     const path = newFilters.mainCategory
       ? `${basePath}/${newFilters.mainCategory.toLowerCase()}`
       : basePath;
 
-    // Build the full URL with query string
     const queryString = queryParams.toString();
     const newUrl = queryString ? `${path}?${queryString}` : path;
 
     navigate(newUrl);
   };
 
-  // Handler for filter changes
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
 
     const newFilters = {
       ...filters,
       [name]: value,
-      // Reset subCategory if mainCategory changes
       ...(name === 'mainCategory' ? { subCategory: '' } : {}),
-      // Reset to page 1 when filters change
       page: 1
     };
 
@@ -97,7 +85,6 @@ const AdminCategory = () => {
     updateUrlWithFilters(newFilters);
   };
 
-  // Update filters when URL params change
   useEffect(() => {
     const newFilters = getInitialFilters();
     setFilters(newFilters);
@@ -105,7 +92,6 @@ const AdminCategory = () => {
 
   const { ref, inView } = useInView();
 
-  // Handle infinite scroll pagination
   const {
     data,
     isLoading,
@@ -116,12 +102,10 @@ const AdminCategory = () => {
     isFetchingNextPage
   } = useFilterProducts(filters);
 
-  // Fetch next page when scrolling to bottom
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
 
-      // Update page number in filters and URL
       setFilters(prev => {
         const newFilters = { ...prev, page: prev.page + 1 };
         updateUrlWithFilters(newFilters);
@@ -130,18 +114,13 @@ const AdminCategory = () => {
     }
   }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-  // Get all products from all pages
   const allProducts = data?.pages?.flatMap(page => page.products) || [];
 
   return (
     <div className="px-auto py-6">
-      <h1 className="text-2xl font-bold">Product Categories Admin</h1>
-
-      {/* Filter Panel */}
+      <h1 className="text-2xl font-bold mb-5">Filter Products</h1>
       <div className="glass-morphism p-4 rounded-lg shadow-lg mb-6">
-        <h2 className="text-lg font-semibold mb-4 text-text">Filter Products</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Price Order Filter */}
           <div>
             <label className="block text-sm font-medium text-text-muted mb-1">
               Price Order
@@ -158,7 +137,6 @@ const AdminCategory = () => {
             </select>
           </div>
 
-          {/* Size Filter */}
           <div>
             <label className="block text-sm font-medium text-text-muted mb-1">
               Size
@@ -178,7 +156,6 @@ const AdminCategory = () => {
             </select>
           </div>
 
-          {/* Main Category Filter */}
           <div>
             <label className="block text-sm font-medium text-text-muted mb-1">
               Main Category
@@ -196,7 +173,6 @@ const AdminCategory = () => {
             </select>
           </div>
 
-          {/* Sub Category Filter - shows based on main category */}
           {filters.mainCategory && (
             <div className="md:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-text-muted mb-1">
@@ -220,7 +196,6 @@ const AdminCategory = () => {
         </div>
       </div>
 
-      {/* Products Table */}
       <ProductDataTable
         products={allProducts}
         isLoading={isLoading}
@@ -230,7 +205,6 @@ const AdminCategory = () => {
         isFetchingNextPage={isFetchingNextPage}
         onLoadMore={fetchNextPage}
         onProductAction={(product) => {
-          // Handle product editing here
           console.log("Edit product:", product);
         }}
         actionLabel="Edit"

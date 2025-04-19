@@ -337,3 +337,119 @@ export const sanitizedCollection = (collection) => {
       };
    }
 };
+
+export const sanitizedOffer = (offer) => {
+  try {
+    const sanitizedOffer = {};
+    const errors = {};
+
+    // Validate offerName (required, string, 3-50 chars)
+    if (!offer.offerName || typeof offer.offerName !== 'string' || !offer.offerName.trim()) {
+      errors.offerName = "Offer name is required";
+    } else if (offer.offerName.trim().length < 3 || offer.offerName.trim().length > 50) {
+      errors.offerName = "Offer name must be between 3 and 50 characters";
+    } else {
+      sanitizedOffer.offerName = offer.offerName.trim();
+    }
+
+    // Validate offerCode (required, string, must be uppercase)
+    if (!offer.offerCode || typeof offer.offerCode !== 'string' || !offer.offerCode.trim()) {
+      errors.offerCode = "Offer code is required";
+    } else {
+      const code = offer.offerCode.trim();
+      if (code !== code.toUpperCase()) {
+        errors.offerCode = "Offer code must be in UPPERCASE";
+      } else {
+        sanitizedOffer.offerCode = code;
+      }
+    }
+
+    // Validate offerStatus (boolean, defaults to false)
+    if (offer.offerStatus !== undefined) {
+      sanitizedOffer.offerStatus = Boolean(offer.offerStatus);
+    } else {
+      sanitizedOffer.offerStatus = false; // Default value
+    }
+
+    // Validate discountValue (required, positive number)
+    if (offer.discountValue !== undefined) {
+      const parsedDiscount = typeof offer.discountValue === 'string' 
+        ? parseFloat(offer.discountValue) 
+        : offer.discountValue;
+      
+      if (isNaN(parsedDiscount) || parsedDiscount <= 0) {
+        errors.discountValue = "Discount value must be a positive number";
+      } else {
+        sanitizedOffer.discountValue = parsedDiscount;
+      }
+    } else {
+      errors.discountValue = "Discount value is required";
+    }
+
+    // Validate startDate (required, valid date)
+    if (!offer.startDate) {
+      errors.startDate = "Start date is required";
+    } else {
+      const startDate = new Date(offer.startDate);
+      if (isNaN(startDate.getTime())) {
+        errors.startDate = "Start date is not a valid date";
+      } else {
+        sanitizedOffer.startDate = startDate;
+      }
+    }
+
+    // Validate endDate (required, valid date, after startDate)
+    if (!offer.endDate) {
+      errors.endDate = "End date is required";
+    } else {
+      const endDate = new Date(offer.endDate);
+      if (isNaN(endDate.getTime())) {
+        errors.endDate = "End date is not a valid date";
+      } else {
+        sanitizedOffer.endDate = endDate;
+        
+        // Check if endDate is after startDate (only if both are valid)
+        if (sanitizedOffer.startDate && !errors.startDate && !errors.endDate) {
+          if (endDate <= sanitizedOffer.startDate) {
+            errors.endDate = "End date must be after start date";
+          }
+        }
+      }
+    }
+
+    // Validate products (array of valid ObjectIds)
+    if (offer.products) {
+      if (!Array.isArray(offer.products)) {
+        errors.products = "Products must be an array";
+      } else {
+        const validProductIds = offer.products
+          .filter(id => id && typeof id === 'string' && id.trim() !== '')
+          .filter(id => {
+            // Check if valid MongoDB ObjectId format
+            const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+            return objectIdRegex.test(id.trim());
+          })
+          .map(id => id.trim());
+        
+        sanitizedOffer.products = validProductIds;
+      }
+    } else {
+      // Products array is optional in this case
+      sanitizedOffer.products = [];
+    }
+
+    // Return validation result
+    if (Object.keys(errors).length > 0) {
+      return { valid: false, errors };
+    }
+
+    return { valid: true, data: sanitizedOffer };
+  } catch (error) {
+    console.error("Error sanitizing offer:", error);
+    return {
+      valid: false,
+      errors: { general: "Failed to validate offer data" },
+      exception: error.message
+    };
+  }
+};

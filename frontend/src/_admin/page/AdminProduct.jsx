@@ -148,7 +148,7 @@ const AdminProduct = () => {
         </div>
 
         <div className="glass-morphism rounded-lg shadow-lg p-4 mb-4">
-          <div className="relative">
+          <div className="relative flex justify-center items-center">
             <input
               ref={searchInputRef}
               type="text"
@@ -159,7 +159,7 @@ const AdminProduct = () => {
               aria-label="Search products"
               disabled={currentIsLoading && !allProducts.length}
             />
-            <Search className="absolute top-3 left-3 w-5 h-5 text-text-muted" />
+            <Search className="absolute left-3 w-5 h-5 text-text-muted" />
 
             {searchQuery && (
               <button

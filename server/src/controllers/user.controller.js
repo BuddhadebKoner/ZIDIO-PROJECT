@@ -5,8 +5,6 @@ import { User } from "../models/user.model.js";
 export const updateAvatar = async (req, res) => {
    try {
       const userId = req.userId;
-
-      // take the avatar from the body
       const { avatar } = req.body;
       if (!avatar) {
          return res.status(400).json({
@@ -23,7 +21,6 @@ export const updateAvatar = async (req, res) => {
          });
       }
 
-      // check avatar is in the avatars array
       const avatarExists = avatars.find(item => item.name === avatar);
       if (!avatarExists) {
          return res.status(400).json({
@@ -32,7 +29,6 @@ export const updateAvatar = async (req, res) => {
          });
       }
 
-      // update the user avatar
       user.avatar = avatar;
       await user.save();
 
@@ -114,10 +110,9 @@ export const addAddress = async (req, res) => {
       const userId = req.userId;
       const { addressLine1, addressLine2, city, state, country, postalCode } = req.body;
 
-      // Validate required fields
       const requiredFields = { addressLine1, city, state, country, postalCode };
       const missingFields = Object.keys(requiredFields).filter(key => !requiredFields[key]);
-      
+
       if (missingFields.length > 0) {
          return res.status(400).json({
             success: false,
@@ -125,7 +120,6 @@ export const addAddress = async (req, res) => {
          });
       }
 
-      // Validate field formats
       if (addressLine1.trim().length < 3) {
          return res.status(400).json({
             success: false,
@@ -147,7 +141,6 @@ export const addAddress = async (req, res) => {
          });
       }
 
-      // Postal code validation - basic pattern check
       const postalCodeRegex = /^[a-zA-Z0-9\s-]{3,10}$/;
       if (!postalCodeRegex.test(postalCode.trim())) {
          return res.status(400).json({
@@ -164,7 +157,6 @@ export const addAddress = async (req, res) => {
          });
       }
 
-      // Check if user already has an address
       if (user.address) {
          return res.status(400).json({
             success: false,
@@ -172,7 +164,6 @@ export const addAddress = async (req, res) => {
          });
       }
 
-      // Sanitize inputs
       const sanitizedData = {
          userId: user._id,
          addressLine1: addressLine1.trim(),
@@ -183,10 +174,8 @@ export const addAddress = async (req, res) => {
          postalCode: postalCode.trim()
       };
 
-      // Add address to user
       const newAddress = await Address.create(sanitizedData);
 
-      // Update user with address
       user.address = newAddress._id;
       await user.save();
 
@@ -210,7 +199,7 @@ export const updateAddress = async (req, res) => {
    try {
       const userId = req.userId;
       let user = await User.findOne({ clerkId: userId });
-      
+
       if (!user) {
          return res.status(404).json({
             success: false,
@@ -218,7 +207,6 @@ export const updateAddress = async (req, res) => {
          });
       }
 
-      // Check if user has an address
       if (!user.address) {
          return res.status(400).json({
             success: false,
@@ -228,7 +216,6 @@ export const updateAddress = async (req, res) => {
 
       const { addressLine1, addressLine2, city, state, country, postalCode } = req.body;
 
-      // Check if any update field is provided
       if (!addressLine1 && !addressLine2 && !city && !state && !country && !postalCode) {
          return res.status(400).json({
             success: false,
@@ -236,7 +223,6 @@ export const updateAddress = async (req, res) => {
          });
       }
 
-      // Get existing address to handle partial updates
       const existingAddress = await Address.findById(user.address);
       if (!existingAddress) {
          return res.status(404).json({
@@ -245,7 +231,6 @@ export const updateAddress = async (req, res) => {
          });
       }
 
-      // Validate provided fields
       if (addressLine1 && addressLine1.trim().length < 3) {
          return res.status(400).json({
             success: false,
@@ -277,7 +262,6 @@ export const updateAddress = async (req, res) => {
          }
       }
 
-      // Create update object with sanitized data
       const updateData = {};
       if (addressLine1) updateData.addressLine1 = addressLine1.trim();
       if (addressLine2 !== undefined) updateData.addressLine2 = addressLine2 ? addressLine2.trim() : null;
@@ -286,7 +270,6 @@ export const updateAddress = async (req, res) => {
       if (country) updateData.country = country.trim();
       if (postalCode) updateData.postalCode = postalCode.trim();
 
-      // Update address
       const updatedAddress = await Address.findByIdAndUpdate(
          user.address,
          updateData,

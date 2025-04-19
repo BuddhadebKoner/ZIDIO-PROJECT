@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useInView } from 'react-intersection-observer';
 import { LoaderCircle } from 'lucide-react';
 
@@ -9,29 +9,30 @@ const ProductDataTable = ({
   error = null,
   hasNextPage = false,
   isFetchingNextPage = false,
-  onLoadMore = () => {},
-  onProductAction = () => {},
+  onLoadMore = () => { },
+  onProductAction = () => { },
   actionLabel = "Edit",
   actionIcon = null,
   infiniteScrollRef = null,
+  emptyStateMessage = "No products found",
 }) => {
-  // If infiniteScrollRef is not provided, use react-intersection-observer
-  const { ref, inView } = useInView();
-  
-  // Handle infinite scroll
-  useEffect(() => {
+  const { ref, inView } = useInView({
+    threshold: 0.5,
+    triggerOnce: false
+  });
+
+  React.useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       onLoadMore();
     }
   }, [inView, hasNextPage, isFetchingNextPage, onLoadMore]);
 
-  // Use the provided ref or the one from useInView
   const scrollRef = infiniteScrollRef || ref;
 
   return (
     <div className="glass-morphism rounded-lg shadow-lg overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-700">
+        <table className="min-w-full divide-y divide-gray-700" role="grid" aria-label="Products table">
           <thead style={{ background: 'rgba(30, 30, 30, 0.8)' }}>
             <tr>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">
@@ -70,7 +71,7 @@ const ProductDataTable = ({
             ) : products.length === 0 ? (
               <tr>
                 <td colSpan="5" className="px-6 py-8 text-center text-text-muted">
-                  No products found
+                  {emptyStateMessage}
                 </td>
               </tr>
             ) : (
@@ -78,7 +79,7 @@ const ProductDataTable = ({
                 <tr key={product._id} className="hover:bg-surface transition-colors duration-150">
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-text">{product.title}</div>
-                    <div className="text-sm text-text-muted">{product.subTitle}</div>
+                    {product.subTitle && <div className="text-sm text-text-muted">{product.subTitle}</div>}
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-text">₹{product.price}</div>
@@ -90,9 +91,9 @@ const ProductDataTable = ({
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-text-muted">
-                    {product.categories && product.categories.map((cat, idx) => (
-                      <div key={idx}>
-                        {cat.main} &gt; {cat.sub}
+                    {product.categories?.map((cat, idx) => (
+                      <div key={`${product._id}-cat-${idx}`}>
+                        {cat.main} / {cat.sub}
                       </div>
                     ))}
                   </td>
@@ -100,7 +101,7 @@ const ProductDataTable = ({
                     <button
                       onClick={() => onProductAction(product)}
                       className="text-accent-400 hover:text-accent-300 mr-3 transition-colors flex items-center gap-1"
-                      aria-label={`${actionLabel} product`}>
+                      aria-label={`${actionLabel} ${product.title}`}>
                       {actionIcon}
                       {actionLabel}
                     </button>
@@ -112,7 +113,6 @@ const ProductDataTable = ({
         </table>
       </div>
 
-      {/* Load more trigger */}
       {hasNextPage && (
         <div
           ref={scrollRef}
@@ -130,4 +130,4 @@ const ProductDataTable = ({
   );
 };
 
-export default ProductDataTable;
+export default React.memo(ProductDataTable);

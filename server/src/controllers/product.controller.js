@@ -95,7 +95,6 @@ export const filterProducts = async (req, res) => {
    try {
       let { page, limit, priceOrder, size, categories, mainCategory, subCategory } = req.query;
 
-      // Pagination setup
       page = parseInt(page) || 1;
       limit = parseInt(limit) || 10;
       if (page < 1 || limit < 1) {
@@ -106,10 +105,8 @@ export const filterProducts = async (req, res) => {
       }
       const skip = (page - 1) * limit;
 
-      // Build query object
       const query = {};
 
-      // Size filtering
       if (size) {
          if (Array.isArray(size)) {
             query.size = { $in: size };
@@ -118,11 +115,9 @@ export const filterProducts = async (req, res) => {
          }
       }
 
-      // Category filtering
       if (categories || mainCategory || subCategory) {
          const categoryQuery = [];
 
-         // Handle array of category objects (from JSON)
          if (categories) {
             try {
                const parsedCategories = typeof categories === 'string' ? JSON.parse(categories) : categories;
@@ -139,7 +134,6 @@ export const filterProducts = async (req, res) => {
             }
          }
 
-         // Handle individual main/sub category filters
          if (mainCategory) {
             if (subCategory) {
                categoryQuery.push({
@@ -158,10 +152,8 @@ export const filterProducts = async (req, res) => {
          }
       }
 
-      // Determine sort order
-      let sortOptions = { createdAt: -1 }; // Default sort by newest
+      let sortOptions = { createdAt: -1 };
 
-      // Price ordering - simple ascending or descending
       if (priceOrder) {
          if (priceOrder.toLowerCase() === 'asc') {
             sortOptions = { price: 1 };
@@ -170,7 +162,6 @@ export const filterProducts = async (req, res) => {
          }
       }
 
-      // Execute query
       const products = await Product.find(query)
          .skip(skip)
          .limit(limit)
