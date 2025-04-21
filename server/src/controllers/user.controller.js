@@ -189,7 +189,7 @@ export const addAddress = async (req, res) => {
       return res.status(500).json({
          success: false,
          message: "Failed to add address",
-         error: process.env.NODE_ENV === 'development' ? error.message : undefined
+         error: "Internal server error"
       });
    }
 };
@@ -294,7 +294,7 @@ export const updateAddress = async (req, res) => {
       return res.status(500).json({
          success: false,
          message: "Failed to update address",
-         error: process.env.NODE_ENV === 'development' ? error.message : undefined
+         error: "Internal server error"
       });
    }
 }

@@ -4,7 +4,6 @@ import ElementLoader from './ElementLoader';
 const FullPageLoader = () => {
    const [isGifLoaded, setIsGifLoaded] = useState(false);
 
-   // Preload the GIF
    useEffect(() => {
       const img = new Image();
       img.src = "/loadingLogo.gif";

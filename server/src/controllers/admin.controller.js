@@ -72,7 +72,7 @@ export const addProduct = async (req, res) => {
       return res.status(500).json({
          success: false,
          message: "Failed to add product",
-         error: process.env.NODE_ENV === 'development' ? error.message : "Server error"
+         error: "Server error"
       });
    }
 };
@@ -135,7 +135,7 @@ export const addCollection = async (req, res) => {
       return res.status(500).json({
          success: false,
          message: "Failed to add product",
-         error: process.env.NODE_ENV === 'development' ? error.message : "Server error"
+         error: "Server error"
       });
    }
 }
@@ -241,7 +241,7 @@ export const addOffer = async (req, res) => {
       return res.status(500).json({
          success: false,
          message: "Failed to add offer",
-         error: process.env.NODE_ENV === 'development' ? error.message : "Server error"
+         error: "Server error"
       });
    }
 };
