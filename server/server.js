@@ -9,6 +9,7 @@ import userRouter from './src/routes/user.route.js';
 import adminRouter from './src/routes/admin.route.js';
 import collectionRouter from './src/routes/collection.route.js';
 import productRouter from './src/routes/product.route.js';
+import offerRouter from './src/routes/offer.route.js';
 
 dotenv.config();
 
@@ -59,6 +60,8 @@ app.use('/api/admin', adminRouter);
 app.use('/api/collections', collectionRouter);
 // products
 app.use('/api/products', productRouter);
+// offers
+app.use('/api/offers', offerRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on PORT http://localhost:${port}/`);

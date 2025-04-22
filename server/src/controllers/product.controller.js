@@ -191,3 +191,133 @@ export const filterProducts = async (req, res) => {
       });
    }
 };
+
+export const getProductById = async (req, res) => {
+   try {
+      const { slug } = req.params;
+
+      if (!slug) {
+         return res.status(400).json({
+            success: false,
+            message: "Product ID is required.",
+         });
+      }
+
+      const currentDate = new Date();
+
+      const productAggregation = await Product.aggregate([
+         { $match: { slug } },
+         {
+            $lookup: {
+               from: "collections",
+               localField: "collections",
+               foreignField: "_id",
+               as: "collections"
+            }
+         },
+         {
+            $lookup: {
+               from: "offers",
+               localField: "offer",
+               foreignField: "_id",
+               as: "offerData"
+            }
+         },
+         {
+            $addFields: {
+               offer: {
+                  $cond: {
+                     if: { $gt: [{ $size: "$offerData" }, 0] },
+                     then: { $arrayElemAt: ["$offerData", 0] },
+                     else: null
+                  }
+               },
+               isOfferValid: {
+                  $cond: {
+                     if: { $gt: [{ $size: "$offerData" }, 0] },
+                     then: {
+                        $and: [
+                           { $eq: [{ $arrayElemAt: ["$offerData.offerStatus", 0] }, true] },
+                           { $lte: [{ $arrayElemAt: ["$offerData.startDate", 0] }, currentDate] },
+                           { $gte: [{ $arrayElemAt: ["$offerData.endDate", 0] }, currentDate] }
+                        ]
+                     },
+                     else: false
+                  }
+               }
+            }
+         },
+         {
+            $addFields: {
+               finalPrice: {
+                  $cond: {
+                     if: "$isOfferValid",
+                     then: {
+                        $round: [
+                           {
+                              $subtract: [
+                                 "$price",
+                                 {
+                                    $multiply: [
+                                       "$price",
+                                       {
+                                          $divide: [{ $arrayElemAt: ["$offerData.discountValue", 0] }, 100]
+                                       }
+                                    ]
+                                 }
+                              ]
+                           },
+                           0
+                        ]
+                     },
+                     else: "$price"
+                  }
+               },
+               discountAmount: {
+                  $cond: {
+                     if: "$isOfferValid",
+                     then: {
+                        $round: [
+                           {
+                              $multiply: [
+                                 "$price",
+                                 { $divide: [{ $arrayElemAt: ["$offerData.discountValue", 0] }, 100] }
+                              ]
+                           },
+                           0
+                        ]
+                     },
+                     else: 0
+                  }
+               }
+            }
+         },
+         {
+            $project: {
+               offerData: 0
+            }
+         }
+      ]);
+
+      if (!productAggregation.length) {
+         return res.status(404).json({
+            success: false,
+            message: "Product not found.",
+         });
+      }
+
+      const product = productAggregation[0];
+
+      return res.status(200).json({
+         success: true,
+         message: "Product fetched successfully",
+         product,
+      });
+   } catch (error) {
+      console.error("Error fetching product by ID", error);
+      return res.status(500).json({
+         success: false,
+         message: "Internal Server Error",
+      });
+   }
+};

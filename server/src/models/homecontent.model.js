@@ -47,6 +47,20 @@ const homeContentSchema = new mongoose.Schema({
          },
       }
    ],
+   offerFeatured: [{
+      imageUrl: {
+         type: String,
+         required: true,
+      },
+      imageId: {
+         type: String,
+         required: true,
+      },
+      offer: {
+         type: mongoose.Schema.Types.ObjectId,
+         ref: "Offer",
+      }
+   }],
    alltimeBestSellers: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
