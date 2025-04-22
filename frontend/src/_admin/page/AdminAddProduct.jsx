@@ -34,8 +34,7 @@ const AdminAddProduct = () => {
     categoryName: '',
     subCategory: '',
     path: '',
-    collections: '',
-    offer: ''
+    collections: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -506,7 +505,7 @@ const AdminAddProduct = () => {
           <div className="md:col-span-2">
             <h2 className="text-xl font-semibold mb-4 text-primary-300">Collections</h2>
             <div>
-              <FindCollections 
+              <FindCollections
                 onSelectCollection={(collectionId, collectionName) => {
                   setFormData({
                     ...formData,
@@ -520,21 +519,6 @@ const AdminAddProduct = () => {
                   Selected collection ID: {formData.collections}
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Offer */}
-          <div className="md:col-span-2">
-            <h2 className="text-xl font-semibold mb-4 text-primary-300">Offer</h2>
-            <div>
-              <label className="block text-sm font-medium mb-1">Offer ID (optional)</label>
-              <input
-                type="text"
-                className="w-full px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted"
-                placeholder="Offer ID"
-                value={formData.offer}
-                onChange={(e) => setFormData({ ...formData, offer: e.target.value })}
-              />
             </div>
           </div>
         </div>

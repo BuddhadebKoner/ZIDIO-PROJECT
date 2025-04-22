@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { addProduct } from "../api/admin.api";
 import { getAllCollections, searchCollections } from "../api/collection.api";
 import { filterProducts, getAllProducts, searchProducts } from "../api/product.api";
+import { getAllOffers, searchOffers } from "../api/offer.api";
 
 export const useIsAuthenticated = () => {
    const { user } = useUser();
@@ -178,6 +179,37 @@ export const useFilterProducts = (filterParams) => {
          }
          return undefined;
       },
+      refetchOnWindowFocus: false,
+   });
+}
+
+// get all offers
+export const useGetAllOffers = (limit = 5) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.OFFERS.GET_ALL_OFFERS, limit],
+      queryFn: ({ pageParam = 1 }) => getAllOffers(pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      refetchOnWindowFocus: false,
+   });
+};
+
+// search offers
+export const useSearchOffers = (searchTerm = '', limit = 5) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.OFFERS.SEARCH_OFFERS, searchTerm, limit],
+      queryFn: ({ pageParam = 1 }) => searchOffers(searchTerm, pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      enabled: searchTerm.length > 0,
       refetchOnWindowFocus: false,
    });
 }

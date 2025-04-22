@@ -1,5 +1,5 @@
 import { Edit, Plus, Search, X } from 'lucide-react'
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useGetAllCollections, useSearchCollections } from '../../lib/query/queriesAndMutation';
 import CollectionDataTable from '../../components/common/CollectionDataTable';
@@ -10,26 +10,18 @@ const AdminCollection = () => {
   const searchInputRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  // catch params
-  const params = useParams();
-  const { slug } = params;
+  const { slug } = useParams();
 
-  // Focus search input on component mount and keyboard shortcut
   useEffect(() => {
-    // Focus the search input on mount
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
 
-    // Add keyboard shortcut (Ctrl+F or Cmd+F) to focus search
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         e.preventDefault();
-        if (searchInputRef.current) {
-          searchInputRef.current.focus();
-        }
+        searchInputRef.current?.focus();
       }
-      // Add Escape key functionality to clear search
       if (e.key === 'Escape' && searchQuery) {
         handleClearSearch();
       }
@@ -39,7 +31,6 @@ const AdminCollection = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [searchQuery]);
 
-  // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchQuery);
@@ -48,7 +39,6 @@ const AdminCollection = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Get all collections (used when not searching)
   const {
     data,
     isLoading,
@@ -59,7 +49,6 @@ const AdminCollection = () => {
     fetchNextPage,
   } = useGetAllCollections();
 
-  // Search collections when search query exists
   const {
     data: searchCollectionsData,
     fetchNextPage: fetchNextSearchCollections,
@@ -70,62 +59,52 @@ const AdminCollection = () => {
     error: searchError,
   } = useSearchCollections(debouncedSearchTerm);
 
-  // Handle search input change
-  const handleSearch = (e) => {
+  const handleSearch = useCallback((e) => {
     setSearchQuery(e.target.value);
-  };
-
-  // Clear search and refocus input
-  const handleClearSearch = useCallback(() => {
-    setSearchQuery('');
-    if (searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
   }, []);
 
-  // Determine which collections to display based on search mode
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+    searchInputRef.current?.focus();
+  }, []);
+
   const isSearchMode = !!debouncedSearchTerm;
 
-  // Extract and flatten collections from the pages structure
-  const allCollections = React.useMemo(() => {
-    if (isSearchMode) {
-      // Use search results when searching
-      if (!searchCollectionsData?.pages) return [];
-      return searchCollectionsData.pages.flatMap(page => {
-        if (page.collections) return page.collections;
-        if (page.data) return page.data;
-        return page;
-      });
-    } else {
-      // Use all collections when not searching
-      if (!data?.pages) return [];
-      return data.pages.flatMap(page => {
-        if (page.collections) return page.collections;
-        if (page.data) return page.data;
-        return page;
-      });
-    }
+  const allCollections = useMemo(() => {
+    const pagesData = isSearchMode ? searchCollectionsData?.pages : data?.pages;
+    if (!pagesData) return [];
+    
+    return pagesData.flatMap(page => 
+      page.collections || page.data || page
+    );
   }, [data, searchCollectionsData, isSearchMode]);
 
-  // Determine current states based on search mode
-  const currentIsLoading = isSearchMode ? isLoadingSearchCollections : isLoading;
-  const currentIsError = isSearchMode ? isErrorSearchCollections : isError;
-  const currentError = isSearchMode ? searchError : error;
-  const currentHasNextPage = isSearchMode ? hasNextSearchCollections : hasNextPage;
-  const currentIsFetchingNextPage = isSearchMode ? isFetchingNextSearchCollections : isFetchingNextPage;
-  const currentFetchNextPage = isSearchMode ? fetchNextSearchCollections : fetchNextPage;
+  const currentState = useMemo(() => ({
+    isLoading: isSearchMode ? isLoadingSearchCollections : isLoading,
+    isError: isSearchMode ? isErrorSearchCollections : isError,
+    error: isSearchMode ? searchError : error,
+    hasNextPage: isSearchMode ? hasNextSearchCollections : hasNextPage,
+    isFetchingNextPage: isSearchMode ? isFetchingNextSearchCollections : isFetchingNextPage,
+    fetchNextPage: isSearchMode ? fetchNextSearchCollections : fetchNextPage
+  }), [
+    isSearchMode, 
+    isLoadingSearchCollections, isLoading,
+    isErrorSearchCollections, isError,
+    searchError, error,
+    hasNextSearchCollections, hasNextPage,
+    isFetchingNextSearchCollections, isFetchingNextPage,
+    fetchNextSearchCollections, fetchNextPage
+  ]);
 
-  // Navigate to edit collection page
   const handleCollectionEdit = useCallback((collection) => {
     navigate(`/admin/collection/${collection.slug}`);
   }, [navigate]);
 
-  // Intersection Observer for infinite scrolling - memoized for efficiency
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && currentHasNextPage && !currentIsFetchingNextPage) {
-          currentFetchNextPage();
+        if (entries[0].isIntersecting && currentState.hasNextPage && !currentState.isFetchingNextPage) {
+          currentState.fetchNextPage();
         }
       },
       { threshold: 0.5 }
@@ -141,11 +120,10 @@ const AdminCollection = () => {
         observer.unobserve(currentRef);
       }
     };
-  }, [currentHasNextPage, currentIsFetchingNextPage, currentFetchNextPage]);
+  }, [currentState]);
 
   return (
     <div className="px-auto py-6">
-      {/* Sticky header with search that stays in view when scrolling */}
       <div className="sticky top-0 z-10 bg-background pb-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Collection Management</h1>
@@ -168,7 +146,7 @@ const AdminCollection = () => {
               value={searchQuery}
               onChange={handleSearch}
               aria-label="Search collections"
-              disabled={currentIsLoading && !allCollections.length}
+              disabled={currentState.isLoading && !allCollections.length}
             />
             <Search className="absolute left-3 w-5 h-5 text-text-muted" />
             {searchQuery && (
@@ -182,7 +160,6 @@ const AdminCollection = () => {
             )}
           </div>
 
-          {/* Search results status message */}
           {isSearchMode && (
             <div className="text-sm mt-2 text-text-muted">
               {isLoadingSearchCollections ? 'Searching...' :
@@ -203,12 +180,12 @@ const AdminCollection = () => {
       <div className="glass-morphism rounded-lg shadow-lg overflow-hidden">
         <CollectionDataTable
           collection={allCollections}
-          isLoading={currentIsLoading}
-          isError={currentIsError}
-          error={currentError}
-          hasNextPage={currentHasNextPage}
-          isFetchingNextPage={currentIsFetchingNextPage}
-          onLoadMore={currentFetchNextPage}
+          isLoading={currentState.isLoading}
+          isError={currentState.isError}
+          error={currentState.error}
+          hasNextPage={currentState.hasNextPage}
+          isFetchingNextPage={currentState.isFetchingNextPage}
+          onLoadMore={currentState.fetchNextPage}
           onProductAction={handleCollectionEdit}
           actionLabel="Edit"
           actionIcon={<Edit size={16} />}
@@ -221,7 +198,6 @@ const AdminCollection = () => {
         />
       </div>
 
-      {/* Keyboard shortcut hint */}
       <div className="mt-4 text-center text-sm text-text-muted">
         Press <kbd className="px-2 py-1 bg-surface border border-gray-700 rounded-md">Ctrl+F</kbd> to search | <kbd className="px-2 py-1 bg-surface border border-gray-700 rounded-md">Esc</kbd> to clear search
       </div>

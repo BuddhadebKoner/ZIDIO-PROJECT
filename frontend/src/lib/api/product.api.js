@@ -55,3 +55,17 @@ export const filterProducts = async (filterParams) => {
       throw error;
    }
 }
+
+export const getProductById = async (slug) => { 
+   try {
+      const response = await axiosInstance.get(`/products/${slug}`);
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to fetch product");
+      }
+   } catch (error) {
+      console.error("Error fetching product:", error);
+      throw error;
+   }
+}

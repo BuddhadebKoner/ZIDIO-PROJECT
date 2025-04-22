@@ -14,4 +14,8 @@ export const QUERY_KEYS = {
       GET_ALL_COLLECTIONS: 'getCollections',
       SEARCH_COLLECTIONS: 'searchCollections',
    },
+   OFFERS: {
+      GET_ALL_OFFERS: 'getAllOffers',
+      SEARCH_OFFERS: 'searchOffers',
+   }
 };
