@@ -2,6 +2,7 @@ import { Collection } from "../models/collection.model.js";
 import { Product } from "../models/product.model.js";
 import { Offer } from "../models/offer.model.js";
 import { sanitizedCollection, sanitizedOffer, sanitizedProduct } from "../utils/checkValidation.js";
+import { User } from "../models/user.model.js";
 
 export const addProduct = async (req, res) => {
    try {
@@ -126,6 +127,17 @@ export const addCollection = async (req, res) => {
          });
       }
 
+      // save sollection id to products collections[]
+      const updatedProduct = await Product.updateMany(
+         { _id: { $in: sanitizedCollectionData.products } },
+         { $addToSet: { collections: savedCollection._id } }
+      );
+      if (!updatedProduct) {
+         return res.status(400).json({
+            success: false,
+            message: "Failed to update products with collection ID",
+         });
+      }
       return res.status(201).json({
          success: true,
          message: "Collection added successfully",
@@ -245,3 +257,5 @@ export const addOffer = async (req, res) => {
       });
    }
 };
+
+export const updateProduct = async (req, res) => { };

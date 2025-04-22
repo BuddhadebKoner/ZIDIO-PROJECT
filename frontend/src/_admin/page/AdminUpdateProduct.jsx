@@ -34,7 +34,7 @@ const AdminUpdateProduct = () => {
     categoryName: '',
     subCategory: '',
     path: '',
-    collections: ''
+    collections: [] // Changed from string to array
   });
 
   const [loading, setLoading] = useState(false);
@@ -62,6 +62,7 @@ const AdminUpdateProduct = () => {
         setFetchError('');
 
         const response = await getProductById(slug);
+        console.log("Fetched product data:", response);
 
         if (!response || !response.product) {
           throw new Error("Product not found or invalid response format");
@@ -80,8 +81,10 @@ const AdminUpdateProduct = () => {
         const subCategory = productData.categories?.[0]?.sub || '';
         const path = productData.categories?.[0]?.path || '';
 
-        // Map collections to the form format
-        const collectionId = productData.collections?.[0]?._id || '';
+        // Map collections to array of IDs
+        const collectionIds = productData.collections ? 
+          productData.collections.map(collection => collection._id) : 
+          [];
 
         // Convert array values to comma-separated strings with null checks
         const tagsString = Array.isArray(productData.tags)
@@ -134,7 +137,7 @@ const AdminUpdateProduct = () => {
           categoryName: mainCategory,
           subCategory: subCategory,
           path: path,
-          collections: collectionId
+          collections: collectionIds // Now storing as array
         });
       } catch (err) {
         console.error("Failed to fetch product:", err);
@@ -176,6 +179,11 @@ const AdminUpdateProduct = () => {
       : [...formData.sizes, size];
 
     handleFieldChange('sizes', newSizes);
+  };
+
+  // Add removeCollection function
+  const removeCollection = (collectionId) => {
+    handleFieldChange('collections', formData.collections.filter(id => id !== collectionId));
   };
 
   // Validate form before submission
@@ -235,9 +243,9 @@ const AdminUpdateProduct = () => {
           changedFields.sizes = formData.sizes;
         }
       } else if (field === 'collections') {
-        // Special handling for collections - compare formData.collections (string) with originalData.collections[0]._id
-        const originalCollectionId = originalData.collections?.[0]?._id || '';
-        if (formData.collections !== originalCollectionId) {
+        // Special handling for collections - compare formData.collections (array) with originalData.collections.map(_id)
+        const originalCollectionIds = originalData.collections?.map(collection => collection._id) || [];
+        if (JSON.stringify(formData.collections) !== JSON.stringify(originalCollectionIds)) {
           changedFields.collections = formData.collections;
         }
       } else if (typeof formData[field] === 'boolean') {
@@ -436,7 +444,7 @@ const AdminUpdateProduct = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="rounded-lg bg-gray-900/30 p-6">
+      <form onSubmit={handleSubmit} className="rounded-lg">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
             <h2 className="text-xl font-semibold mb-4 text-primary-300">Basic Information</h2>
@@ -485,7 +493,7 @@ const AdminUpdateProduct = () => {
                 )}
               </div>
               <div>
-                <label htmlFor="price" className="block text-sm font-medium mb-1">Price ($)</label>
+                <label htmlFor="price" className="block text-sm font-medium mb-1">Price (₹)</label>
                 <input
                   id="price"
                   type="number"
@@ -565,7 +573,7 @@ const AdminUpdateProduct = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
               {formData.images.map((image, index) => (
-                <div key={index} className="p-4 border border-gray-700 rounded-md relative bg-gray-800/50">
+                <div key={index} className="p-4 border border-gray-700 rounded-md relative">
                   <button
                     type="button"
                     className="absolute top-2 right-2 bg-red-500/80 text-white p-1 rounded-full hover:bg-red-600"
@@ -767,13 +775,39 @@ const AdminUpdateProduct = () => {
               <div>
                 <FindCollections
                   onSelectCollection={(collectionId, collectionName) => {
-                    handleFieldChange('collections', collectionId);
+                    // Check if collection already exists
+                    if (formData.collections.includes(collectionId)) {
+                      // Remove it
+                      handleFieldChange('collections', 
+                        formData.collections.filter(id => id !== collectionId));
+                    } else {
+                      // Add it
+                      handleFieldChange('collections', 
+                        [...formData.collections, collectionId]);
+                    }
                   }}
-                  selectedCollectionId={formData.collections}
+                  selectedCollectionId={formData.collections} // Pass the entire array
                 />
-                {formData.collections && (
-                  <div className="mt-2 text-sm text-primary-300">
-                    Selected collection ID: {formData.collections}
+                
+                {/* Display selected collections */}
+                {formData.collections.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="text-sm font-medium mb-2 text-primary-300">Selected Collections:</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.collections.map(collectionId => (
+                        <div key={collectionId} 
+                             className="inline-flex items-center bg-surface/60 border border-gray-700 px-3 py-1 rounded-full">
+                          <span className="text-sm">{collectionId}</span>
+                          <button 
+                            type="button"
+                            onClick={() => removeCollection(collectionId)}
+                            className="ml-2 text-text-muted hover:text-red-400"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -788,7 +822,7 @@ const AdminUpdateProduct = () => {
                 Offers allow you to provide discounts on specific products. The current offer cannot be changed here.
                 To manage the product's offer, please use the Offers management page.
               </p>
-              <div className="bg-gray-800/50 border border-gray-700 rounded-md p-4">
+              <div className="border border-gray-700 rounded-md p-4">
                 {offerData ? (
                   <div className="flex items-center justify-between">
                     <div>

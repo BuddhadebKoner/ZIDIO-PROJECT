@@ -1,4 +1,4 @@
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SingleImageUploader from '../../components/shared/SingleImageUploader';
@@ -34,7 +34,7 @@ const AdminAddProduct = () => {
     categoryName: '',
     subCategory: '',
     path: '',
-    collections: ''
+    collections: [] // Changed from string to array
   });
 
   const [loading, setLoading] = useState(false);
@@ -148,6 +148,14 @@ const AdminAddProduct = () => {
     });
   };
 
+  // New function to handle removing a collection
+  const removeCollection = (collectionId) => {
+    setFormData({
+      ...formData,
+      collections: formData.collections.filter(id => id !== collectionId)
+    });
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex items-center gap-4 mb-6">
@@ -203,7 +211,7 @@ const AdminAddProduct = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Price ($)</label>
+                <label className="block text-sm font-medium mb-1">Price (₹)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -507,16 +515,43 @@ const AdminAddProduct = () => {
             <div>
               <FindCollections
                 onSelectCollection={(collectionId, collectionName) => {
-                  setFormData({
-                    ...formData,
-                    collections: collectionId
-                  });
+                  // Check if the collection is already selected
+                  if (formData.collections.includes(collectionId)) {
+                    // Remove it
+                    setFormData({
+                      ...formData,
+                      collections: formData.collections.filter(id => id !== collectionId)
+                    });
+                  } else {
+                    // Add it
+                    setFormData({
+                      ...formData,
+                      collections: [...formData.collections, collectionId]
+                    });
+                  }
                 }}
-                selectedCollectionId={formData.collections}
+                selectedCollectionId={formData.collections} // Pass the entire array
               />
-              {formData.collections && (
-                <div className="mt-2 text-sm text-primary-300">
-                  Selected collection ID: {formData.collections}
+              
+              {/* Display selected collections */}
+              {formData.collections.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium mb-2 text-primary-300">Selected Collections:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.collections.map(collectionId => (
+                      <div key={collectionId} 
+                           className="inline-flex items-center bg-surface/60 border border-gray-700 px-3 py-1 rounded-full">
+                        <span className="text-sm">{collectionId}</span>
+                        <button 
+                          type="button"
+                          onClick={() => removeCollection(collectionId)}
+                          className="ml-2 text-text-muted hover:text-red-400"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

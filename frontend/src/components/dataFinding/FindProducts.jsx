@@ -8,8 +8,14 @@ import ProductDataLable from '../common/ProductDataLable';
 
 const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [internalSelectedIds, setInternalSelectedIds] = useState(selectedProductIds);
   const containerRef = useRef(null);
   const debouncedSearchTerm = useDebounce(searchQuery, 500);
+
+  // Sync the internal state with the prop when it changes externally
+  useEffect(() => {
+    setInternalSelectedIds(selectedProductIds);
+  }, [selectedProductIds]);
 
   // Setup intersection observer for infinite scrolling
   const { ref: loadMoreRef, inView } = useInView({
@@ -62,14 +68,15 @@ const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
   const handleToggleProduct = (productId) => {
     let updatedSelectedProducts;
 
-    if (selectedProductIds.includes(productId)) {
+    if (internalSelectedIds.includes(productId)) {
       // Remove product if already selected
-      updatedSelectedProducts = selectedProductIds.filter(id => id !== productId);
+      updatedSelectedProducts = internalSelectedIds.filter(id => id !== productId);
     } else {
       // Add product if not selected
-      updatedSelectedProducts = [...selectedProductIds, productId];
+      updatedSelectedProducts = [...internalSelectedIds, productId];
     }
 
+    setInternalSelectedIds(updatedSelectedProducts);
     onSelectProducts(updatedSelectedProducts);
   };
 
@@ -115,14 +122,17 @@ const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
         )}
       </div>
 
-      {selectedProductIds.length > 0 && (
+      {internalSelectedIds.length > 0 && (
         <div className="mb-3 px-3 py-2 bg-surface/50 border border-gray-700 rounded-md">
           <div className="flex items-center justify-between">
             <span className="text-sm text-text-muted">
-              {selectedProductIds.length} product{selectedProductIds.length !== 1 ? 's' : ''} selected
+              {internalSelectedIds.length} product{internalSelectedIds.length !== 1 ? 's' : ''} selected
             </span>
             <button
-              onClick={() => onSelectProducts([])}
+              onClick={() => {
+                setInternalSelectedIds([]);
+                onSelectProducts([]);
+              }}
               className="text-xs text-primary-400 hover:text-primary-300"
               aria-label="Clear all selections"
             >
@@ -181,7 +191,7 @@ const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
               <ProductDataLable
                 key={product._id}
                 product={product}
-                isSelected={selectedProductIds.includes(product._id)}
+                isSelected={internalSelectedIds.includes(product._id)}
                 onClick={() => handleToggleProduct(product._id)}
               />
             ))}

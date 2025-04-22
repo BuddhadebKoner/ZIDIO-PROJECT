@@ -11,6 +11,11 @@ const FindCollections = ({ onSelectCollection, selectedCollectionId }) => {
   const containerRef = useRef(null);
   const debouncedSearchTerm = useDebounce(searchQuery, 500);
   
+  // Parse the selectedCollectionId into an array if not already
+  const selectedCollectionIds = Array.isArray(selectedCollectionId) 
+    ? selectedCollectionId 
+    : selectedCollectionId ? [selectedCollectionId] : [];
+  
   // Setup intersection observer for infinite scrolling
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0.1,
@@ -149,7 +154,7 @@ const FindCollections = ({ onSelectCollection, selectedCollectionId }) => {
               <CollectionDataLabel
                 key={collection._id}
                 collection={collection}
-                isSelected={selectedCollectionId === collection._id}
+                isSelected={selectedCollectionIds.includes(collection._id)}
                 onClick={onSelectCollection}
               />
             ))}
@@ -212,7 +217,10 @@ function useDebounce(value, delay) {
 
 FindCollections.propTypes = {
   onSelectCollection: PropTypes.func.isRequired,
-  selectedCollectionId: PropTypes.string
+  selectedCollectionId: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string)
+  ])
 };
 
 export default FindCollections;

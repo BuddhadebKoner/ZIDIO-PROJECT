@@ -82,7 +82,7 @@ export const sanitizedProduct = (product) => {
             errors.sizes = "At least one valid size is required (S, M, L, XL, XXL)";
          } else {
             sanitizedProduct.sizes = filteredSizes;
-            sanitizedProduct.size = filteredSizes[0]; // For schema compatibility
+            sanitizedProduct.size = filteredSizes[0]; 
          }
       } else {
          errors.sizes = "At least one size is required";
