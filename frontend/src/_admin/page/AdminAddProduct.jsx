@@ -460,7 +460,12 @@ const AdminAddProduct = () => {
 
           {/* Category - Updated with dropdowns */}
           <div className="md:col-span-2">
-            <h2 className="text-xl font-semibold mb-4 text-primary-300">Category</h2>
+            <div className='flex flex-col'>
+              <h2 className="text-xl font-semibold mb-4 text-primary-300">Category</h2>
+              <p className='mb-4'>
+                fill carefully category cant be change after creation product
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Category Name</label>
@@ -532,17 +537,17 @@ const AdminAddProduct = () => {
                 }}
                 selectedCollectionId={formData.collections} // Pass the entire array
               />
-              
+
               {/* Display selected collections */}
               {formData.collections.length > 0 && (
                 <div className="mt-4">
                   <h3 className="text-sm font-medium mb-2 text-primary-300">Selected Collections:</h3>
                   <div className="flex flex-wrap gap-2">
                     {formData.collections.map(collectionId => (
-                      <div key={collectionId} 
-                           className="inline-flex items-center bg-surface/60 border border-gray-700 px-3 py-1 rounded-full">
+                      <div key={collectionId}
+                        className="inline-flex items-center bg-surface/60 border border-gray-700 px-3 py-1 rounded-full">
                         <span className="text-sm">{collectionId}</span>
-                        <button 
+                        <button
                           type="button"
                           onClick={() => removeCollection(collectionId)}
                           className="ml-2 text-text-muted hover:text-red-400"

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Collection } from "../models/collection.model.js";
 
 export const getCollections = async (req, res) => {
@@ -82,6 +83,40 @@ export const searchCollections = async (req, res) => {
       });
    } catch (error) {
       console.error("Error searching collections:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Internal Server Error",
+      });
+   }
+};
+
+export const getCollectionsById = async (req, res) => { 
+   try {
+      const { slug } = req.params;
+
+      if (!slug) { 
+         return res.status(400).json({
+            success: false,
+            message: "Collection slug is required",
+         });
+      }
+
+      const collection = await Collection.findOne({ slug }).lean();
+
+      if (!collection) {
+         return res.status(404).json({
+            success: false,
+            message: "Collection not found",
+         });
+      }
+
+      return res.status(200).json({
+         success: true,
+         message: "Collection fetched successfully",
+         collection,
+      });
+   } catch (error) {
+      console.error("Error fetching collection by ID:", error);
       return res.status(500).json({
          success: false,
          message: "Internal Server Error",

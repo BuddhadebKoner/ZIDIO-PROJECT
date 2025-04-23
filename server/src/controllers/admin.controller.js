@@ -2,7 +2,6 @@ import { Collection } from "../models/collection.model.js";
 import { Product } from "../models/product.model.js";
 import { Offer } from "../models/offer.model.js";
 import { sanitizedCollection, sanitizedOffer, sanitizedProduct } from "../utils/checkValidation.js";
-import { User } from "../models/user.model.js";
 
 export const addProduct = async (req, res) => {
    try {
@@ -150,7 +149,7 @@ export const addCollection = async (req, res) => {
          error: "Server error"
       });
    }
-}
+};
 
 export const addOffer = async (req, res) => {
    try {
@@ -258,4 +257,250 @@ export const addOffer = async (req, res) => {
    }
 };
 
-export const updateProduct = async (req, res) => { };
+export const updateProduct = async (req, res) => {
+   try {
+      const userId = req.userId;
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "Unauthorized: Authentication required"
+         });
+      }
+
+      const { slug } = req.params;
+      if (!slug) {
+         return res.status(400).json({
+            success: false,
+            message: "Product slug is required"
+         });
+      }
+
+      const updateData = req.body;
+      console.log("Update data size:", updateData.size);
+
+      if (!updateData || Object.keys(updateData).length === 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Update data is required"
+         });
+      }
+
+      const existingProduct = await Product.findOne({ slug });
+      if (!existingProduct) {
+         return res.status(404).json({
+            success: false,
+            message: "Product not found"
+         });
+      }
+
+      const errors = {};
+
+      if (updateData.title !== undefined) {
+         if (typeof updateData.title !== 'string' || !updateData.title.trim()) {
+            errors.title = "Title must be a non-empty string";
+         }
+      }
+
+      if (updateData.price !== undefined) {
+         const parsedPrice = Number(updateData.price);
+         if (isNaN(parsedPrice) || parsedPrice < 0) {
+            errors.price = "Price must be a positive number";
+         } else {
+            updateData.price = parsedPrice;
+         }
+      }
+
+      if (updateData.size !== undefined) {
+         if (!Array.isArray(updateData.size)) {
+            errors.size = "Size must be an array";
+         } else {
+            const validSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+            const validSizeValues = updateData.size.filter(size => validSizes.includes(size));
+
+            if (updateData.size.length > 0 && validSizeValues.length === 0) {
+               errors.size = "Size must contain at least one valid value: S, M, L, XL, XXL";
+            }
+         }
+      }
+
+      if (Object.keys(errors).length > 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Validation failed",
+            fieldErrors: errors
+         });
+      }
+
+      if (updateData.collections && updateData.collections.length > 0) {
+         const collectionsExist = await Collection.find({
+            _id: { $in: updateData.collections }
+         });
+
+         if (collectionsExist.length !== updateData.collections.length) {
+            return res.status(400).json({
+               success: false,
+               message: "Validation failed",
+               fieldErrors: { collections: "One or more collection IDs are invalid" }
+            });
+         }
+      }
+
+      const updatedProduct = await Product.findByIdAndUpdate(
+         existingProduct._id,
+         { $set: updateData },
+         { new: true, runValidators: true }
+      );
+
+      if (updateData.collections) {
+         await Collection.updateMany(
+            { _id: { $nin: updateData.collections }, products: existingProduct._id },
+            { $pull: { products: existingProduct._id } }
+         );
+
+         await Collection.updateMany(
+            { _id: { $in: updateData.collections } },
+            { $addToSet: { products: existingProduct._id } }
+         );
+      }
+
+      return res.status(200).json({
+         success: true,
+         message: "Product updated successfully",
+         product: updatedProduct
+      });
+
+   } catch (error) {
+      console.error("Error updating product:", error);
+
+      if (error.name === 'ValidationError') {
+         const validationErrors = {};
+         for (const field in error.errors) {
+            validationErrors[field] = error.errors[field].message;
+         }
+
+         return res.status(400).json({
+            success: false,
+            message: "Validation error",
+            fieldErrors: validationErrors
+         });
+      }
+
+      return res.status(500).json({
+         success: false,
+         message: "Failed to update product",
+         error: error.message || "Server error"
+      });
+   }
+};
+
+export const updateCollection = async (req, res) => {
+   try {
+      const userId = req.userId;
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "Unauthorized: Authentication required"
+         });
+      }
+
+      const { slug } = req.params;
+      if (!slug) {
+         return res.status(400).json({
+            success: false,
+            message: "Collection slug is required"
+         });
+      }
+
+      const updateData = req.body;
+      if (!updateData || Object.keys(updateData).length === 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Update data is required"
+         });
+      }
+
+      // Find the collection first to ensure it exists
+      const existingCollection = await Collection.findOne({ slug });
+      if (!existingCollection) {
+         return res.status(404).json({
+            success: false,
+            message: "Collection not found"
+         });
+      }
+
+      // Sanitize the update data (you'll need to create this utility function)
+      const sanitizedResult = sanitizedCollectionUpdate(updateData);
+      if (!sanitizedResult.valid) {
+         return res.status(400).json({
+            success: false,
+            message: "Validation failed",
+            fieldErrors: sanitizedResult.errors,
+            exception: sanitizedResult.exception
+         });
+      }
+
+      const sanitizedUpdate = sanitizedResult.data;
+
+      // Handle product changes if products were provided in the update
+      if (sanitizedUpdate.products) {
+         // Get products to remove (products in existing collection but not in update)
+         const productsToRemove = existingCollection.products.filter(
+            productId => !sanitizedUpdate.products.includes(productId.toString())
+         );
+
+         // Get products to add (products in update but not in existing collection)
+         const productsToAdd = sanitizedUpdate.products.filter(
+            productId => !existingCollection.products.some(id => id.toString() === productId)
+         );
+
+         // Remove this collection from products that are no longer in the collection
+         if (productsToRemove.length > 0) {
+            await Product.updateMany(
+               { _id: { $in: productsToRemove } },
+               { $pull: { collections: existingCollection._id } }
+            );
+         }
+
+         // Add this collection to products that are newly added to the collection
+         if (productsToAdd.length > 0) {
+            await Product.updateMany(
+               { _id: { $in: productsToAdd } },
+               { $addToSet: { collections: existingCollection._id } }
+            );
+         }
+      }
+
+      // Update the collection
+      const updatedCollection = await Collection.findByIdAndUpdate(
+         existingCollection._id,
+         { $set: sanitizedUpdate },
+         { new: true, runValidators: true }
+      );
+
+      return res.status(200).json({
+         success: true,
+         message: "Collection updated successfully",
+         collection: updatedCollection
+      });
+   } catch (error) {
+      console.error("Error updating collection:", error);
+
+      if (error.name === 'ValidationError') {
+         const validationErrors = {};
+         for (const field in error.errors) {
+            validationErrors[field] = error.errors[field].message;
+         }
+         return res.status(400).json({
+            success: false,
+            message: "Validation error",
+            fieldErrors: validationErrors
+         });
+      }
+
+      return res.status(500).json({
+         success: false,
+         message: "Failed to update collection",
+         error: "Server error"
+      });
+   }
+};

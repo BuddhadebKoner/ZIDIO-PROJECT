@@ -70,7 +70,7 @@ export const addCollection = async (collectionData) => {
    }
 };
 
-export const addOffer = async (offerData) => { 
+export const addOffer = async (offerData) => {
    try {
       const response = await axiosInstance.post('/admin/add-offer', offerData, {
          headers: {
@@ -97,6 +97,44 @@ export const addOffer = async (offerData) => {
       return {
          success: false,
          message: error.response?.data?.message || "Failed to add offer",
+         error: error.response?.data?.error || error.message
+      };
+   }
+}
+
+export const updateProduct = async (slug, productData) => {
+   if (!productData || Object.keys(productData).length === 0) {
+      return {
+         success: false,
+         message: "Nothing to change"
+      }
+   }
+   try {
+      const response = await axiosInstance.put(`/admin/update-product/${slug}`, productData, {
+         headers: {
+            'Content-Type': 'application/json',
+         },
+      });
+
+      return {
+         success: true,
+         message: response.data.message || "Product updated successfully",
+         product: response.data.product,
+      };
+   } catch (error) {
+      console.error('Error updating product:', error);
+
+      if (error.response?.data?.fieldErrors) {
+         return {
+            success: false,
+            message: error.response.data.message || "Product validation failed",
+            fieldErrors: error.response.data.fieldErrors
+         };
+      }
+
+      return {
+         success: false,
+         message: error.response?.data?.message || "Failed to update product",
          error: error.response?.data?.error || error.message
       };
    }

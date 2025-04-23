@@ -5,10 +5,19 @@ import SingleImageUploader from '../../components/shared/SingleImageUploader';
 import { toast } from 'react-toastify';
 import FindCollections from '../../components/dataFinding/FindCollections';
 import { getProductById } from '../../lib/api/product.api';
+import { updateProduct } from '../../lib/api/admin.api';
+import {
+  validateProductForm,
+  processProductData,
+  identifyChangedFields,
+  formatSubmitData,
+  updateImageArray
+} from '../../utils/product.utils';
 
 const AdminUpdateProduct = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     slug: '',
     title: '',
@@ -34,7 +43,7 @@ const AdminUpdateProduct = () => {
     categoryName: '',
     subCategory: '',
     path: '',
-    collections: [] // Changed from string to array
+    collections: []
   });
 
   const [loading, setLoading] = useState(false);
@@ -46,7 +55,6 @@ const AdminUpdateProduct = () => {
   const [dirtyFields, setDirtyFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Size options
   const sizeOptions = ['S', 'M', 'L', 'XL', 'XXL'];
 
   useEffect(() => {
@@ -62,7 +70,6 @@ const AdminUpdateProduct = () => {
         setFetchError('');
 
         const response = await getProductById(slug);
-        console.log("Fetched product data:", response);
 
         if (!response || !response.product) {
           throw new Error("Product not found or invalid response format");
@@ -71,74 +78,13 @@ const AdminUpdateProduct = () => {
         const productData = response.product;
         setOriginalData(productData);
 
-        // Store offer data if available
         if (productData.offer) {
           setOfferData(productData.offer);
         }
 
-        // Map categories to the form format - handle null values safely
-        const mainCategory = productData.categories?.[0]?.main || '';
-        const subCategory = productData.categories?.[0]?.sub || '';
-        const path = productData.categories?.[0]?.path || '';
+        const processedData = processProductData(productData);
+        setFormData(processedData);
 
-        // Map collections to array of IDs
-        const collectionIds = productData.collections ? 
-          productData.collections.map(collection => collection._id) : 
-          [];
-
-        // Convert array values to comma-separated strings with null checks
-        const tagsString = Array.isArray(productData.tags)
-          ? productData.tags.join(', ')
-          : productData.tags || '';
-
-        const techStackString = Array.isArray(productData.technologyStack)
-          ? productData.technologyStack.join(', ')
-          : productData.technologyStack || '';
-
-        // Ensure images is always an array
-        const imageArray = Array.isArray(productData.images) && productData.images.length > 0
-          ? productData.images.map(img => ({
-            imageUrl: img.imageUrl || '',
-            imageId: img.imageId || ''
-          }))
-          : [{ imageUrl: '', imageId: '' }];
-
-        // Convert size string/array to array if needed
-        const sizesArray = Array.isArray(productData.sizes)
-          ? productData.sizes
-          : productData.size
-            ? [productData.size]
-            : [];
-
-        setFormData({
-          slug: productData.slug || '',
-          title: productData.title || '',
-          subTitle: productData.subTitle || '',
-          description: productData.description || '',
-          price: (productData.price !== undefined && productData.price !== null)
-            ? productData.price.toString()
-            : '',
-          images: imageArray,
-          bannerImageUrl: productData.bannerImageUrl || '',
-          bannerImageId: productData.bannerImageId || '',
-          sizes: sizesArray,
-          tags: tagsString,
-          technologyStack: techStackString,
-          productModelLink: productData.productModelLink || '',
-          isUnderPremium: Boolean(productData.isUnderPremium),
-          isExcusiveProducts: Boolean(productData.isExcusiveProducts),
-          isNewArrival: Boolean(productData.isNewArrival),
-          isUnderHotDeals: Boolean(productData.isUnderHotDeals),
-          isBestSeller: Boolean(productData.isBestSeller),
-          isWomenFeatured: Boolean(productData.isWomenFeatured),
-          isMenFeatured: Boolean(productData.isMenFeatured),
-          isFeaturedToBanner: Boolean(productData.isFeaturedToBanner),
-          isTrendingNow: Boolean(productData.isTrendingNow),
-          categoryName: mainCategory,
-          subCategory: subCategory,
-          path: path,
-          collections: collectionIds // Now storing as array
-        });
       } catch (err) {
         console.error("Failed to fetch product:", err);
         setFetchError(err.message || "Failed to load product data. Please try again.");
@@ -151,7 +97,6 @@ const AdminUpdateProduct = () => {
     fetchProductData();
   }, [slug]);
 
-  // Handle field changes with dirty tracking
   const handleFieldChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -163,7 +108,6 @@ const AdminUpdateProduct = () => {
       [field]: true
     }));
 
-    // Clear validation error for this field if exists
     if (validationErrors[field]) {
       setValidationErrors(prev => {
         const newErrors = { ...prev };
@@ -174,106 +118,31 @@ const AdminUpdateProduct = () => {
   };
 
   const handleSizeChange = (size) => {
-    const newSizes = formData.sizes.includes(size)
-      ? formData.sizes.filter(s => s !== size)
-      : [...formData.sizes, size];
+    const newSizes = [...formData.sizes];
+
+    const sizeIndex = newSizes.indexOf(size);
+    if (sizeIndex === -1) {
+      newSizes.push(size);
+    } else {
+      newSizes.splice(sizeIndex, 1);
+    }
 
     handleFieldChange('sizes', newSizes);
   };
 
-  // Add removeCollection function
   const removeCollection = (collectionId) => {
     handleFieldChange('collections', formData.collections.filter(id => id !== collectionId));
   };
 
-  // Validate form before submission
-  const validateForm = () => {
-    const errors = {};
-
-    if (!formData.title.trim()) {
-      errors.title = "Title is required";
-    }
-
-    if (!formData.description.trim()) {
-      errors.description = "Description is required";
-    }
-
-    if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) < 0) {
-      errors.price = "Price must be a valid positive number";
-    }
-
-    if (!formData.bannerImageUrl) {
-      errors.bannerImage = "Banner image is required";
-    }
-
-    const validImages = formData.images.filter(img => img.imageUrl && img.imageId);
-    if (validImages.length === 0) {
-      errors.images = "At least one product image is required";
-    }
-
-    if (formData.sizes.length === 0) {
-      errors.sizes = "At least one size is required";
-    }
-
-    if (!formData.categoryName) {
-      errors.categoryName = "Category is required";
-    }
-
-    if (!formData.subCategory) {
-      errors.subCategory = "Sub-category is required";
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const logChangedFields = () => {
-    const changedFields = {};
-
-    Object.keys(dirtyFields).forEach(field => {
-      // Handle arrays and objects specially
-      if (field === 'images') {
-        // Only include if the structure has changed
-        if (JSON.stringify(formData.images) !== JSON.stringify(originalData.images)) {
-          changedFields.images = formData.images;
-        }
-      } else if (field === 'sizes') {
-        // Compare arrays
-        if (JSON.stringify(formData.sizes) !== JSON.stringify(originalData.sizes)) {
-          changedFields.sizes = formData.sizes;
-        }
-      } else if (field === 'collections') {
-        // Special handling for collections - compare formData.collections (array) with originalData.collections.map(_id)
-        const originalCollectionIds = originalData.collections?.map(collection => collection._id) || [];
-        if (JSON.stringify(formData.collections) !== JSON.stringify(originalCollectionIds)) {
-          changedFields.collections = formData.collections;
-        }
-      } else if (typeof formData[field] === 'boolean') {
-        // Special handling for boolean values (feature toggles)
-        if (Boolean(formData[field]) !== Boolean(originalData[field])) {
-          changedFields[field] = formData[field];
-        }
-      } else {
-        // Regular fields - only add if values differ
-        if (formData[field] !== originalData[field]) {
-          changedFields[field] = formData[field];
-        }
-      }
-    });
-
-    console.log("Changed fields:", changedFields);
-    return changedFields;
-  };
-
-  const hasChanges = Object.keys(dirtyFields).length > 0 && Object.keys(logChangedFields()).length > 0;
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    const errors = validateProductForm(formData);
+    setValidationErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
       toast.error("Please fix the form errors before submitting");
-      // Scroll to first error
-      const firstErrorId = Object.keys(validationErrors)[0];
+      const firstErrorId = Object.keys(errors)[0];
       const element = document.getElementById(firstErrorId);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -281,47 +150,35 @@ const AdminUpdateProduct = () => {
       return;
     }
 
-    // Log only changed fields
-    logChangedFields();
+    const changedFields = identifyChangedFields(dirtyFields, formData, originalData);
+
+    if (Object.keys(changedFields).length === 0) {
+      toast.info("No changes to update");
+      return;
+    }
 
     setLoading(true);
     setError('');
 
     try {
-      // Filter out empty images
-      const filteredImages = formData.images.filter(img => img.imageUrl && img.imageId);
+      const submitData = formatSubmitData(changedFields, formData);
 
-      if (filteredImages.length === 0) {
+      if (submitData.images && submitData.images.filter(img => img.imageUrl && img.imageId).length === 0) {
         throw new Error('Please upload at least one product image');
       }
 
-      // Format data for API submission
-      const submitData = {
-        ...formData,
-        // Convert comma-separated strings to arrays and sanitize
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-        technologyStack: formData.technologyStack.split(',').map(tech => tech.trim()).filter(tech => tech),
-        // Use only valid images
-        images: filteredImages,
-        // Format price as number
-        price: Number(formData.price),
-        // Format categories for API
-        categories: [{
-          main: formData.categoryName,
-          sub: formData.subCategory,
-          path: formData.path
-        }],
-        // Include original offer data if it existed
-        ...(offerData && { offer: offerData })
-      };
+      console.log("Submitting changes:", submitData);
 
-      console.log("Product update data:", submitData);
+      const response = await updateProduct(slug, submitData);
 
-      // Here you would make the actual API call to update the product
-      // const response = await updateProduct(slug, submitData);
+      if (response.success) {
+        toast.success(response.message || "Product updated successfully");
+        setDirtyFields({});
+        setOriginalData({ ...originalData, ...submitData });
+      } else {
+        throw new Error(response.message || "Failed to update product");
+      }
 
-      toast.success("Product updated successfully");
-      navigate("/admin/products");
     } catch (err) {
       console.error("Error updating product:", err);
       setError(err.message || "Failed to update product. Please try again.");
@@ -332,59 +189,35 @@ const AdminUpdateProduct = () => {
   };
 
   const addProductImage = (imageUrl, imageId, index) => {
-    setFormData(prevState => {
-      const updatedImages = [...prevState.images];
-
-      if (index !== undefined && updatedImages[index]) {
-        updatedImages[index] = {
-          ...updatedImages[index],
-          ...(imageUrl && { imageUrl }),
-          ...(imageId && { imageId })
-        };
-      } else {
-        updatedImages.push({
-          imageUrl: imageUrl || '',
-          imageId: imageId || ''
-        });
-      }
-
-      return {
-        ...prevState,
-        images: updatedImages
-      };
+    const updatedImages = updateImageArray(formData.images, {
+      action: 'add',
+      imageUrl,
+      imageId,
+      index
     });
 
-    setDirtyFields(prev => ({
-      ...prev,
-      images: true
-    }));
+    setFormData(prev => ({ ...prev, images: updatedImages }));
+    setDirtyFields(prev => ({ ...prev, images: true }));
   };
 
   const removeProductImage = (index) => {
-    const updatedImages = formData.images.filter((_, i) => i !== index);
+    const updatedImages = updateImageArray(formData.images, {
+      action: 'remove',
+      index
+    });
 
-    // If removing the last image, add an empty one
-    const finalImages = updatedImages.length === 0
-      ? [{ imageUrl: '', imageId: '' }]
-      : updatedImages;
-
-    setFormData(prev => ({
-      ...prev,
-      images: finalImages
-    }));
-
-    setDirtyFields(prev => ({
-      ...prev,
-      images: true
-    }));
+    setFormData(prev => ({ ...prev, images: updatedImages }));
+    setDirtyFields(prev => ({ ...prev, images: true }));
   };
 
   const addImageField = () => {
-    setFormData(prev => ({
-      ...prev,
-      images: [...prev.images, { imageUrl: '', imageId: '' }]
-    }));
+    const updatedImages = updateImageArray(formData.images, { action: 'addField' });
+    setFormData(prev => ({ ...prev, images: updatedImages }));
   };
+
+  const hasChanges = Object.keys(dirtyFields).length > 0 &&
+    Object.keys(identifyChangedFields(dirtyFields, formData, originalData)).length > 0;
+
 
   if (fetchLoading) {
     return (
@@ -436,7 +269,6 @@ const AdminUpdateProduct = () => {
         </div>
       )}
 
-      {/* Unsaved changes warning */}
       {Object.keys(dirtyFields).length > 0 && (
         <div className="bg-yellow-900/30 text-yellow-400 p-4 rounded-md mb-6 flex items-center gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -627,8 +459,8 @@ const AdminUpdateProduct = () => {
                   <div
                     key={size}
                     className={`px-4 py-2 rounded-md cursor-pointer transition-colors ${formData.sizes.includes(size)
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                       }`}
                     onClick={() => handleSizeChange(size)}
                   >
@@ -775,30 +607,26 @@ const AdminUpdateProduct = () => {
               <div>
                 <FindCollections
                   onSelectCollection={(collectionId, collectionName) => {
-                    // Check if collection already exists
                     if (formData.collections.includes(collectionId)) {
-                      // Remove it
-                      handleFieldChange('collections', 
+                      handleFieldChange('collections',
                         formData.collections.filter(id => id !== collectionId));
                     } else {
-                      // Add it
-                      handleFieldChange('collections', 
+                      handleFieldChange('collections',
                         [...formData.collections, collectionId]);
                     }
                   }}
-                  selectedCollectionId={formData.collections} // Pass the entire array
+                  selectedCollectionId={formData.collections} 
                 />
-                
-                {/* Display selected collections */}
+
                 {formData.collections.length > 0 && (
                   <div className="mt-4">
                     <h3 className="text-sm font-medium mb-2 text-primary-300">Selected Collections:</h3>
                     <div className="flex flex-wrap gap-2">
                       {formData.collections.map(collectionId => (
-                        <div key={collectionId} 
-                             className="inline-flex items-center bg-surface/60 border border-gray-700 px-3 py-1 rounded-full">
+                        <div key={collectionId}
+                          className="inline-flex items-center bg-surface/60 border border-gray-700 px-3 py-1 rounded-full">
                           <span className="text-sm">{collectionId}</span>
-                          <button 
+                          <button
                             type="button"
                             onClick={() => removeCollection(collectionId)}
                             className="ml-2 text-text-muted hover:text-red-400"
@@ -814,7 +642,6 @@ const AdminUpdateProduct = () => {
             </div>
           </div>
 
-          {/* New Offer Management Section */}
           <div className="md:col-span-2">
             <h2 className="text-xl font-semibold mb-4 text-primary-300">Offer</h2>
             <div className="mb-4">

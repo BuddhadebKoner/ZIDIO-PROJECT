@@ -68,3 +68,17 @@ export const uploadImage = async (file, path) => {
       };
    }
 };
+
+export const getCollectionById = async (slug) => {
+   try {
+      const response = await axiosInstance.get(`/collections/${slug}`);
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to fetch product");
+      }
+   } catch (error) {
+      console.error("Error fetching product:", error);
+      throw error;
+   }
+}
