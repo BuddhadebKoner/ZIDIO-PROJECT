@@ -1,6 +1,6 @@
 import express from 'express'
 import { adminAuth } from '../middlewares/adminAuth.middleware.js'
-import { addCollection, addOffer, addProduct, updateProduct } from '../controllers/admin.controller.js'
+import { addCollection, addOffer, addProduct, updateCollection, updateProduct } from '../controllers/admin.controller.js'
 
 const adminRouter = express.Router()
 
@@ -10,6 +10,8 @@ adminRouter.post('/add-product', adminAuth, addProduct);
 adminRouter.put('/update-product/:slug', adminAuth, updateProduct);
 // add collections
 adminRouter.post('/add-collection', adminAuth, addCollection)
+// update collectionsExist
+adminRouter.put('/update-collection/:slug', adminAuth, updateCollection)
 // add offer
 adminRouter.post('/add-offer', adminAuth, addOffer)
 
