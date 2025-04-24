@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSignIn, useClerk } from '@clerk/clerk-react';
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const SignIn = () => {
   const { signIn } = useSignIn();
@@ -10,6 +12,8 @@ const SignIn = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
+
+  const { refreshUserData } = useAuth();
 
   const [email, setEmail] = useState('');
 
@@ -59,8 +63,9 @@ const SignIn = () => {
       });
 
       if (result.status === "complete") {
+        toast.info("Reload Required")
         // Sign-in successful, redirect
-        navigate('/'); 
+        navigate('/');
       } else {
         // Handle edge cases
         console.log("Additional verification steps required:", result);

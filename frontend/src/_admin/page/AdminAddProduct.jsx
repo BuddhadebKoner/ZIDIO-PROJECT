@@ -51,12 +51,16 @@ const AdminAddProduct = () => {
         ...formData,
         sizes: formData.sizes.filter(s => s !== size)
       });
+
+      console.log("Size added:", formData.sizes);
     } else {
       // Add size if not already selected
       setFormData({
         ...formData,
         sizes: [...formData.sizes, size]
       });
+
+      console.log("Size added:", formData.sizes);
     }
   };
 

@@ -85,9 +85,8 @@ const ProductDataTable = ({
                     <div className="text-sm text-text">₹{product.price}</div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                      style={{ background: 'var(--color-primary-900)', color: 'var(--color-text)' }}>
-                      {product.size}
+                    <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
+                      {Array.isArray(product.size) ? product.size.join(', ') : product.size}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-text-muted">

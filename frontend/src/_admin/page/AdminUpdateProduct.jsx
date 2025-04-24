@@ -379,9 +379,6 @@ const AdminUpdateProduct = () => {
               disabled={loading}
               path="products"
             />
-            <p className="mt-2 text-sm text-gray-400">
-              Recommended size: 1200x400px. Max file size: 2MB.
-            </p>
           </div>
 
           <div className="md:col-span-2">
@@ -440,10 +437,6 @@ const AdminUpdateProduct = () => {
                 </button>
               </div>
             )}
-
-            <p className="mt-2 text-sm text-gray-400">
-              Recommended size: 800x800px. Max file size: 2MB. Add multiple images to show different angles or variations.
-            </p>
           </div>
 
           <div className="md:col-span-2">

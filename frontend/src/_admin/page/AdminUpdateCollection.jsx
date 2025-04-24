@@ -5,11 +5,18 @@ import { toast } from "react-toastify";
 import SingleImageUploader from '../../components/shared/SingleImageUploader';
 import FindProducts from '../../components/dataFinding/FindProducts';
 import { getCollectionById } from '../../lib/api/auth.api';
+import { 
+  identifyCollectionChanges, 
+  validateCollectionForm,
+  formatCollectionDataForForm
+} from '../../utils/collection.utils';
+import { updateCollection } from '../../lib/api/admin.api';
 
 const AdminUpdateCollection = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
 
+  const [originalData, setOriginalData] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -33,16 +40,9 @@ const AdminUpdateCollection = () => {
         const response = await getCollectionById(slug);
 
         if (response && response.success) {
-          const collectionData = response.collection;
-          setFormData({
-            name: collectionData.name || '',
-            slug: collectionData.slug || '',
-            subtitle: collectionData.subtitle || '',
-            isFeatured: collectionData.isFeatured || false,
-            bannerImageUrl: collectionData.bannerImageUrl || '',
-            bannerImageId: collectionData.bannerImageId || '',
-            productIds: collectionData.products || []
-          });
+          const formattedData = formatCollectionDataForForm(response.collection);
+          setFormData(formattedData);
+          setOriginalData(formattedData);
         } else {
           setGeneralError('Failed to fetch collection data');
           toast.error('Failed to fetch collection data');
@@ -101,46 +101,52 @@ const AdminUpdateCollection = () => {
     setGeneralError('');
     setErrors({});
 
-    // Basic client-side validation
-    const clientErrors = {};
+    // Validate form data using utility function
+    const validationErrors = validateCollectionForm(formData);
 
-    if (!formData.name.trim()) {
-      clientErrors.name = 'Collection name is required';
-    }
-
-    if (!formData.slug.trim()) {
-      clientErrors.slug = 'Slug is required';
-    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(formData.slug.trim())) {
-      clientErrors.slug = 'Slug must contain only lowercase letters, numbers, and hyphens';
-    }
-
-    if (!formData.subtitle.trim()) {
-      clientErrors.subtitle = 'Subtitle is required';
-    }
-
-    if (!formData.bannerImageUrl || !formData.bannerImageId) {
-      clientErrors.bannerImageUrl = 'Banner image is required';
-    }
-
-    if (formData.productIds.length === 0) {
-      clientErrors.productIds = 'At least one product is required';
-    }
-
-    // If client-side validation fails, show errors and return
-    if (Object.keys(clientErrors).length > 0) {
-      setErrors(clientErrors);
+    // If validation fails, show errors and return
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       setLoading(false);
       toast.error('Please fix the form errors');
       return;
     }
 
-    // Instead of making an API call, we'll just log the data
-    console.log("Updated collection data to submit:", formData);
-    toast.success('Collection would be updated (data logged to console)');
-    setLoading(false);
+    // Identify changed fields using utility function
+    const changedFields = identifyCollectionChanges(originalData, formData);
 
-    // In a real scenario you would call updateCollection API here
-    // and handle the response appropriately
+    if (!changedFields) {
+      toast.info('No changes detected');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Call the API with only the changed fields
+      const response = await updateCollection(slug, changedFields);
+
+      console.log('Update response:', response);
+      
+      if (response.success) {
+        toast.success(response.message || 'Collection updated successfully');
+      } else {
+        // Handle field-specific errors
+        if (response.fieldErrors) {
+          setErrors(response.fieldErrors);
+          toast.error('Please fix the form errors');
+        } else {
+          // Handle general error
+          setGeneralError(response.message || 'Failed to update collection');
+          toast.error(response.message || 'Failed to update collection');
+        }
+      }
+    } catch (error) {
+      console.error('Error in update submission:', error);
+      setGeneralError('An unexpected error occurred. Please try again.');
+      toast.error('An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (fetchLoading) {
@@ -191,7 +197,7 @@ const AdminUpdateCollection = () => {
               )}
             </div>
 
-            {/* Collection Slug Field */}
+            {/* Collection Slug Field - Make it disabled */}
             <div className="space-y-2">
               <label htmlFor="slug" className="block text-sm font-medium">
                 Slug <span className="text-red-500">*</span>
@@ -203,11 +209,13 @@ const AdminUpdateCollection = () => {
                   name="slug"
                   value={formData.slug}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 bg-surface border ${errors.slug ? 'border-red-500' : 'border-gray-700'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted`}
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-700 rounded-md focus:outline-none text-text cursor-not-allowed opacity-70"
                   placeholder="collection-slug"
+                  disabled={true}
                   required
                 />
               </div>
+              <p className="text-xs text-gray-400">Slug cannot be changed after creation</p>
               {errors.slug && (
                 <p className="text-red-500 text-xs mt-1">{errors.slug}</p>
               )}
@@ -316,12 +324,14 @@ const AdminUpdateCollection = () => {
         <div className="flex space-x-4 pt-4">
           <button
             type="submit"
-            disabled={loading}
-            className="btn-primary flex items-center justify-center min-w-32"
+            disabled={loading || fetchLoading}
+            className={`btn-primary flex items-center justify-center min-w-32 ${
+              (loading || fetchLoading) ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
           >
             {loading ? (
               <>
-                <LoaderCircle className='animate-spin' />
+                <LoaderCircle className='animate-spin mr-2' />
                 Updating Collection...
               </>
             ) : 'Update Collection'}
@@ -330,6 +340,7 @@ const AdminUpdateCollection = () => {
             type="button"
             onClick={() => navigate('/admin/collections')}
             className="btn-secondary"
+            disabled={loading}
           >
             Cancel
           </button>

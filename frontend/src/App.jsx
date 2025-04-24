@@ -10,7 +10,7 @@ import Lenis from '@studio-freight/lenis';
 import { useAuth } from "./context/AuthContext";
 import FullPageLoader from "./components/loaders/FullPageLoader";
 import AdminLayout from "./_admin/AdminLayout";
-
+import AuthCallback from "./_auth/page/AuthCallback";
 
 // pages
 import { AccountDetails, Address, Cart, Categories, Collections, Home, Offers, Orders, Product, Profile, Search, SosCallBack, Wishlist } from "./_root/page";
@@ -123,6 +123,7 @@ const App = () => {
           <Route path='/sign-in' element={<SignIn />} />
           <Route path='/sign-up' element={<SignUp />} />
           <Route path='/forgot-password' element={<ForgotPassword />} />
+          <Route path='/auth-callback' element={<AuthCallback />} />
         </Route>
         <Route element={<RootLayout />}>
           <Route index element={<Home />} />

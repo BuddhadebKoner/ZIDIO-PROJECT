@@ -139,3 +139,41 @@ export const updateProduct = async (slug, productData) => {
       };
    }
 }
+
+export const updateCollection = async (slug, collectionData) => {
+   if (!collectionData || Object.keys(collectionData).length === 0) {
+      return {
+         success: false,
+         message: "Nothing to change"
+      }
+   }
+   try {
+      const response = await axiosInstance.put(`/admin/update-collection/${slug}`, collectionData, {
+         headers: {
+            'Content-Type': 'application/json',
+         },
+      });
+
+      return {
+         success: true,
+         message: response.data.message || "Collection updated successfully",
+         product: response.data.collection,
+      };
+   } catch (error) {
+      console.error('Error updating collection:', error);
+
+      if (error.response?.data?.fieldErrors) {
+         return {
+            success: false,
+            message: error.response.data.message || "Product validation failed",
+            fieldErrors: error.response.data.fieldErrors
+         };
+      }
+
+      return {
+         success: false,
+         message: error.response?.data?.message || "Failed to update collection",
+         error: error.response?.data?.error || error.message
+      };
+   }
+}

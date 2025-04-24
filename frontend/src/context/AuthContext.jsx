@@ -11,11 +11,11 @@ export const AuthProvider = ({ children }) => {
 
    // fetch current user from clerk
    const { isLoaded, user } = useUser();
-   
-   const { 
-      data: authData, 
-      isLoading, 
-      refetch: refreshUserData 
+
+   const {
+      data: authData,
+      isLoading,
+      refetch: refreshUserData
    } = useIsAuthenticated();
 
    useEffect(() => {
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
             setError(authData?.message || "Authentication failed");
          }
       }
-   }, [authData]);
+   }, [authData, user, isLoaded, useUser, children]);
 
    const cartItemsCount = currentUser?.cart?.length || 0;
    const wishlistItemsCount = currentUser?.wishlist?.length || 0;
