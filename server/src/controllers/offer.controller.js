@@ -91,3 +91,38 @@ export const searchOffers = async (req, res) => {
       });
    }
 }
+
+// get offer detaild by offer code
+export const getOfferDetailsByCode = async (req, res) => {
+   try {
+      const { slug } = req.params;
+      if (!slug) {
+         return res.status(400).json({
+            success: false,
+            message: "offer slug is required",
+         });
+      }
+
+      const offer = await Offer.findOne({ offerCode: slug })
+      if (!offer) {
+         return res.status(404).json({
+            success: false,
+            message: "Offer not found",
+         });
+      }
+      
+      // return offer data 
+      return res.status(200).json({
+         success: true,
+         message: "Offer fetched successfully",
+         offer
+      });
+
+   } catch (error) {
+      console.error("Error fetching offer by code:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Internal Server Error",
+      });
+   }
+}

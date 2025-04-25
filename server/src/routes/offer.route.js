@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllOffers, searchOffers } from '../controllers/offer.controller.js';
+import { getAllOffers, getOfferDetailsByCode, searchOffers } from '../controllers/offer.controller.js';
 
 
 const offerRouter = express.Router();
@@ -8,6 +8,8 @@ const offerRouter = express.Router();
 offerRouter.get('/get-offers', getAllOffers);
 // Route to search offers
 offerRouter.get('/search', searchOffers);
+// get offer by offerCode	
+offerRouter.get('/:slug', getOfferDetailsByCode)
 
 
 export default offerRouter;
