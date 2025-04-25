@@ -205,7 +205,7 @@ const AdminCategory = () => {
         isFetchingNextPage={isFetchingNextPage}
         onLoadMore={fetchNextPage}
         onProductAction={(product) => {
-          console.log("Edit product:", product);
+          navigate(`/admin/products/${product.slug}`)
         }}
         actionLabel="Edit"
       />

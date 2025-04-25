@@ -43,36 +43,6 @@ const AdminAddOffer = () => {
       })
    }
 
-   const handleProductIdChange = (index, value) => {
-      const updatedProducts = [...formData.products]
-      updatedProducts[index] = value
-      setFormData({
-         ...formData,
-         products: updatedProducts
-      })
-
-      // Clear products field error when user edits
-      setFieldErrors({
-         ...fieldErrors,
-         products: ''
-      })
-   }
-
-   const addProductIdField = () => {
-      setFormData({
-         ...formData,
-         products: [...formData.products, '']
-      })
-   }
-
-   const removeProductIdField = (index) => {
-      const updatedProducts = formData.products.filter((_, i) => i !== index)
-      setFormData({
-         ...formData,
-         products: updatedProducts
-      })
-   }
-
    // Validate the form before submission
    const validateForm = () => {
       let isValid = true
@@ -286,7 +256,7 @@ const AdminAddOffer = () => {
                         />
                         {renderFieldError('offerCode')}
                         <p className="text-xs text-gray-400">
-                           This code will be used by customers during checkout (uppercase letters and numbers only)
+                           Offer codes cannot be modified after creation
                         </p>
                      </div>
                   </div>
@@ -360,16 +330,16 @@ const AdminAddOffer = () => {
                {/* Products Section */}
                <div className="space-y-4 p-4 rounded-lg border border-gray-700">
                   <h2 className="text-xl font-semibold mb-4 text-primary-300">Applicable Products</h2>
-                  
+
                   <div className="space-y-2">
                      <label className="block text-sm font-medium">
                         Select Products <span className="text-red-500">*</span>
-                     </label>       
+                     </label>
                      <FindProducts
                         onSelectProducts={handleProductSelection}
                         selectedProductIds={formData.products}
                      />
-                     
+
                      {renderFieldError('products')}
                   </div>
                </div>

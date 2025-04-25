@@ -4,13 +4,13 @@ import { X, ChevronLeft, LoaderCircle } from 'lucide-react'
 import { toast } from "react-toastify";
 import SingleImageUploader from '../../components/shared/SingleImageUploader';
 import FindProducts from '../../components/dataFinding/FindProducts';
-import { getCollectionById } from '../../lib/api/auth.api';
 import { 
   identifyCollectionChanges, 
   validateCollectionForm,
   formatCollectionDataForForm
 } from '../../utils/collection.utils';
 import { updateCollection } from '../../lib/api/admin.api';
+import { getCollectionById } from '../../lib/api/collection.api';
 
 const AdminUpdateCollection = () => {
   const { slug } = useParams();

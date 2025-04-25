@@ -147,17 +147,20 @@ const App = () => {
           {/*admin dashbord  */}
           <Route index element={<AdminDashboard />} />
           {/* product edit and update */}
-          <Route path="/admin/products" element={<AdminProduct />} /> 
+          <Route path="/admin/products" element={<AdminProduct />} />
+          <Route path="/admin/add-product" element={<AdminAddProduct />} />
           <Route path="/admin/products/:slug" element={<AdminUpdateProduct />} />
           {/* edit update collections */}
-          <Route path="/admin/collection" element={<AdminCollection />} /> 
-          <Route path="/admin/collection/:slug" element={<AdminUpdateCollection />} /> 
+          <Route path="/admin/collection" element={<AdminCollection />} />
+          <Route path="/admin/collection/:slug" element={<AdminUpdateCollection />} />
+          <Route path="/admin/add-collection" element={<AdminAddCollection />} />
           {/* edit update category */}
-          <Route path="/admin/category" element={<AdminCategory />} /> 
+          <Route path="/admin/category" element={<AdminCategory />} />
           <Route path="/admin/category/:slug" element={<AdminCategory />} />
           {/* add offer */}
           <Route path="/admin/offer" element={<AdminOffer />} />
-          <Route path="/admin/offer/:slug" element={<AdminOffer />} />
+          <Route path="/admin/offer/:slug" element={<AdminUpdateOffer />} />
+          <Route path="/admin/add-offer" element={<AdminAddOffer />} />
           {/* admin settings */}
           <Route path="/admin/settings" element={<AdminSettings />} />
           {/* orders */}
@@ -169,15 +172,6 @@ const App = () => {
           {/* reviews */}
           <Route path="/admin/reviews" element={<AdminReviews />} />
           <Route path="/admin/reviews/:slug" element={<AdminReviews />} />
-          {/* add and update product */}
-          <Route path="/admin/add-product" element={<AdminAddProduct />} />
-          <Route path="/admin/update-product/:slug" element={<AdminUpdateProduct />} />
-          {/* add and update collection */}
-          <Route path="/admin/add-collection" element={<AdminAddCollection />} />
-          <Route path="/admin/update-collection/:slug" element={<AdminUpdateCollection />} />
-          {/* offers add and update */}
-          <Route path="/admin/add-offer" element={<AdminAddOffer />} />
-          <Route path="/admin/update-offer/:slug" element={<AdminUpdateOffer />} />
         </Route>
       </Routes>
       {/* Toast notifications */}

@@ -17,7 +17,7 @@ export const getAllOffers = async (page = 1, limit = 5) => {
    }
 }
 
-export const searchOffers = async (searchTerm = '', page = 1, limit = 5) => { 
+export const searchOffers = async (searchTerm = '', page = 1, limit = 5) => {
    try {
       const queryParams = new URLSearchParams({
          searchTerm,
@@ -36,6 +36,20 @@ export const searchOffers = async (searchTerm = '', page = 1, limit = 5) => {
       }
    } catch (error) {
       console.error("Error searching offers:", error);
+      throw error;
+   }
+}
+
+export const getOfferDetailsByCode = async (slug) => {
+   try {
+      const response = await axiosInstance.get(`/offers/${slug}`);
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to fetch offers");
+      }
+   } catch (error) {
+      console.error("Error fetching offer details:", error);
       throw error;
    }
 }

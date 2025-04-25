@@ -102,7 +102,7 @@ const OfferDataTable = ({
                               <td className="px-6 py-4 text-sm font-medium">
                                  <button
                                     onClick={() => onProductAction(item)}
-                                    className="text-accent-400 hover:text-accent-300 mr-3 transition-colors flex items-center gap-1"
+                                    className="cursor-pointer text-accent-400 hover:text-accent-300 mr-3 transition-colors flex items-center gap-1"
                                     aria-label={`${actionLabel} offer`}>
                                     {actionIcon}
                                     {actionLabel}

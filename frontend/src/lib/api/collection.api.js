@@ -17,7 +17,6 @@ export const getAllCollections = async (page = 1, limit = 5) => {
    }
 };
 
-
 export const searchCollections = async (searchTerm = '', page = 1, limit = 5) => {
    try {
       const queryParams = new URLSearchParams({
@@ -40,3 +39,17 @@ export const searchCollections = async (searchTerm = '', page = 1, limit = 5) =>
       throw error;
    }
 };
+
+export const getCollectionById = async (slug) => {
+   try {
+      const response = await axiosInstance.get(`/collections/${slug}`);
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to fetch product");
+      }
+   } catch (error) {
+      console.error("Error fetching product:", error);
+      throw error;
+   }
+}

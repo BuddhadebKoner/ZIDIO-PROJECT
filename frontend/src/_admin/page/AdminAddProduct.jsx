@@ -541,28 +541,6 @@ const AdminAddProduct = () => {
                 }}
                 selectedCollectionId={formData.collections} // Pass the entire array
               />
-
-              {/* Display selected collections */}
-              {formData.collections.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="text-sm font-medium mb-2 text-primary-300">Selected Collections:</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.collections.map(collectionId => (
-                      <div key={collectionId}
-                        className="inline-flex items-center bg-surface/60 border border-gray-700 px-3 py-1 rounded-full">
-                        <span className="text-sm">{collectionId}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeCollection(collectionId)}
-                          className="ml-2 text-text-muted hover:text-red-400"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

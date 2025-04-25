@@ -105,7 +105,7 @@ const AdminOffer = () => {
 
   // Handle editing an offer
   const handleOfferEdit = useCallback((offer) => {
-    navigate(`/admin/offer/${offer.slug || offer._id}`);
+    navigate(`/admin/offer/${offer.offerCode}`);
   }, [navigate]);
 
   // Intersection observer for infinite scrolling
