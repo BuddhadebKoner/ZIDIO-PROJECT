@@ -2,6 +2,7 @@ import { Collection } from "../models/collection.model.js";
 import { Product } from "../models/product.model.js";
 import { Offer } from "../models/offer.model.js";
 import { sanitizedCollection, sanitizedOffer, sanitizedProduct } from "../utils/checkValidation.js";
+import { HomeContent } from "../models/homecontent.model.js";
 
 export const addProduct = async (req, res) => {
    try {
@@ -411,7 +412,7 @@ export const updateCollection = async (req, res) => {
       }
 
       const updateData = req.body;
-      
+
       if (!updateData || Object.keys(updateData).length === 0) {
          return res.status(400).json({
             success: false,
@@ -450,20 +451,20 @@ export const updateCollection = async (req, res) => {
       if (updateData.products) {
          // Make sure we're working with strings for comparison
          const existingProductIds = existingCollection.products.map(id => id.toString());
-         
+
          // Check if products is actually an array of strings
-         if (!Array.isArray(updateData.products) || 
-             updateData.products.some(id => typeof id !== 'string')) {
+         if (!Array.isArray(updateData.products) ||
+            updateData.products.some(id => typeof id !== 'string')) {
             return res.status(400).json({
                success: false,
                message: "Products must be an array of string IDs",
             });
          }
-         
+
          const productsToRemove = existingProductIds.filter(
             productId => !updateData.products.includes(productId)
          );
-         
+
          const productsToAdd = updateData.products.filter(
             productId => !existingProductIds.includes(productId)
          );
@@ -494,13 +495,13 @@ export const updateCollection = async (req, res) => {
 
       // Clone updateData to avoid modifying the original when updating
       const cleanedUpdateData = { ...updateData };
-      
+
       // We need to rename 'products' to match the schema field if it's included
       if (cleanedUpdateData.productIds) {
          cleanedUpdateData.products = cleanedUpdateData.productIds;
          delete cleanedUpdateData.productIds; // Remove the incorrect field
       }
-      
+
       // Convert potential numbers back to strings for safety
       if (cleanedUpdateData.products) {
          cleanedUpdateData.products = cleanedUpdateData.products.map(id => id.toString());
@@ -544,6 +545,328 @@ export const updateCollection = async (req, res) => {
       return res.status(500).json({
          success: false,
          message: "Failed to update collection",
+         error: error.message || "Server error"
+      });
+   }
+};
+
+export const updateOffer = async (req, res) => {
+   try {
+      const userId = req.userId;
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "Unauthorized: Authentication required"
+         });
+      }
+
+      const { slug } = req.params;
+      if (!slug) {
+         return res.status(400).json({
+            success: false,
+            message: "Offer code is required"
+         });
+      }
+
+      const updateData = req.body;
+      if (!updateData || Object.keys(updateData).length === 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Update data is required"
+         });
+      }
+
+      const existingOffer = await Offer.findOne({ offerCode: slug });
+      if (!existingOffer) {
+         return res.status(404).json({
+            success: false,
+            message: "Offer not found"
+         });
+      }
+
+      const errors = {};
+
+      if (updateData.offerName !== undefined) {
+         if (typeof updateData.offerName !== 'string' || !updateData.offerName.trim()) {
+            errors.offerName = "Offer name is required";
+         } else if (updateData.offerName.trim().length < 3) {
+            errors.offerName = "Offer name must be at least 3 characters";
+         } else if (updateData.offerName.trim().length > 50) {
+            errors.offerName = "Offer name cannot exceed 50 characters";
+         }
+      }
+
+      if (updateData.discountValue !== undefined) {
+         const parsedDiscount = Number(updateData.discountValue);
+         if (isNaN(parsedDiscount) || parsedDiscount <= 0) {
+            errors.discountValue = "Discount must be a positive number";
+         } else if (parsedDiscount > 100) {
+            errors.discountValue = "Discount cannot exceed 100%";
+         } else {
+            updateData.discountValue = parsedDiscount;
+         }
+      }
+
+      if (updateData.startDate !== undefined && updateData.endDate !== undefined) {
+         const startDate = new Date(updateData.startDate);
+         const endDate = new Date(updateData.endDate);
+
+         if (isNaN(startDate.getTime())) {
+            errors.startDate = "Invalid start date format";
+         }
+
+         if (isNaN(endDate.getTime())) {
+            errors.endDate = "Invalid end date format";
+         }
+
+         if (!errors.startDate && !errors.endDate && startDate >= endDate) {
+            errors.endDate = "End date must be after start date";
+         }
+      } else if (updateData.startDate !== undefined) {
+         const startDate = new Date(updateData.startDate);
+         const existingEndDate = new Date(existingOffer.endDate);
+
+         if (isNaN(startDate.getTime())) {
+            errors.startDate = "Invalid start date format";
+         } else if (startDate >= existingEndDate) {
+            errors.startDate = "Start date must be before the existing end date";
+         }
+      } else if (updateData.endDate !== undefined) {
+         const endDate = new Date(updateData.endDate);
+         const existingStartDate = new Date(existingOffer.startDate);
+
+         if (isNaN(endDate.getTime())) {
+            errors.endDate = "Invalid end date format";
+         } else if (existingStartDate >= endDate) {
+            errors.endDate = "End date must be after the existing start date";
+         }
+      }
+
+      if (updateData.products !== undefined) {
+         if (!Array.isArray(updateData.products) || updateData.products.length === 0) {
+            errors.products = "At least one product must be selected for the offer";
+         } else {
+            // Validate that all product IDs exist
+            const products = await Product.find({ _id: { $in: updateData.products } });
+            if (products.length !== updateData.products.length) {
+               errors.products = "One or more product IDs are invalid";
+            } else {
+               // Find products with different offers - but don't block the update
+               const productsWithDifferentOffers = await Product.find({
+                  _id: { $in: updateData.products },
+                  offer: { $ne: null, $ne: existingOffer._id }
+               });
+
+               // Instead of error, just prepare a notification about which offers will be replaced
+               if (productsWithDifferentOffers.length > 0) {
+                  // This will be used later in the response message
+                  updateData._productsWithReplacedOffers = productsWithDifferentOffers.map(p => p.title);
+               }
+            }
+         }
+      }
+
+      if (Object.keys(errors).length > 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Validation failed",
+            fieldErrors: errors
+         });
+      }
+
+      if (updateData.products) {
+         const existingProductIds = existingOffer.products.map(id => id.toString());
+
+         const productsToRemove = existingProductIds.filter(
+            productId => !updateData.products.includes(productId)
+         );
+
+         const productsToAdd = updateData.products.filter(
+            productId => !existingProductIds.includes(productId)
+         );
+
+         if (productsToRemove.length > 0) {
+            await Product.updateMany(
+               { _id: { $in: productsToRemove } },
+               { $set: { offer: null } }
+            );
+         }
+
+         if (productsToAdd.length > 0) {
+            const productsWithExistingOffers = await Product.find({
+               _id: { $in: productsToAdd },
+               offer: { $ne: null, $ne: existingOffer._id }
+            });
+
+            const replacedOfferIds = [...new Set(productsWithExistingOffers.map(p => p.offer))];
+
+            await Product.updateMany(
+               { _id: { $in: productsToAdd } },
+               { $set: { offer: existingOffer._id } }
+            );
+
+            if (replacedOfferIds.length > 0) {
+               await Offer.updateMany(
+                  { _id: { $in: replacedOfferIds } },
+                  { $pull: { products: { $in: productsToAdd } } }
+               );
+            }
+         }
+
+         if (updateData._productsWithReplacedOffers) {
+            delete updateData._productsWithReplacedOffers;
+         }
+      }
+
+      const updatedOffer = await Offer.findByIdAndUpdate(
+         existingOffer._id,
+         { $set: updateData },
+         { new: true, runValidators: true }
+      );
+
+      // Improved response with information about replaced offers if any
+      let message = "Offer updated successfully";
+      if (updateData._productsWithReplacedOffers && updateData._productsWithReplacedOffers.length > 0) {
+         message += `. The following products had their previous offers replaced: ${updateData._productsWithReplacedOffers.join(', ')}`;
+      }
+
+      return res.status(200).json({
+         success: true,
+         message: message,
+         offer: updatedOffer
+      });
+
+   } catch (error) {
+      console.error("Error updating offer:", error);
+
+      if (error.name === 'ValidationError') {
+         const validationErrors = {};
+         for (const field in error.errors) {
+            validationErrors[field] = error.errors[field].message;
+         }
+
+         return res.status(400).json({
+            success: false,
+            message: "Validation error",
+            fieldErrors: validationErrors
+         });
+      }
+
+      return res.status(500).json({
+         success: false,
+         message: "Failed to update offer",
+         error: error.message || "Server error"
+      });
+   }
+};
+
+export const getHomeContent = async (req, res) => {
+   try {
+      let homeContent = await HomeContent.findOne()
+         .populate('exclusiveProducts.productId')
+         .populate('newArrivals.productId')
+         .populate('collections.collectionId')
+         .populate('offerFeatured.offer')
+         .populate('alltimeBestSellers')
+         .populate('womenFeatured.productId');
+
+      if (!homeContent) {
+         homeContent = await HomeContent.create({
+            heroBannerImages: [],
+            exclusiveProducts: [],
+            newArrivals: [],
+            collections: [],
+            offerFeatured: [],
+            alltimeBestSellers: null,
+            womenFeatured: []
+         });
+      }
+
+      return res.status(200).json({
+         success: true,
+         message: "Home content fetched successfully",
+         homeContent
+      });
+   } catch (error) {
+      console.error("Error fetching home content:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to fetch home content",
+         error: error.message || "Server error"
+      });
+   }
+};
+
+// Update entire home content
+export const updateHomeContent = async (req, res) => {
+   try {
+      const {
+         heroBannerImages,
+         exclusiveProducts,
+         newArrivals,
+         collections,
+         offerFeatured,
+         alltimeBestSellers,
+         womenFeatured
+      } = req.body;
+
+      let homeContent = await HomeContent.findOne();
+
+      if (!homeContent) {
+         homeContent = new HomeContent({});
+      }
+
+      // Only update fields that are provided
+      if (heroBannerImages) homeContent.heroBannerImages = heroBannerImages;
+      if (exclusiveProducts) homeContent.exclusiveProducts = exclusiveProducts;
+      if (newArrivals) homeContent.newArrivals = newArrivals;
+
+      // Validate collections structure before updating
+      if (collections) {
+         if (!Array.isArray(collections)) {
+            return res.status(400).json({
+               success: false,
+               message: "Collections must be an array",
+            });
+         }
+
+         // Validate each collection item
+         for (const item of collections) {
+            if (!item.collectionId) {
+               return res.status(400).json({
+                  success: false,
+                  message: "Each collection must have a collectionId",
+               });
+            }
+
+            if (!item.imageDetails || !item.imageDetails.imageUrl) {
+               return res.status(400).json({
+                  success: false,
+                  message: "Each collection must have imageDetails with imageUrl",
+               });
+            }
+         }
+
+         homeContent.collections = collections;
+      }
+
+      if (offerFeatured) homeContent.offerFeatured = offerFeatured;
+      if (alltimeBestSellers) homeContent.alltimeBestSellers = alltimeBestSellers;
+      if (womenFeatured) homeContent.womenFeatured = womenFeatured;
+
+      homeContent.lastUpdated = new Date();
+      await homeContent.save();
+
+      return res.status(200).json({
+         success: true,
+         message: "Home content updated successfully",
+         homeContent
+      });
+   } catch (error) {
+      console.error("Error updating home content:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to update home content",
          error: error.message || "Server error"
       });
    }

@@ -1,6 +1,7 @@
 import express from 'express';
 import { userAuth } from '../middlewares/userAuth.middleware.js';
 import { addAddress, updateAddress, updateAvatar, updateUserDetails } from '../controllers/user.controller.js';
+import { getHomeContent } from '../controllers/admin.controller.js';
 
 const userRouter = express.Router();
 
@@ -12,6 +13,8 @@ userRouter.patch('/update-profile', userAuth, updateUserDetails);
 userRouter.post('/add-address', userAuth, addAddress);
 // update address
 userRouter.patch('/update-address', userAuth, updateAddress);
+// get home content
+userRouter.get('/home-content', userAuth, getHomeContent)
 
 
 export default userRouter;

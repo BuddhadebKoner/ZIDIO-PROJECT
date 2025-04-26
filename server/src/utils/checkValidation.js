@@ -139,25 +139,6 @@ export const sanitizedProduct = (product) => {
          }
       }
 
-      // Validate and sanitize boolean fields
-      const booleanFields = [
-         'isUnderPremium', 'isExcusiveProducts', 'isNewArrival',
-         'isUnderHotDeals', 'isBestSeller', 'isWomenFeatured',
-         'isMenFeatured', 'isFeaturedToBanner', 'isTrendingNow'
-      ];
-
-      booleanFields.forEach(field => {
-         if (product[field] !== undefined) {
-            if (typeof product[field] === 'string') {
-               sanitizedProduct[field] = product[field].toLowerCase() === 'true';
-            } else {
-               sanitizedProduct[field] = Boolean(product[field]);
-            }
-         } else {
-            sanitizedProduct[field] = false;
-         }
-      });
-
       // Validate and sanitize category fields
       if (!product.categoryName || !product.subCategory || !product.path) {
          errors.category = "Category name, subcategory, and path are required";

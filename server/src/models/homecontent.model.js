@@ -1,78 +1,77 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose';
 
-const homeContentSchema = new mongoose.Schema({
-   heroBannerImages: [{
-      imageUrl: {
-         type: String,
-         required: true,
-      },
-      imageId: {
-         type: String,
-         required: true,
-      },
-      path: {
-         type: String,
-         required: true,
-      },
-   }],
+const HomeContentSchema = new mongoose.Schema({
+   heroBannerImages: [
+      {
+         imageUrl: {
+            type: String, required: true
+         },
+         imageId: {
+            type: String, required: true
+         },
+         path: {
+            type: String, default: '/'
+         }
+      }
+   ],
    exclusiveProducts: [
       {
          productId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Product",
-         },
-      },
+            ref: 'Product'
+         }
+      }
    ],
    newArrivals: [
       {
          productId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Product",
-         },
-      },
+            ref: 'Product'
+         }
+      }
    ],
    collections: [
       {
-         type: mongoose.Schema.Types.ObjectId,
-         ref: "Collection",
-      },
-      {
-         imageUrl: {
-            type: String,
-            required: true,
+         collectionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Collection'
          },
-         imageId: {
-            type: String,
-            required: true,
-         },
+         imageDetails: {
+            imageUrl: {
+               type: String
+            },
+            imageId: {
+               type: String
+            }
+         }
       }
    ],
-   offerFeatured: [{
-      imageUrl: {
-         type: String,
-         required: true,
-      },
-      imageId: {
-         type: String,
-         required: true,
-      },
-      offer: {
-         type: mongoose.Schema.Types.ObjectId,
-         ref: "Offer",
+   offerFeatured: [
+      {
+         imageUrl: {
+            type: String, required: true
+         },
+         imageId: {
+            type: String, required: true
+         },
+         offer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Offer'
+         }
       }
-   }],
+   ],
    alltimeBestSellers: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
+      ref: 'Product'
    },
    womenFeatured: [
       {
          productId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Product",
-         },
-      },
+            ref: 'Product'
+         }
+      }
    ],
-});
+}, { timestamps: true });
 
-export const HomeContent = mongoose.model("HomeContent", homeContentSchema);
+export const HomeContent = mongoose.model('HomeContent', HomeContentSchema);
