@@ -22,19 +22,10 @@ const AdminAddProduct = () => {
     tags: '',
     technologyStack: '',
     productModelLink: '',
-    isUnderPremium: false,
-    isExcusiveProducts: false,
-    isNewArrival: false,
-    isUnderHotDeals: false,
-    isBestSeller: false,
-    isWomenFeatured: false,
-    isMenFeatured: false,
-    isFeaturedToBanner: false,
-    isTrendingNow: false,
     categoryName: '',
     subCategory: '',
     path: '',
-    collections: [] // Changed from string to array
+    collections: [] 
   });
 
   const [loading, setLoading] = useState(false);
@@ -153,12 +144,12 @@ const AdminAddProduct = () => {
   };
 
   // New function to handle removing a collection
-  const removeCollection = (collectionId) => {
-    setFormData({
-      ...formData,
-      collections: formData.collections.filter(id => id !== collectionId)
-    });
-  };
+  // const removeCollection = (collectionId) => {
+  //   setFormData({
+  //     ...formData,
+  //     collections: formData.collections.filter(id => id !== collectionId)
+  //   });
+  // };
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -362,103 +353,6 @@ const AdminAddProduct = () => {
                 onChange={(e) => setFormData({ ...formData, technologyStack: e.target.value })}
                 required
               />
-            </div>
-          </div>
-
-          {/* Featured Options */}
-          <div className="md:col-span-2">
-            <h2 className="text-xl font-semibold mb-4 text-primary-300">Featured Options</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isUnderPremium"
-                  className="mr-2"
-                  checked={formData.isUnderPremium}
-                  onChange={(e) => setFormData({ ...formData, isUnderPremium: e.target.checked })}
-                />
-                <label htmlFor="isUnderPremium">Premium Product</label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isExcusiveProducts"
-                  className="mr-2"
-                  checked={formData.isExcusiveProducts}
-                  onChange={(e) => setFormData({ ...formData, isExcusiveProducts: e.target.checked })}
-                />
-                <label htmlFor="isExcusiveProducts">Exclusive Product</label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isNewArrival"
-                  className="mr-2"
-                  checked={formData.isNewArrival}
-                  onChange={(e) => setFormData({ ...formData, isNewArrival: e.target.checked })}
-                />
-                <label htmlFor="isNewArrival">New Arrival</label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isUnderHotDeals"
-                  className="mr-2"
-                  checked={formData.isUnderHotDeals}
-                  onChange={(e) => setFormData({ ...formData, isUnderHotDeals: e.target.checked })}
-                />
-                <label htmlFor="isUnderHotDeals">Hot Deal</label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isBestSeller"
-                  className="mr-2"
-                  checked={formData.isBestSeller}
-                  onChange={(e) => setFormData({ ...formData, isBestSeller: e.target.checked })}
-                />
-                <label htmlFor="isBestSeller">Best Seller</label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isWomenFeatured"
-                  className="mr-2"
-                  checked={formData.isWomenFeatured}
-                  onChange={(e) => setFormData({ ...formData, isWomenFeatured: e.target.checked })}
-                />
-                <label htmlFor="isWomenFeatured">Women Featured</label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isMenFeatured"
-                  className="mr-2"
-                  checked={formData.isMenFeatured}
-                  onChange={(e) => setFormData({ ...formData, isMenFeatured: e.target.checked })}
-                />
-                <label htmlFor="isMenFeatured">Men Featured</label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isFeaturedToBanner"
-                  className="mr-2"
-                  checked={formData.isFeaturedToBanner}
-                  onChange={(e) => setFormData({ ...formData, isFeaturedToBanner: e.target.checked })}
-                />
-                <label htmlFor="isFeaturedToBanner">Featured to Banner</label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isTrendingNow"
-                  className="mr-2"
-                  checked={formData.isTrendingNow}
-                  onChange={(e) => setFormData({ ...formData, isTrendingNow: e.target.checked })}
-                />
-                <label htmlFor="isTrendingNow">Trending Now</label>
-              </div>
             </div>
           </div>
 

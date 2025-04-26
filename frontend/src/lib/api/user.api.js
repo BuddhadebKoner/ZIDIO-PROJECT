@@ -74,7 +74,7 @@ export const getUpdateUser = async (updateProfile) => {
 };
 
 // add address
-export const getAddAddress = async (address) => { 
+export const getAddAddress = async (address) => {
    try {
       const response = await axiosInstance.post('/user/add-address',
          { ...address },
@@ -117,6 +117,22 @@ export const getUpdateAddress = async (address) => {
       };
    } catch (error) {
       console.error('Error Updating Address', error);
+      throw error;
+   }
+};
+
+// get home content
+export const getHomeContent = async () => {
+   try {
+      const response = await axiosInstance.get('/user/home-content');
+
+      return {
+         success: true,
+         message: 'Home content fetched successfully',
+         data: response.data,
+      };
+   } catch (error) {
+      console.error('Error Fetching Home Content', error);
       throw error;
    }
 };

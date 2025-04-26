@@ -4,6 +4,7 @@ import { ChevronLeft, LoaderCircle, Plus, Trash2, AlertCircle } from 'lucide-rea
 import { toast } from "react-toastify"
 import FindProducts from '../../components/dataFinding/FindProducts'
 import { getOfferDetailsByCode } from '../../lib/api/offer.api'
+import { updateOffer } from '../../lib/api/admin.api'
 
 const AdminUpdateOffer = () => {
   const navigate = useNavigate()
@@ -179,16 +180,13 @@ const AdminUpdateOffer = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // Validate form
     if (!validateForm()) {
       toast.error('Please fix the form errors')
       return
     }
 
-    // Get only changed fields
     const changedFields = getChangedFields()
 
-    // If no changes, show a message and return
     if (Object.keys(changedFields).length === 0) {
       toast.info('No changes detected')
       return
@@ -196,13 +194,46 @@ const AdminUpdateOffer = () => {
 
     setLoading(true)
     try {
-
-      console.log('Submitting form with data:', changedFields)
-
-      toast.success('Offer updated successfully')
+      const response = await updateOffer(slug, changedFields)
+      
+      if (response.success) {
+        // If there's a special message about replaced offers, show it
+        if (response.message.includes('previous offers replaced')) {
+          toast.success(response.message)
+        } else {
+          toast.success('Offer updated successfully')
+        }
+        
+        // Update original data to reflect the new state
+        setOriginalData({
+          ...originalData,
+          ...changedFields
+        })
+      } else {
+        // Handle validation errors from server
+        if (response.fieldErrors) {
+          setFieldErrors(response.fieldErrors)
+          toast.error('Please fix the validation errors')
+        } else {
+          toast.error(response.message || 'Failed to update offer')
+        }
+      }
     } catch (error) {
       console.error('Error updating offer:', error)
-      toast.error(error.message || 'Failed to update offer')
+      
+      // Handle structured error responses
+      if (error.response?.data) {
+        const { fieldErrors, message } = error.response.data
+        
+        if (fieldErrors) {
+          setFieldErrors(fieldErrors)
+          toast.error('Please fix the validation errors')
+        } else {
+          toast.error(message || 'Failed to update offer')
+        }
+      } else {
+        toast.error(error.message || 'Network error occurred. Please try again.')
+      }
     } finally {
       setLoading(false)
     }

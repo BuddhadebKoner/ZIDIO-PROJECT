@@ -177,3 +177,36 @@ export const updateCollection = async (slug, collectionData) => {
       };
    }
 }
+
+export const updateOffer = async (slug, offerData) => { 
+   console.log("updateOffer", slug);
+   try {
+      const response = await axiosInstance.put(`/admin/update-offer/${slug}`, offerData, {
+         headers: {
+            'Content-Type': 'application/json',
+         },
+      });
+
+      return {
+         success: true,
+         message: response.data.message || "Offer updated successfully",
+         product: response.data.offer,
+      };
+   } catch (error) {
+      console.error('Error updating offer:', error);
+
+      if (error.response?.data?.fieldErrors) {
+         return {
+            success: false,
+            message: error.response.data.message || "Product validation failed",
+            fieldErrors: error.response.data.fieldErrors
+         };
+      }
+
+      return {
+         success: false,
+         message: error.response?.data?.message || "Failed to update offer",
+         error: error.response?.data?.error || error.message
+      };
+   }
+}

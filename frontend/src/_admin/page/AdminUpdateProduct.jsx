@@ -31,15 +31,6 @@ const AdminUpdateProduct = () => {
     tags: '',
     technologyStack: '',
     productModelLink: '',
-    isUnderPremium: false,
-    isExcusiveProducts: false,
-    isNewArrival: false,
-    isUnderHotDeals: false,
-    isBestSeller: false,
-    isWomenFeatured: false,
-    isMenFeatured: false,
-    isFeaturedToBanner: false,
-    isTrendingNow: false,
     categoryName: '',
     subCategory: '',
     path: '',
@@ -130,9 +121,9 @@ const AdminUpdateProduct = () => {
     handleFieldChange('sizes', newSizes);
   };
 
-  const removeCollection = (collectionId) => {
-    handleFieldChange('collections', formData.collections.filter(id => id !== collectionId));
-  };
+  // const removeCollection = (collectionId) => {
+  //   handleFieldChange('collections', formData.collections.filter(id => id !== collectionId));
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -517,39 +508,6 @@ const AdminUpdateProduct = () => {
           </div>
 
           <div className="md:col-span-2">
-            <h2 className="text-xl font-semibold mb-4 text-primary-300">Featured Options</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-3">
-              {[
-                { id: 'isUnderPremium', label: 'Premium Product' },
-                { id: 'isExcusiveProducts', label: 'Exclusive Product' },
-                { id: 'isNewArrival', label: 'New Arrival' },
-                { id: 'isUnderHotDeals', label: 'Hot Deal' },
-                { id: 'isBestSeller', label: 'Best Seller' },
-                { id: 'isWomenFeatured', label: 'Women Featured' },
-                { id: 'isMenFeatured', label: 'Men Featured' },
-                { id: 'isFeaturedToBanner', label: 'Featured to Banner' },
-                { id: 'isTrendingNow', label: 'Trending Now' }
-              ].map(option => (
-                <div key={option.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={option.id}
-                    className="h-4 w-4 rounded border-gray-600 bg-gray-800 text-primary-600 focus:ring-primary-500 focus:ring-offset-gray-900"
-                    checked={formData[option.id]}
-                    onChange={(e) => handleFieldChange(option.id, e.target.checked)}
-                  />
-                  <label htmlFor={option.id} className="ml-2 cursor-pointer">
-                    {option.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-            <p className="mt-4 text-sm text-gray-400">
-              These options control where this product appears across featured sections of the store.
-            </p>
-          </div>
-
-          <div className="md:col-span-2">
             <h2 className="text-xl font-semibold mb-4 text-primary-300">Category</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
@@ -632,7 +590,7 @@ const AdminUpdateProduct = () => {
                         <p className="text-xs mt-1">Valid until: {new Date(offerData.endDate).toLocaleDateString()}</p>
                       </div>
                     </div>
-                    <Link to={`/admin/offer/${offerData.offerName}`} className="btn-secondary text-sm">
+                    <Link to={`/admin/offer/${offerData.offerCode}`} className="btn-secondary text-sm">
                       Manage Offer
                     </Link>
                   </div>
