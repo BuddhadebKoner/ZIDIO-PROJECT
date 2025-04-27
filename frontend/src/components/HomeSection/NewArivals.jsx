@@ -6,116 +6,564 @@ const NewArivals = () => {
    // Sample product data
    const products = [
       {
-         id: 1,
-         name: "Flamewave Oversized T-Shirt",
-         description: "Men's Brown Oversized Cargo Joggers",
-         image: [
-            "https://images.unsplash.com/photo-1627225924765-552d49cf47ad?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
-            "https://images.unsplash.com/photo-1622470953794-aa9c70b0fb9d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
+         "_id": "6807758ad97cecc47bba9960",
+         "slug": "arc-reactor",
+         "title": "Arc Reactor",
+         "subTitle": "Arc Reactor (Glow In The Dark) - Marvel Official Hoodie",
+         "description": "The artwork will be screen printed to perfection on a premium Redwolf branded brushed fleece hoodie featuring kangaroo pockets, drawstrings and a hood.",
+         "price": 999,
+         "images": [
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319108/e-commerce/products/bhgpiebtko1zw6xjckzu.webp",
+               "imageId": "e-commerce/products/bhgpiebtko1zw6xjckzu",
+               "_id": "6807758ad97cecc47bba9961"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319116/e-commerce/products/phqepkkrjhvlrjahbflx.webp",
+               "imageId": "e-commerce/products/phqepkkrjhvlrjahbflx",
+               "_id": "6807758ad97cecc47bba9962"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319126/e-commerce/products/lxdtcqayg4uy2f6gptch.webp",
+               "imageId": "e-commerce/products/lxdtcqayg4uy2f6gptch",
+               "_id": "6807758ad97cecc47bba9963"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319135/e-commerce/products/g1ojyqzdcggjp52knixk.webp",
+               "imageId": "e-commerce/products/g1ojyqzdcggjp52knixk",
+               "_id": "6807758ad97cecc47bba9964"
+            }
          ],
-         price: {
-            current: 1299,
-            original: 1999,
-            discount: 20
-         }
+         "bannerImageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319147/e-commerce/products/hfrml7rfkbd0jro7vxhs.jpg",
+         "bannerImageId": "e-commerce/products/hfrml7rfkbd0jro7vxhs",
+         "size": [
+            "S"
+         ],
+         "tags": [
+            "shirt",
+            "marvel",
+            "superman"
+         ],
+         "technologyStack": [
+            "3d texture"
+         ],
+         "productModelLink": "https://www.redwolf.in",
+         "isUnderPremium": true,
+         "isExcusiveProducts": true,
+         "isNewArrival": false,
+         "isUnderHotDeals": false,
+         "isBestSeller": false,
+         "isWomenFeatured": false,
+         "isMenFeatured": false,
+         "isFeaturedToBanner": false,
+         "isTrendingNow": false,
+         "categories": [
+            {
+               "main": "T-shirt",
+               "sub": "Acid Wash",
+               "path": "/t-shirt/acid-wash",
+               "_id": "6807758ad97cecc47bba9965"
+            }
+         ],
+         "collections": [
+            "68077634d97cecc47bba9972",
+            "68077bd3d97cecc47bba9a02",
+            "680b12d898c02627baee504b"
+         ],
+         "offer": null,
+         "createdAt": "2025-04-22T10:55:06.930Z",
+         "updatedAt": "2025-04-25T04:43:04.500Z",
+         "__v": 0
       },
       {
-         id: 2,
-         name: "Urban Streetwear Jacket",
-         description: "Black Denim Urban Style Jacket",
-         image: [
-            "https://images.unsplash.com/photo-1627225924765-552d49cf47ad?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
-            "https://images.unsplash.com/photo-1622470953794-aa9c70b0fb9d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
+         "_id": "6807758ad97cecc47bba9960",
+         "slug": "arc-reactor",
+         "title": "Arc Reactor",
+         "subTitle": "Arc Reactor (Glow In The Dark) - Marvel Official Hoodie",
+         "description": "The artwork will be screen printed to perfection on a premium Redwolf branded brushed fleece hoodie featuring kangaroo pockets, drawstrings and a hood.",
+         "price": 999,
+         "images": [
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319108/e-commerce/products/bhgpiebtko1zw6xjckzu.webp",
+               "imageId": "e-commerce/products/bhgpiebtko1zw6xjckzu",
+               "_id": "6807758ad97cecc47bba9961"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319116/e-commerce/products/phqepkkrjhvlrjahbflx.webp",
+               "imageId": "e-commerce/products/phqepkkrjhvlrjahbflx",
+               "_id": "6807758ad97cecc47bba9962"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319126/e-commerce/products/lxdtcqayg4uy2f6gptch.webp",
+               "imageId": "e-commerce/products/lxdtcqayg4uy2f6gptch",
+               "_id": "6807758ad97cecc47bba9963"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319135/e-commerce/products/g1ojyqzdcggjp52knixk.webp",
+               "imageId": "e-commerce/products/g1ojyqzdcggjp52knixk",
+               "_id": "6807758ad97cecc47bba9964"
+            }
          ],
-         price: {
-            current: 2499,
-            original: 3999,
-            discount: 35
-         }
+         "bannerImageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319147/e-commerce/products/hfrml7rfkbd0jro7vxhs.jpg",
+         "bannerImageId": "e-commerce/products/hfrml7rfkbd0jro7vxhs",
+         "size": [
+            "S"
+         ],
+         "tags": [
+            "shirt",
+            "marvel",
+            "superman"
+         ],
+         "technologyStack": [
+            "3d texture"
+         ],
+         "productModelLink": "https://www.redwolf.in",
+         "isUnderPremium": true,
+         "isExcusiveProducts": true,
+         "isNewArrival": false,
+         "isUnderHotDeals": false,
+         "isBestSeller": false,
+         "isWomenFeatured": false,
+         "isMenFeatured": false,
+         "isFeaturedToBanner": false,
+         "isTrendingNow": false,
+         "categories": [
+            {
+               "main": "T-shirt",
+               "sub": "Acid Wash",
+               "path": "/t-shirt/acid-wash",
+               "_id": "6807758ad97cecc47bba9965"
+            }
+         ],
+         "collections": [
+            "68077634d97cecc47bba9972",
+            "68077bd3d97cecc47bba9a02",
+            "680b12d898c02627baee504b"
+         ],
+         "offer": null,
+         "createdAt": "2025-04-22T10:55:06.930Z",
+         "updatedAt": "2025-04-25T04:43:04.500Z",
+         "__v": 0
       },
       {
-         id: 3,
-         name: "Comfort Slim Fit Pants",
-         description: "Navy Blue Tapered Fit Trousers",
-         image: [
-            "https://images.unsplash.com/photo-1627225924765-552d49cf47ad?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
-            "https://images.unsplash.com/photo-1622470953794-aa9c70b0fb9d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
+         "_id": "6807758ad97cecc47bba9960",
+         "slug": "arc-reactor",
+         "title": "Arc Reactor",
+         "subTitle": "Arc Reactor (Glow In The Dark) - Marvel Official Hoodie",
+         "description": "The artwork will be screen printed to perfection on a premium Redwolf branded brushed fleece hoodie featuring kangaroo pockets, drawstrings and a hood.",
+         "price": 999,
+         "images": [
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319108/e-commerce/products/bhgpiebtko1zw6xjckzu.webp",
+               "imageId": "e-commerce/products/bhgpiebtko1zw6xjckzu",
+               "_id": "6807758ad97cecc47bba9961"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319116/e-commerce/products/phqepkkrjhvlrjahbflx.webp",
+               "imageId": "e-commerce/products/phqepkkrjhvlrjahbflx",
+               "_id": "6807758ad97cecc47bba9962"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319126/e-commerce/products/lxdtcqayg4uy2f6gptch.webp",
+               "imageId": "e-commerce/products/lxdtcqayg4uy2f6gptch",
+               "_id": "6807758ad97cecc47bba9963"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319135/e-commerce/products/g1ojyqzdcggjp52knixk.webp",
+               "imageId": "e-commerce/products/g1ojyqzdcggjp52knixk",
+               "_id": "6807758ad97cecc47bba9964"
+            }
          ],
-         price: {
-            current: 1799,
-            original: 2299,
-            discount: 15
-         }
+         "bannerImageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319147/e-commerce/products/hfrml7rfkbd0jro7vxhs.jpg",
+         "bannerImageId": "e-commerce/products/hfrml7rfkbd0jro7vxhs",
+         "size": [
+            "S"
+         ],
+         "tags": [
+            "shirt",
+            "marvel",
+            "superman"
+         ],
+         "technologyStack": [
+            "3d texture"
+         ],
+         "productModelLink": "https://www.redwolf.in",
+         "isUnderPremium": true,
+         "isExcusiveProducts": true,
+         "isNewArrival": false,
+         "isUnderHotDeals": false,
+         "isBestSeller": false,
+         "isWomenFeatured": false,
+         "isMenFeatured": false,
+         "isFeaturedToBanner": false,
+         "isTrendingNow": false,
+         "categories": [
+            {
+               "main": "T-shirt",
+               "sub": "Acid Wash",
+               "path": "/t-shirt/acid-wash",
+               "_id": "6807758ad97cecc47bba9965"
+            }
+         ],
+         "collections": [
+            "68077634d97cecc47bba9972",
+            "68077bd3d97cecc47bba9a02",
+            "680b12d898c02627baee504b"
+         ],
+         "offer": null,
+         "createdAt": "2025-04-22T10:55:06.930Z",
+         "updatedAt": "2025-04-25T04:43:04.500Z",
+         "__v": 0
       },
       {
-         id: 4,
-         name: "Classic White Sneakers",
-         description: "Casual Low-Top Canvas Shoes",
-         image: [
-            "https://images.unsplash.com/photo-1627225924765-552d49cf47ad?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
-            "https://images.unsplash.com/photo-1622470953794-aa9c70b0fb9d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
+         "_id": "6807758ad97cecc47bba9960",
+         "slug": "arc-reactor",
+         "title": "Arc Reactor",
+         "subTitle": "Arc Reactor (Glow In The Dark) - Marvel Official Hoodie",
+         "description": "The artwork will be screen printed to perfection on a premium Redwolf branded brushed fleece hoodie featuring kangaroo pockets, drawstrings and a hood.",
+         "price": 999,
+         "images": [
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319108/e-commerce/products/bhgpiebtko1zw6xjckzu.webp",
+               "imageId": "e-commerce/products/bhgpiebtko1zw6xjckzu",
+               "_id": "6807758ad97cecc47bba9961"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319116/e-commerce/products/phqepkkrjhvlrjahbflx.webp",
+               "imageId": "e-commerce/products/phqepkkrjhvlrjahbflx",
+               "_id": "6807758ad97cecc47bba9962"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319126/e-commerce/products/lxdtcqayg4uy2f6gptch.webp",
+               "imageId": "e-commerce/products/lxdtcqayg4uy2f6gptch",
+               "_id": "6807758ad97cecc47bba9963"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319135/e-commerce/products/g1ojyqzdcggjp52knixk.webp",
+               "imageId": "e-commerce/products/g1ojyqzdcggjp52knixk",
+               "_id": "6807758ad97cecc47bba9964"
+            }
          ],
-         price: {
-            current: 999,
-            original: 1499,
-            discount: 25
-         }
+         "bannerImageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319147/e-commerce/products/hfrml7rfkbd0jro7vxhs.jpg",
+         "bannerImageId": "e-commerce/products/hfrml7rfkbd0jro7vxhs",
+         "size": [
+            "S"
+         ],
+         "tags": [
+            "shirt",
+            "marvel",
+            "superman"
+         ],
+         "technologyStack": [
+            "3d texture"
+         ],
+         "productModelLink": "https://www.redwolf.in",
+         "isUnderPremium": true,
+         "isExcusiveProducts": true,
+         "isNewArrival": false,
+         "isUnderHotDeals": false,
+         "isBestSeller": false,
+         "isWomenFeatured": false,
+         "isMenFeatured": false,
+         "isFeaturedToBanner": false,
+         "isTrendingNow": false,
+         "categories": [
+            {
+               "main": "T-shirt",
+               "sub": "Acid Wash",
+               "path": "/t-shirt/acid-wash",
+               "_id": "6807758ad97cecc47bba9965"
+            }
+         ],
+         "collections": [
+            "68077634d97cecc47bba9972",
+            "68077bd3d97cecc47bba9a02",
+            "680b12d898c02627baee504b"
+         ],
+         "offer": null,
+         "createdAt": "2025-04-22T10:55:06.930Z",
+         "updatedAt": "2025-04-25T04:43:04.500Z",
+         "__v": 0
       },
       {
-         id: 5,
-         name: "Flamewave Oversized T-Shirt",
-         description: "Men's Brown Oversized Cargo Joggers",
-         image: [
-            "https://images.unsplash.com/photo-1627225924765-552d49cf47ad?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
-            "https://images.unsplash.com/photo-1622470953794-aa9c70b0fb9d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
+         "_id": "6807758ad97cecc47bba9960",
+         "slug": "arc-reactor",
+         "title": "Arc Reactor",
+         "subTitle": "Arc Reactor (Glow In The Dark) - Marvel Official Hoodie",
+         "description": "The artwork will be screen printed to perfection on a premium Redwolf branded brushed fleece hoodie featuring kangaroo pockets, drawstrings and a hood.",
+         "price": 999,
+         "images": [
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319108/e-commerce/products/bhgpiebtko1zw6xjckzu.webp",
+               "imageId": "e-commerce/products/bhgpiebtko1zw6xjckzu",
+               "_id": "6807758ad97cecc47bba9961"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319116/e-commerce/products/phqepkkrjhvlrjahbflx.webp",
+               "imageId": "e-commerce/products/phqepkkrjhvlrjahbflx",
+               "_id": "6807758ad97cecc47bba9962"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319126/e-commerce/products/lxdtcqayg4uy2f6gptch.webp",
+               "imageId": "e-commerce/products/lxdtcqayg4uy2f6gptch",
+               "_id": "6807758ad97cecc47bba9963"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319135/e-commerce/products/g1ojyqzdcggjp52knixk.webp",
+               "imageId": "e-commerce/products/g1ojyqzdcggjp52knixk",
+               "_id": "6807758ad97cecc47bba9964"
+            }
          ],
-         price: {
-            current: 1299,
-            original: 1999,
-            discount: 20
-         }
+         "bannerImageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319147/e-commerce/products/hfrml7rfkbd0jro7vxhs.jpg",
+         "bannerImageId": "e-commerce/products/hfrml7rfkbd0jro7vxhs",
+         "size": [
+            "S"
+         ],
+         "tags": [
+            "shirt",
+            "marvel",
+            "superman"
+         ],
+         "technologyStack": [
+            "3d texture"
+         ],
+         "productModelLink": "https://www.redwolf.in",
+         "isUnderPremium": true,
+         "isExcusiveProducts": true,
+         "isNewArrival": false,
+         "isUnderHotDeals": false,
+         "isBestSeller": false,
+         "isWomenFeatured": false,
+         "isMenFeatured": false,
+         "isFeaturedToBanner": false,
+         "isTrendingNow": false,
+         "categories": [
+            {
+               "main": "T-shirt",
+               "sub": "Acid Wash",
+               "path": "/t-shirt/acid-wash",
+               "_id": "6807758ad97cecc47bba9965"
+            }
+         ],
+         "collections": [
+            "68077634d97cecc47bba9972",
+            "68077bd3d97cecc47bba9a02",
+            "680b12d898c02627baee504b"
+         ],
+         "offer": null,
+         "createdAt": "2025-04-22T10:55:06.930Z",
+         "updatedAt": "2025-04-25T04:43:04.500Z",
+         "__v": 0
       },
       {
-         id: 6,
-         name: "Urban Streetwear Jacket",
-         description: "Black Denim Urban Style Jacket",
-         image: [
-            "https://images.unsplash.com/photo-1627225924765-552d49cf47ad?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
-            "https://images.unsplash.com/photo-1622470953794-aa9c70b0fb9d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
+         "_id": "6807758ad97cecc47bba9960",
+         "slug": "arc-reactor",
+         "title": "Arc Reactor",
+         "subTitle": "Arc Reactor (Glow In The Dark) - Marvel Official Hoodie",
+         "description": "The artwork will be screen printed to perfection on a premium Redwolf branded brushed fleece hoodie featuring kangaroo pockets, drawstrings and a hood.",
+         "price": 999,
+         "images": [
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319108/e-commerce/products/bhgpiebtko1zw6xjckzu.webp",
+               "imageId": "e-commerce/products/bhgpiebtko1zw6xjckzu",
+               "_id": "6807758ad97cecc47bba9961"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319116/e-commerce/products/phqepkkrjhvlrjahbflx.webp",
+               "imageId": "e-commerce/products/phqepkkrjhvlrjahbflx",
+               "_id": "6807758ad97cecc47bba9962"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319126/e-commerce/products/lxdtcqayg4uy2f6gptch.webp",
+               "imageId": "e-commerce/products/lxdtcqayg4uy2f6gptch",
+               "_id": "6807758ad97cecc47bba9963"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319135/e-commerce/products/g1ojyqzdcggjp52knixk.webp",
+               "imageId": "e-commerce/products/g1ojyqzdcggjp52knixk",
+               "_id": "6807758ad97cecc47bba9964"
+            }
          ],
-         price: {
-            current: 2499,
-            original: 3999,
-            discount: 35
-         }
+         "bannerImageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319147/e-commerce/products/hfrml7rfkbd0jro7vxhs.jpg",
+         "bannerImageId": "e-commerce/products/hfrml7rfkbd0jro7vxhs",
+         "size": [
+            "S"
+         ],
+         "tags": [
+            "shirt",
+            "marvel",
+            "superman"
+         ],
+         "technologyStack": [
+            "3d texture"
+         ],
+         "productModelLink": "https://www.redwolf.in",
+         "isUnderPremium": true,
+         "isExcusiveProducts": true,
+         "isNewArrival": false,
+         "isUnderHotDeals": false,
+         "isBestSeller": false,
+         "isWomenFeatured": false,
+         "isMenFeatured": false,
+         "isFeaturedToBanner": false,
+         "isTrendingNow": false,
+         "categories": [
+            {
+               "main": "T-shirt",
+               "sub": "Acid Wash",
+               "path": "/t-shirt/acid-wash",
+               "_id": "6807758ad97cecc47bba9965"
+            }
+         ],
+         "collections": [
+            "68077634d97cecc47bba9972",
+            "68077bd3d97cecc47bba9a02",
+            "680b12d898c02627baee504b"
+         ],
+         "offer": null,
+         "createdAt": "2025-04-22T10:55:06.930Z",
+         "updatedAt": "2025-04-25T04:43:04.500Z",
+         "__v": 0
       },
       {
-         id: 7,
-         name: "Comfort Slim Fit Pants",
-         description: "Navy Blue Tapered Fit Trousers",
-         image: [
-            "https://images.unsplash.com/photo-1627225924765-552d49cf47ad?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
-            "https://images.unsplash.com/photo-1622470953794-aa9c70b0fb9d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
+         "_id": "6807758ad97cecc47bba9960",
+         "slug": "arc-reactor",
+         "title": "Arc Reactor",
+         "subTitle": "Arc Reactor (Glow In The Dark) - Marvel Official Hoodie",
+         "description": "The artwork will be screen printed to perfection on a premium Redwolf branded brushed fleece hoodie featuring kangaroo pockets, drawstrings and a hood.",
+         "price": 999,
+         "images": [
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319108/e-commerce/products/bhgpiebtko1zw6xjckzu.webp",
+               "imageId": "e-commerce/products/bhgpiebtko1zw6xjckzu",
+               "_id": "6807758ad97cecc47bba9961"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319116/e-commerce/products/phqepkkrjhvlrjahbflx.webp",
+               "imageId": "e-commerce/products/phqepkkrjhvlrjahbflx",
+               "_id": "6807758ad97cecc47bba9962"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319126/e-commerce/products/lxdtcqayg4uy2f6gptch.webp",
+               "imageId": "e-commerce/products/lxdtcqayg4uy2f6gptch",
+               "_id": "6807758ad97cecc47bba9963"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319135/e-commerce/products/g1ojyqzdcggjp52knixk.webp",
+               "imageId": "e-commerce/products/g1ojyqzdcggjp52knixk",
+               "_id": "6807758ad97cecc47bba9964"
+            }
          ],
-         price: {
-            current: 1799,
-            original: 2299,
-            discount: 15
-         }
+         "bannerImageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319147/e-commerce/products/hfrml7rfkbd0jro7vxhs.jpg",
+         "bannerImageId": "e-commerce/products/hfrml7rfkbd0jro7vxhs",
+         "size": [
+            "S"
+         ],
+         "tags": [
+            "shirt",
+            "marvel",
+            "superman"
+         ],
+         "technologyStack": [
+            "3d texture"
+         ],
+         "productModelLink": "https://www.redwolf.in",
+         "isUnderPremium": true,
+         "isExcusiveProducts": true,
+         "isNewArrival": false,
+         "isUnderHotDeals": false,
+         "isBestSeller": false,
+         "isWomenFeatured": false,
+         "isMenFeatured": false,
+         "isFeaturedToBanner": false,
+         "isTrendingNow": false,
+         "categories": [
+            {
+               "main": "T-shirt",
+               "sub": "Acid Wash",
+               "path": "/t-shirt/acid-wash",
+               "_id": "6807758ad97cecc47bba9965"
+            }
+         ],
+         "collections": [
+            "68077634d97cecc47bba9972",
+            "68077bd3d97cecc47bba9a02",
+            "680b12d898c02627baee504b"
+         ],
+         "offer": null,
+         "createdAt": "2025-04-22T10:55:06.930Z",
+         "updatedAt": "2025-04-25T04:43:04.500Z",
+         "__v": 0
       },
       {
-         id: 8,
-         name: "Classic White Sneakers",
-         description: "Casual Low-Top Canvas Shoes",
-         image: [
-            "https://images.unsplash.com/photo-1627225924765-552d49cf47ad?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
-            "https://images.unsplash.com/photo-1622470953794-aa9c70b0fb9d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D",
+         "_id": "6807758ad97cecc47bba9960",
+         "slug": "arc-reactor",
+         "title": "Arc Reactor",
+         "subTitle": "Arc Reactor (Glow In The Dark) - Marvel Official Hoodie",
+         "description": "The artwork will be screen printed to perfection on a premium Redwolf branded brushed fleece hoodie featuring kangaroo pockets, drawstrings and a hood.",
+         "price": 999,
+         "images": [
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319108/e-commerce/products/bhgpiebtko1zw6xjckzu.webp",
+               "imageId": "e-commerce/products/bhgpiebtko1zw6xjckzu",
+               "_id": "6807758ad97cecc47bba9961"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319116/e-commerce/products/phqepkkrjhvlrjahbflx.webp",
+               "imageId": "e-commerce/products/phqepkkrjhvlrjahbflx",
+               "_id": "6807758ad97cecc47bba9962"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319126/e-commerce/products/lxdtcqayg4uy2f6gptch.webp",
+               "imageId": "e-commerce/products/lxdtcqayg4uy2f6gptch",
+               "_id": "6807758ad97cecc47bba9963"
+            },
+            {
+               "imageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319135/e-commerce/products/g1ojyqzdcggjp52knixk.webp",
+               "imageId": "e-commerce/products/g1ojyqzdcggjp52knixk",
+               "_id": "6807758ad97cecc47bba9964"
+            }
          ],
-         price: {
-            current: 999,
-            original: 1499,
-            discount: 25
-         }
+         "bannerImageUrl": "https://res.cloudinary.com/db4jch8sj/image/upload/v1745319147/e-commerce/products/hfrml7rfkbd0jro7vxhs.jpg",
+         "bannerImageId": "e-commerce/products/hfrml7rfkbd0jro7vxhs",
+         "size": [
+            "S"
+         ],
+         "tags": [
+            "shirt",
+            "marvel",
+            "superman"
+         ],
+         "technologyStack": [
+            "3d texture"
+         ],
+         "productModelLink": "https://www.redwolf.in",
+         "isUnderPremium": true,
+         "isExcusiveProducts": true,
+         "isNewArrival": false,
+         "isUnderHotDeals": false,
+         "isBestSeller": false,
+         "isWomenFeatured": false,
+         "isMenFeatured": false,
+         "isFeaturedToBanner": false,
+         "isTrendingNow": false,
+         "categories": [
+            {
+               "main": "T-shirt",
+               "sub": "Acid Wash",
+               "path": "/t-shirt/acid-wash",
+               "_id": "6807758ad97cecc47bba9965"
+            }
+         ],
+         "collections": [
+            "68077634d97cecc47bba9972",
+            "68077bd3d97cecc47bba9a02",
+            "680b12d898c02627baee504b"
+         ],
+         "offer": null,
+         "createdAt": "2025-04-22T10:55:06.930Z",
+         "updatedAt": "2025-04-25T04:43:04.500Z",
+         "__v": 0
       },
    ];
 

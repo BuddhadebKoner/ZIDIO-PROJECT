@@ -210,3 +210,35 @@ export const updateOffer = async (slug, offerData) => {
       };
    }
 }
+
+export const updateHomeContent = async (homeData) => {
+   try {
+      const response = await axiosInstance.put('/admin/update-home', homeData, {
+         headers: {
+            'Content-Type': 'application/json',
+         },
+      });
+
+      return {
+         success: true,
+         message: response.data.message || "Home content updated successfully",
+         product: response.data.home,
+      };
+   } catch (error) {
+      console.error('Error updating home content:', error);
+
+      if (error.response?.data?.fieldErrors) {
+         return {
+            success: false,
+            message: error.response.data.message || "Product validation failed",
+            fieldErrors: error.response.data.fieldErrors
+         };
+      }
+
+      return {
+         success: false,
+         message: error.response?.data?.message || "Failed to update home content",
+         error: error.response?.data?.error || error.message
+      };
+   }
+}

@@ -6,7 +6,30 @@ import { toast } from 'react-toastify';
 import { useInView } from 'react-intersection-observer';
 import ProductDataLable from '../common/ProductDataLable';
 
-const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
+/**
+ * Dynamic reusable product finder component
+ * @param {Object} props - Component properties
+ * @param {function} props.onSelectProducts - Callback function when products are selected
+ * @param {Array} props.selectedProductIds - Array of pre-selected product IDs
+ * @param {string} props.title - Optional custom title for the component
+ * @param {string} props.emptyStateMessage - Optional custom message for empty state
+ * @param {number} props.maxSelections - Optional maximum number of products that can be selected
+ * @param {boolean} props.allowMultiple - Whether multiple products can be selected (default: true)
+ * @param {boolean} props.showAddButton - Whether to show the add button (default: true)
+ * @param {boolean} props.showCount - Whether to show the count badge (default: true)
+ * @param {string} props.className - Additional CSS classes
+ */
+const FindProducts = ({
+  onSelectProducts,
+  selectedProductIds = [],
+  title = "Selected Products",
+  emptyStateMessage = "No products selected",
+  maxSelections = null,
+  allowMultiple = true,
+  showAddButton = true,
+  showCount = true,
+  className = "",
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [internalSelectedIds, setInternalSelectedIds] = useState(selectedProductIds);
   const [showPopup, setShowPopup] = useState(false);
@@ -14,6 +37,7 @@ const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
   const popupRef = useRef(null);
   const debouncedSearchTerm = useDebounce(searchQuery, 500);
 
+  // Synchronize with external selected IDs
   useEffect(() => {
     setInternalSelectedIds(selectedProductIds);
   }, [selectedProductIds]);
@@ -57,11 +81,25 @@ const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
 
   const handleToggleProduct = (productId) => {
     let updatedSelectedProducts;
+
     if (internalSelectedIds.includes(productId)) {
+      // Remove product
       updatedSelectedProducts = internalSelectedIds.filter(id => id !== productId);
     } else {
-      updatedSelectedProducts = [...internalSelectedIds, productId];
+      // Add product - handle different selection modes
+      if (!allowMultiple) {
+        // Single selection mode
+        updatedSelectedProducts = [productId];
+      } else if (maxSelections && internalSelectedIds.length >= maxSelections) {
+        // Max selections reached
+        toast.warning(`Maximum of ${maxSelections} products can be selected`);
+        return;
+      } else {
+        // Normal multiple selection
+        updatedSelectedProducts = [...internalSelectedIds, productId];
+      }
     }
+
     setInternalSelectedIds(updatedSelectedProducts);
     onSelectProducts(updatedSelectedProducts);
   };
@@ -81,6 +119,11 @@ const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
   const handleClosePopup = () => {
     setShowPopup(false);
     setSearchQuery('');
+  };
+
+  const handleClearAll = () => {
+    setInternalSelectedIds([]);
+    onSelectProducts([]);
   };
 
   useEffect(() => {
@@ -114,40 +157,45 @@ const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
   }, [showPopup]);
 
   return (
-    <div className="w-full relative">
+    <div className={`w-full relative ${className}`}>
       <div className="mb-6 border border-gray-700 rounded-md overflow-hidden bg-surface/40 shadow-lg">
         <div className="flex items-center justify-between p-3 bg-surface/80 border-b border-gray-700">
           <div className="flex items-center gap-2">
-            <h3 className="text-md font-medium text-text">Selected Products</h3>
-            {internalSelectedIds.length > 0 && (
+            <h3 className="text-md font-medium text-text">{title}</h3>
+            {showCount && internalSelectedIds.length > 0 && (
               <div className="px-2 py-0.5 bg-primary-600 text-white text-xs rounded-full">
                 {internalSelectedIds.length}
+                {maxSelections && ` / ${maxSelections}`}
               </div>
             )}
           </div>
-          <button
-            type="button" 
-            onClick={handleAddButtonClick}
-            className="px-3 py-1.5 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors flex items-center gap-1 shadow-md relative overflow-hidden group"
-            aria-label="Add products"
-          >
-            <span className="absolute inset-0 w-full h-full bg-white/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-            <Plus className="w-4 h-4 relative z-10" />
-            <span className="relative z-10">Add Products</span>
-          </button>
+          {showAddButton && (
+            <button
+              type="button"
+              onClick={handleAddButtonClick}
+              className="px-3 py-1.5 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors flex items-center gap-1 shadow-md relative overflow-hidden group"
+              aria-label="Add products"
+            >
+              <span className="absolute inset-0 w-full h-full bg-white/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
+              <Plus className="w-4 h-4 relative z-10" />
+              <span className="relative z-10">Add Products</span>
+            </button>
+          )}
         </div>
 
         <div className="p-3">
           {internalSelectedIds.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-text-muted bg-gray-900/20 rounded-md border border-dashed border-gray-700">
               <Info className="w-10 h-10 mb-2 opacity-60" />
-              <p>No products selected</p>
-              <button
-                onClick={handleAddButtonClick}
-                className="mt-3 text-sm text-primary-400 hover:text-primary-300 transition-colors"
-              >
-                Click to add products
-              </button>
+              <p>{emptyStateMessage}</p>
+              {showAddButton && (
+                <button
+                  onClick={handleAddButtonClick}
+                  className="mt-3 text-sm text-primary-400 hover:text-primary-300 transition-colors"
+                >
+                  Click to add products
+                </button>
+              )}
             </div>
           ) : (
             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
@@ -176,10 +224,7 @@ const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
           {internalSelectedIds.length > 0 && (
             <div className="mt-3 flex justify-end">
               <button
-                onClick={() => {
-                  setInternalSelectedIds([]);
-                  onSelectProducts([]);
-                }}
+                onClick={handleClearAll}
                 className="text-xs text-primary-400 hover:text-primary-300 py-1 px-2 hover:bg-primary-950/50 rounded transition-colors"
                 aria-label="Clear all selections"
               >
@@ -197,7 +242,10 @@ const FindProducts = ({ onSelectProducts, selectedProductIds = [] }) => {
             className="bg-surface border border-gray-700 rounded-lg w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-[fadeIn_0.2s_ease-out]"
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-surface/80">
-              <h3 className="text-lg font-medium">Add Products</h3>
+              <h3 className="text-lg font-medium">
+                Add {allowMultiple ? "Products" : "a Product"}
+                {maxSelections && ` (Max: ${maxSelections})`}
+              </h3>
               <button
                 onClick={handleClosePopup}
                 className="p-1.5 text-text-muted hover:text-text hover:bg-gray-800 rounded-full transition-colors"
@@ -372,7 +420,14 @@ function useDebounce(value, delay) {
 
 FindProducts.propTypes = {
   onSelectProducts: PropTypes.func.isRequired,
-  selectedProductIds: PropTypes.array
+  selectedProductIds: PropTypes.array,
+  title: PropTypes.string,
+  emptyStateMessage: PropTypes.string,
+  maxSelections: PropTypes.number,
+  allowMultiple: PropTypes.bool,
+  showAddButton: PropTypes.bool,
+  showCount: PropTypes.bool,
+  className: PropTypes.string
 };
 
 export default FindProducts;

@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { ChevronDown, ChevronUp, Image, Loader2, Trash2 } from 'lucide-react';
 import SingleImageUploader from '../../../components/shared/SingleImageUploader';
+import { updateHomeContent } from '../../../lib/api/admin.api';
 
-const BannerSection = ({ initialBanners }) => {
-   const [banners, setBanners] = useState(initialBanners || [{
-      imageUrl: '',
-      imageId: '',
-      path: ''
-   }]);
+const BannerSection = ({ initialBanners = [] }) => {
+   const [banners, setBanners] = useState(initialBanners.length > 0 ? initialBanners : [
+      { imageUrl: '', imageId: '', path: '' }
+   ]);
 
    const [errors, setErrors] = useState({});
    const [loading, setLoading] = useState(false);
@@ -18,81 +17,104 @@ const BannerSection = ({ initialBanners }) => {
       setExpanded(!expanded);
    };
 
-   const handleBannerImageChange = (url, index = 0) => {
-      console.log("Image URL received:", url);
-      const updatedBanners = [...banners];
-      updatedBanners[index] = {
-         ...updatedBanners[index],
-         imageUrl: url,
-      };
+   const handleBannerImageChange = (url, index) => {
+      if (!url) return;
 
-      setBanners(updatedBanners);
-      console.log("Updated banners state:", updatedBanners);
+      setBanners(prevBanners => {
+         const updatedBanners = [...prevBanners];
+         updatedBanners[index] = {
+            ...updatedBanners[index],
+            imageUrl: url
+         };
+         return updatedBanners;
+      });
 
-      if (errors[`banners[${index}]`]) {
-         setErrors((prev) => {
-            const updated = { ...prev };
-            delete updated[`banners[${index}]`];
-            return updated;
-         });
-      }
+      // Clear errors for this field if they exist
+      clearFieldError(`banners[${index}].imageUrl`);
    };
 
-   const handleBannerImageIdChange = (id, index = 0) => {
-      const updatedBanners = [...banners];
-      updatedBanners[index] = {
-         ...updatedBanners[index],
-         imageId: id
-      };
-
-      setBanners(updatedBanners);
+   const handleBannerImageIdChange = (id, index) => {
+      setBanners(prevBanners => {
+         const updatedBanners = [...prevBanners];
+         updatedBanners[index] = {
+            ...updatedBanners[index],
+            imageId: id
+         };
+         return updatedBanners;
+      });
    };
 
-   const handleBannerPathChange = (path, index = 0) => {
-      const updatedBanners = [...banners];
-      updatedBanners[index] = {
-         ...updatedBanners[index],
-         path: path
-      };
+   const handleBannerPathChange = (path, index) => {
+      setBanners(prevBanners => {
+         const updatedBanners = [...prevBanners];
+         updatedBanners[index] = {
+            ...updatedBanners[index],
+            path: path
+         };
+         return updatedBanners;
+      });
 
-      setBanners(updatedBanners);
+      // Clear errors for this field if they exist
+      clearFieldError(`banners[${index}].path`);
+   };
 
-      if (errors[`banners[${index}]`]) {
+   const clearFieldError = (fieldName) => {
+      if (errors[fieldName]) {
          setErrors(prev => {
             const updated = { ...prev };
-            delete updated[`banners[${index}]`];
+            delete updated[fieldName];
             return updated;
          });
       }
    };
 
    const handleAddBanner = () => {
-      setBanners([
-         ...banners,
-         { imageUrl: '', imageId: '', path: '' }
-      ]);
+      setBanners(prev => [...prev, { imageUrl: '', imageId: '', path: '' }]);
    };
 
    const handleRemoveBanner = (index) => {
-      const updatedBanners = banners.filter((_, i) => i !== index);
-      setBanners(updatedBanners);
+      setBanners(prevBanners => prevBanners.filter((_, i) => i !== index));
 
-      setErrors(prev => {
-         const updated = { ...prev };
-         delete updated[`banners[${index}]`];
-         return updated;
+      // Clean up any errors for the removed banner
+      const newErrors = { ...errors };
+      Object.keys(newErrors).forEach(key => {
+         if (key.startsWith(`banners[${index}]`)) {
+            delete newErrors[key];
+         }
       });
+      setErrors(newErrors);
    };
 
+   const validateBanners = () => {
+      const newErrors = {};
+      let isValid = true;
 
+      banners.forEach((banner, index) => {
+         if (!banner.imageUrl) {
+            newErrors[`banners[${index}].imageUrl`] = 'Banner image is required';
+            isValid = false;
+         }
+
+         // Path is optional but if provided should be valid
+         if (banner.path && !banner.path.startsWith('/')) {
+            newErrors[`banners[${index}].path`] = 'Path must start with /';
+            isValid = false;
+         }
+      });
+
+      setErrors(newErrors);
+      return isValid;
+   };
 
    const updateBanners = async () => {
-      console.log('Update button clicked, current banners:', banners);
+      if (!validateBanners()) {
+         toast.error('Please fix the errors before updating.');
+         return;
+      }
 
       setLoading(true);
 
       try {
-         // Format data according to the required structure
          const formattedData = {
             heroBannerImages: banners.map(banner => ({
                imageUrl: banner.imageUrl,
@@ -101,21 +123,19 @@ const BannerSection = ({ initialBanners }) => {
             }))
          };
 
-         // Log the formatted data
-         console.log('Banner data to be submitted:', formattedData);
+         console.log('Formatted Data:', formattedData);
 
-         // Mock API call - replace with actual API call
-         await new Promise(resolve => setTimeout(resolve, 800));
+         const res = await updateHomeContent(formattedData);
+         console.log('Response:', res);
+         // For now, just show success message
+         setTimeout(() => {
+            toast.success('Banner settings updated successfully');
+            setLoading(false);
+         }, 800);
 
-         console.log('Update completed successfully');
-         toast.success('Banner settings updated successfully');
-         setErrors({});
       } catch (error) {
-         console.error('Error updating banners:', error);
-         toast.error('Failed to update banner settings');
-      } finally {
+         toast.error(error.message || 'Failed to update banner settings');
          setLoading(false);
-         console.log('Update process finished');
       }
    };
 
@@ -189,9 +209,13 @@ const BannerSection = ({ initialBanners }) => {
                                  label="Banner Image"
                                  currentImageUrl={banner.imageUrl}
                                  disabled={loading}
-                                 path="homecontent"
-                                 className="mb-2"
+                                 path="banners"
                               />
+                              {errors[`banners[${index}].imageUrl`] && (
+                                 <p className="text-red-400 text-sm mt-1.5">
+                                    {errors[`banners[${index}].imageUrl`]}
+                                 </p>
+                              )}
                            </div>
 
                            <div>
@@ -207,12 +231,11 @@ const BannerSection = ({ initialBanners }) => {
                                     className="w-full bg-gray-800 border border-gray-600 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                                     disabled={loading}
                                  />
-                                 {errors[`banners[${index}]`] && (
+                                 {errors[`banners[${index}].path`] && (
                                     <p className="text-red-400 text-sm mt-1.5">
-                                       {errors[`banners[${index}]`]}
+                                       {errors[`banners[${index}].path`]}
                                     </p>
                                  )}
-
                               </div>
                            </div>
                         </div>

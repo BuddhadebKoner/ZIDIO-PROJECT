@@ -10,13 +10,19 @@ const ProductCard = ({ product }) => {
    const [isHeartActive, setIsHeartActive] = useState(false);
 
    // Ensure we have valid image URLs
-   const firstImage = Array.isArray(product.image) && product.image.length > 0
-      ? product.image[0]
+   const firstImage = product.images && product.images.length > 0
+      ? product.images[0].imageUrl
       : "https://picsum.photos/300/400";
 
-   const secondImage = Array.isArray(product.image) && product.image.length > 1
-      ? product.image[1]
-      : "https://picsum.photos/300/400";
+   const secondImage = product.images && product.images.length > 1
+      ? product.images[1].imageUrl
+      : firstImage || "https://picsum.photos/300/400";
+
+   // Calculate discounted price if an offer exists and is active
+   const hasActiveDiscount = product.hasDiscount && product.offer && product.offer.active;
+   const discountedPrice = hasActiveDiscount
+      ? Math.round(product.price - (product.price * product.offer.discountValue / 100))
+      : null;
 
    // Handle mouse events  
    const handleMouseEnter = () => {
@@ -53,7 +59,7 @@ const ProductCard = ({ product }) => {
                   {/* First image (shown by default) */}
                   <img
                      src={firstImage}
-                     alt={`${product.name} - view 1`}
+                     alt={`${product.title} - view 1`}
                      className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out 
                            ${isHovered ? 'opacity-0 scale-110' : 'opacity-100 scale-100'}`}
                   />
@@ -61,7 +67,7 @@ const ProductCard = ({ product }) => {
                   {/* Second image (shown on hover) */}
                   <img
                      src={secondImage}
-                     alt={`${product.name} - view 2`}
+                     alt={`${product.title} - view 2`}
                      className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out 
                            ${isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
                   />
@@ -71,6 +77,14 @@ const ProductCard = ({ product }) => {
                              ${isHovered ? 'opacity-100' : 'opacity-0'}`}></div>
                </div>
             </Link>
+
+            {/* Hot Deal badge in overlay */}
+            {product.isUnderHotDeals && (
+               <span className="absolute top-3 left-3 text-green-500 text-xs font-medium bg-white px-2 py-1 rounded z-10 
+                              shadow-md backdrop-blur-sm">
+                  Hot Deal
+               </span>
+            )}
 
             {/* Wishlist button */}
             <button
@@ -96,16 +110,28 @@ const ProductCard = ({ product }) => {
          </div>
 
          <CardFooter className="flex flex-col items-start gap-1 px-2 sm:px-3 py-2 sm:py-3 bg-surface">
-            <h3 className="font-medium text-gray-100 text-xs sm:text-sm md:text-base line-clamp-1">{product.name}</h3>
-            <p className="text-xs text-gray-400 line-clamp-1">{product.description}</p>
-            <div className="flex gap-1 sm:gap-2 items-center mt-0.5">
-               <span className="text-gray-100 font-semibold text-xs sm:text-sm">₹{product.price.current}</span>
-               {product.price.original && (
-                  <span className="text-gray-500 line-through text-xs">₹{product.price.original}</span>
+            <h3 className="font-medium text-gray-100 text-xs sm:text-sm md:text-base line-clamp-1">{product.title}</h3>
+            <p className="text-xs text-gray-400 line-clamp-1">{product.subTitle || product.description}</p>
+
+            <div className="flex flex-wrap gap-1 sm:gap-2 items-center mt-1">
+               {hasActiveDiscount ? (
+                  <>
+                     <span className="text-primary-500 font-semibold text-xs sm:text-sm">₹{discountedPrice}</span>
+                     <span className="text-gray-400 text-xs line-through">₹{product.price}</span>
+                     <span className="text-green-500 text-xs font-medium bg-green-500/10 px-1.5 py-0.5 rounded">
+                        {product.offer.discountValue}% OFF
+                     </span>
+                  </>
+               ) : (
+                  <span className="text-gray-100 font-semibold text-xs sm:text-sm">₹{product.price}</span>
                )}
-               {product.price.discount && (
-                  <span className="text-green-500 text-xs font-medium">{product.price.discount}% off</span>
-               )}
+
+               <div className="flex gap-1.5 ml-auto">
+                  {/* Moved Hot Deal badge to the card overlay */}
+                  {product.isNewArrival && (
+                     <span className="text-blue-500 text-xs font-medium bg-white px-1.5 py-0.5 rounded">New</span>
+                  )}
+               </div>
             </div>
          </CardFooter>
       </Card>
