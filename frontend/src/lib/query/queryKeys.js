@@ -17,5 +17,8 @@ export const QUERY_KEYS = {
    OFFERS: {
       GET_ALL_OFFERS: 'getAllOffers',
       SEARCH_OFFERS: 'searchOffers',
+   },
+   HOME: {
+      GET_HOME_CONTENT: 'getHomeContent',
    }
 };

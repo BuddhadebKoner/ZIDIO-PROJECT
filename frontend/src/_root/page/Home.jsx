@@ -8,26 +8,46 @@ import AllTimeBestSeller from '../../components/HomeSection/AllTimeBestSeller';
 import Hero from '../../components/HomeSection/Hero';
 import WomenCropTops from '../../components/HomeSection/WomenCropTops';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
+import { useGetHomeContent } from '../../lib/query/queriesAndMutation';
+import FullPageLoader from '../../components/loaders/FullPageLoader';
 
 const Home = () => {
+  const {
+    data: homeContent,
+    isLoading,
+    isError,
+    error,
+  } = useGetHomeContent();
+
+  if (isLoading) {
+    return <FullPageLoader />;
+  }
+
+  if (isError) {
+    console.error('Error loading home content:', error);
+    // Consider adding an error state UI here
+  }
+
+  // console.log('Home Content:', homeContent);
+
   return (
     <>
       {/* Hero is loaded immediately with animation */}
       <div className='pt-8'>
-        <Hero />
+        <Hero bannerImages={homeContent?.heroBannerImages} />
       </div>
 
       {/* Other sections load when scrolled into view */}
       <AnimatedSection delay={100}>
-        <ExclusiveProduct />
+        <ExclusiveProduct products={homeContent?.exclusiveProducts} />
       </AnimatedSection>
 
       <AnimatedSection delay={150}>
-        <NewArivals />
+        <NewArivals products={homeContent?.newArrivals} />
       </AnimatedSection>
 
       <AnimatedSection delay={200}>
-        <ShowAllCollection />
+        <ShowAllCollection collections={homeContent?.collections} />
       </AnimatedSection>
 
       <AnimatedSection delay={250}>
@@ -35,15 +55,15 @@ const Home = () => {
       </AnimatedSection>
 
       <AnimatedSection delay={300}>
-        <ToHotToMissed />
+        <ToHotToMissed featured={homeContent?.offerFeatured} />
       </AnimatedSection>
 
       <AnimatedSection delay={350}>
-        <AllTimeBestSeller />
+        <AllTimeBestSeller products={homeContent?.alltimeBestSellers} />
       </AnimatedSection>
 
       <AnimatedSection delay={400}>
-        <WomenCropTops />
+        <WomenCropTops featured={homeContent?.womenFeatured} />
       </AnimatedSection>
     </>
   );

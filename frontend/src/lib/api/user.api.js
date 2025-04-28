@@ -121,16 +121,11 @@ export const getUpdateAddress = async (address) => {
    }
 };
 
-// get home content
-export const getHomeContent = async () => {
+export const getHomeContentDetails = async () => {
    try {
-      const response = await axiosInstance.get('/user/home-content');
+      const response = await axiosInstance.get('/user/home-content-details');
 
-      return {
-         success: true,
-         message: 'Home content fetched successfully',
-         data: response.data,
-      };
+      return response.data.homeContent;
    } catch (error) {
       console.error('Error Fetching Home Content', error);
       throw error;

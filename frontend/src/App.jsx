@@ -72,14 +72,14 @@ const App = () => {
     const documentReady = document.readyState === 'complete';
 
     const setReady = () => {
-      console.log({
-        isAuthenticated,
-        error,
-        currentUser,
-        cartItemsCount,
-        wishlistItemsCount,
-        hasNotifications,
-      });
+      // console.log({
+      //   isAuthenticated,
+      //   error,
+      //   currentUser,
+      //   cartItemsCount,
+      //   wishlistItemsCount,
+      //   hasNotifications,
+      // });
       setAppIsReady(true);
     };
 

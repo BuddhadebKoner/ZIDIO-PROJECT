@@ -8,7 +8,7 @@ import CollectionsSection from './sections/CollectionsSection.jsx';
 import OfferFeaturedSection from './sections/OfferFeaturedSection.jsx';
 import BestSellersSection from './sections/BestSellersSection.jsx';
 import WomenFeaturedSection from './sections/WomenFeaturedSection.jsx';
-import { getHomeContent } from '../../lib/api/user.api.js';
+import { getHomeContent } from '../../lib/api/admin.api.js';
 
 const AdminSettings = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -19,9 +19,12 @@ const AdminSettings = () => {
     const fetchHomeContent = async () => {
       try {
         const res = await getHomeContent();
+
+        // console.log('Response:', res.data.homeContent.collections);
+
         if (res?.data?.success) {
           setInitialData(res.data.homeContent);
-          console.log('Initial data:', res.data.homeContent);
+          // console.log('Initial data:', res.data.homeContent);
         } else {
           toast.error(res?.data?.message || "Failed to load home content settings");
         }
@@ -63,11 +66,7 @@ const AdminSettings = () => {
       <NewArrivalsSection initialProducts={initialData.newArrivals} />
 
       {/* Featured Collection */}
-      <CollectionsSection
-        initialCollectionId={initialData.collections[0]}
-        initialImageUrl={initialData.collections[1]?.imageUrl}
-        initialImageId={initialData.collections[1]?.imageId}
-      />
+      <CollectionsSection initialCollections={initialData.collections} />
 
       {/* Offer Featured */}
       <OfferFeaturedSection initialOffers={initialData.offerFeatured} />

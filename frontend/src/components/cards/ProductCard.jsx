@@ -19,7 +19,7 @@ const ProductCard = ({ product }) => {
       : firstImage || "https://picsum.photos/300/400";
 
    // Calculate discounted price if an offer exists and is active
-   const hasActiveDiscount = product.hasDiscount && product.offer && product.offer.active;
+   const hasActiveDiscount = product.offer && product.offer.active;
    const discountedPrice = hasActiveDiscount
       ? Math.round(product.price - (product.price * product.offer.discountValue / 100))
       : null;

@@ -178,7 +178,7 @@ export const updateCollection = async (slug, collectionData) => {
    }
 }
 
-export const updateOffer = async (slug, offerData) => { 
+export const updateOffer = async (slug, offerData) => {
    console.log("updateOffer", slug);
    try {
       const response = await axiosInstance.put(`/admin/update-offer/${slug}`, offerData, {
@@ -242,3 +242,18 @@ export const updateHomeContent = async (homeData) => {
       };
    }
 }
+
+export const getHomeContent = async () => {
+   try {
+      const response = await axiosInstance.get('/user/home-content');
+
+      return {
+         success: true,
+         message: 'Home content fetched successfully',
+         data: response.data,
+      };
+   } catch (error) {
+      console.error('Error Fetching Home Content', error);
+      throw error;
+   }
+};

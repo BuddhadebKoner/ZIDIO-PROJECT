@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tansta
 import { isAuthenticated } from "../api/auth.api";
 import { QUERY_KEYS } from "./queryKeys";
 import { useUser } from "@clerk/clerk-react";
-import { getAddAddress, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
+import { getAddAddress, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
 import { addProduct } from "../api/admin.api";
 import { getAllCollections, searchCollections } from "../api/collection.api";
@@ -210,6 +210,15 @@ export const useSearchOffers = (searchTerm = '', limit = 5) => {
          return undefined;
       },
       enabled: searchTerm.length > 0,
+      refetchOnWindowFocus: false,
+   });
+}
+
+// get home content
+export const useGetHomeContent = () => {
+   return useQuery({
+      queryKey: [QUERY_KEYS.HOME.GET_HOME_CONTENT],
+      queryFn: () => getHomeContentDetails(),
       refetchOnWindowFocus: false,
    });
 }
