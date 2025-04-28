@@ -32,17 +32,14 @@ const HomeContentSchema = new mongoose.Schema({
    ],
    collections: [
       {
-         collectionId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Collection'
+         imageUrl: {
+            type: String, required: true
          },
-         imageDetails: {
-            imageUrl: {
-               type: String
-            },
-            imageId: {
-               type: String
-            }
+         imageId: {
+            type: String, required: true
+         },
+         path: {
+            type: String, default: '/'
          }
       }
    ],

@@ -2,6 +2,7 @@ import express from 'express';
 import { userAuth } from '../middlewares/userAuth.middleware.js';
 import { addAddress, updateAddress, updateAvatar, updateUserDetails } from '../controllers/user.controller.js';
 import { getHomeContent } from '../controllers/admin.controller.js';
+import { getHomeContentDetails } from '../controllers/public.controller.js';
 
 const userRouter = express.Router();
 
@@ -13,8 +14,10 @@ userRouter.patch('/update-profile', userAuth, updateUserDetails);
 userRouter.post('/add-address', userAuth, addAddress);
 // update address
 userRouter.patch('/update-address', userAuth, updateAddress);
-// get home content
-userRouter.get('/home-content', userAuth, getHomeContent)
+// get home content for admin panal 
+userRouter.get('/home-content', userAuth, getHomeContent);
+// get home content for user panal
+userRouter.get('/home-content-details', userAuth, getHomeContentDetails);
 
 
 export default userRouter;

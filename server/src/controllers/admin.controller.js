@@ -782,7 +782,7 @@ export const getHomeContent = async (req, res) => {
          heroBannerImages: homeContent.heroBannerImages || [],
          exclusiveProducts: homeContent.exclusiveProducts?.map(item => item.productId) || [],
          newArrivals: homeContent.newArrivals?.map(item => item.productId) || [],
-         collections: homeContent.collections?.map(item => item.collectionId) || [],
+         collections: homeContent.collections || [],
          offerFeatured: homeContent.offerFeatured?.map(item => item.offer) || [],
          alltimeBestSellers: homeContent.alltimeBestSellers || null,
          womenFeatured: homeContent.womenFeatured?.map(item => item.productId) || [],
@@ -829,35 +829,7 @@ export const updateHomeContent = async (req, res) => {
       if (heroBannerImages) homeContent.heroBannerImages = heroBannerImages;
       if (exclusiveProducts) homeContent.exclusiveProducts = exclusiveProducts;
       if (newArrivals) homeContent.newArrivals = newArrivals;
-
-      // Validate collections structure before updating
-      if (collections) {
-         if (!Array.isArray(collections)) {
-            return res.status(400).json({
-               success: false,
-               message: "Collections must be an array",
-            });
-         }
-
-         // Validate each collection item
-         for (const item of collections) {
-            if (!item.collectionId) {
-               return res.status(400).json({
-                  success: false,
-                  message: "Each collection must have a collectionId",
-               });
-            }
-
-            if (!item.imageDetails || !item.imageDetails.imageUrl) {
-               return res.status(400).json({
-                  success: false,
-                  message: "Each collection must have imageDetails with imageUrl",
-               });
-            }
-         }
-
-         homeContent.collections = collections;
-      }
+      if (collections) homeContent.collections = collections;
 
       if (offerFeatured) homeContent.offerFeatured = offerFeatured;
       if (alltimeBestSellers) homeContent.alltimeBestSellers = alltimeBestSellers;
