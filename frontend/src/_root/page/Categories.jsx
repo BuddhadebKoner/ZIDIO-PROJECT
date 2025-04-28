@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
 import { useFilterProducts } from '../../lib/query/queriesAndMutation';
 import ProductCard from '../../components/cards/ProductCard';
@@ -187,12 +187,16 @@ const Categories = () => {
 
   return (
     <>
-      <div className='flex flex-col justify-center items-center py-10'>
-        <h1 className='text-4xl font-semibold text-white mt-10'>
-          {slug ? formatString(slug) : 'All Products'}
-        </h1>
+      <div className='flex flex-col justify-center items-center py-4'>
+        <h2 className='text-4xl font-semibold text-white mt-20'>
+          {slug ? (
+            filters.subCategory ?
+              `${filters.subCategory} ${formatString(slug)}` :
+              formatString(slug)
+          ) : 'All Products'}
+        </h2>
 
-        <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 lg:px-16 mt-8">
+        <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 lg:px-30 mt-8">
           <div className="flex items-center gap-2">
             <button
               className="flex items-center gap-2 bg-surface px-4 py-2 rounded-md border border-gray-800 hover:border-gray-700"
@@ -240,23 +244,9 @@ const Categories = () => {
         </div>
 
         {isFilterOpen && (
-          <div className="w-full px-4 md:px-8 lg:px-16 mt-4">
+          <div className="w-full px-4 md:px-8 lg:px-30 mt-4">
             <div className="p-4 rounded-lg shadow-lg">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-text-muted mb-1">Price Order</label>
-                  <select
-                    name="priceOrder"
-                    value={filters.priceOrder}
-                    onChange={handleFilterChange}
-                    className="w-full p-2 border rounded-md bg-surface text-text border-gray-700 focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"
-                  >
-                    <option value="">Default Order</option>
-                    <option value="asc">Price: Low to High</option>
-                    <option value="desc">Price: High to Low</option>
-                  </select>
-                </div>
-
                 <div>
                   <label className="block text-sm font-medium text-text-muted mb-1">Size</label>
                   <select
@@ -309,11 +299,21 @@ const Categories = () => {
                   </div>
                 )}
               </div>
+
+              {/* Add Clear Filter button */}
+              <div className="flex justify-end">
+                <Link
+                  to="/category"
+                  className="px-4 py-2 text-white rounded-md transition-colors"
+                >
+                  Clear Filters
+                </Link>
+              </div>
             </div>
           </div>
         )}
 
-        <div className="container mx-auto px-4 py-6 mt-2">
+        <div className="container mx-auto px-4 md:px-8 lg:px-30 py-4 mt-2">
           {isLoading && allProducts.length === 0 ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>

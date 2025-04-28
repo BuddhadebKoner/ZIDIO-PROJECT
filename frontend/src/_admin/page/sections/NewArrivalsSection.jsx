@@ -1,21 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { ChevronDown, ChevronUp, Tags, Loader2 } from 'lucide-react';
 import FindProducts from '../../../components/dataFinding/FindProducts';
+import { updateHomeContent } from '../../../lib/api/admin.api';
 
 const NewArrivalsSection = ({ initialProducts }) => {
    const [products, setProducts] = useState(initialProducts || []);
    const [errors, setErrors] = useState(null);
    const [loading, setLoading] = useState(false);
    const [expanded, setExpanded] = useState(true);
+   const [hasChanges, setHasChanges] = useState(false);
+
+   // Helper function to extract product IDs for comparison
+   const extractProductIds = (products) => {
+      if (!products) return [];
+      return products.map(product =>
+         typeof product === 'object' ? product.productId : product
+      );
+   };
+
+   // Reset hasChanges when initialProducts change
+   useEffect(() => {
+      setHasChanges(false);
+   }, [initialProducts]);
 
    const toggleExpanded = () => {
       setExpanded(!expanded);
    };
 
    const handleProductsSelection = (productIds) => {
-      setProducts(productIds.map(id => ({ productId: id })));
+      const newProducts = productIds.map(id => ({ productId: id }));
+      setProducts(newProducts);
       setErrors(null);
+
+      // Compare selected products with initial products to detect changes
+      const initialIds = extractProductIds(initialProducts);
+
+      // Check if arrays have the same elements (regardless of order)
+      const hasChanged =
+         initialIds.length !== productIds.length ||
+         !initialIds.every(id => productIds.includes(id)) ||
+         !productIds.every(id => initialIds.includes(id));
+
+      setHasChanges(hasChanged);
    };
 
    const validateProducts = () => {
@@ -37,14 +64,28 @@ const NewArrivalsSection = ({ initialProducts }) => {
       setLoading(true);
 
       try {
-         // Mock API call - replace with actual API call
-         await new Promise(resolve => setTimeout(resolve, 800));
+         const formattedProducts = {
+            newArrivals: products.map(product => (
+               { productId: product.productId }
+            )),
+         }
 
-         toast.success('New arrivals updated successfully');
-         setErrors(null);
+         const response = await updateHomeContent(formattedProducts);
+
+         if (response && response.success) {
+            toast.success('New arrivals updated successfully');
+            setErrors(null);
+            setHasChanges(false);
+         } else {
+            const errorMessage = response?.message || 'Failed to update new arrivals';
+            toast.error(errorMessage);
+            setErrors(errorMessage);
+         }
       } catch (error) {
          console.error('Error updating new arrivals:', error);
-         toast.error('Failed to update new arrivals');
+         const errorMessage = error.response?.data?.message || 'Failed to update new arrivals';
+         toast.error(errorMessage);
+         setErrors(errorMessage);
       } finally {
          setLoading(false);
       }
@@ -72,7 +113,7 @@ const NewArrivalsSection = ({ initialProducts }) => {
                <button
                   type="button"
                   onClick={updateProducts}
-                  disabled={loading}
+                  disabled={loading || !hasChanges}
                   className="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-600 rounded-md font-medium text-sm transition-colors duration-200 flex items-center"
                >
                   {loading ? (
@@ -81,7 +122,7 @@ const NewArrivalsSection = ({ initialProducts }) => {
                         <span>Updating...</span>
                      </>
                   ) : (
-                     <span>Update</span>
+                     <span>{hasChanges ? "Update" : "No Changes"}</span>
                   )}
                </button>
             </div>
@@ -96,7 +137,7 @@ const NewArrivalsSection = ({ initialProducts }) => {
 
                   <FindProducts
                      onSelectProducts={handleProductsSelection}
-                  selectedProductIds={products.map(p => p.productId)}
+                     selectedProductIds={initialProducts}
                      disabled={loading}
                   />
 

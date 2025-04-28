@@ -1,17 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { ChevronDown, ChevronUp, Image, Loader2, Trash2 } from 'lucide-react';
 import SingleImageUploader from '../../../components/shared/SingleImageUploader';
 import { updateHomeContent } from '../../../lib/api/admin.api';
 
 const BannerSection = ({ initialBanners = [] }) => {
+   const [originalBanners, setOriginalBanners] = useState([]);
    const [banners, setBanners] = useState(initialBanners.length > 0 ? initialBanners : [
       { imageUrl: '', imageId: '', path: '' }
    ]);
-
+   const [hasChanges, setHasChanges] = useState(false);
    const [errors, setErrors] = useState({});
    const [loading, setLoading] = useState(false);
    const [expanded, setExpanded] = useState(true);
+
+   // Store the initial banners for comparison
+   useEffect(() => {
+      setOriginalBanners(JSON.parse(JSON.stringify(banners)));
+   }, []);
+
+   // Check for changes whenever banners are modified
+   useEffect(() => {
+      const checkForChanges = () => {
+         if (originalBanners.length !== banners.length) {
+            setHasChanges(true);
+            return;
+         }
+
+         for (let i = 0; i < banners.length; i++) {
+            const current = banners[i];
+            const original = originalBanners[i];
+            
+            if (!original || 
+                current.imageUrl !== original.imageUrl || 
+                current.imageId !== original.imageId || 
+                current.path !== original.path) {
+               setHasChanges(true);
+               return;
+            }
+         }
+         
+         setHasChanges(false);
+      };
+
+      if (originalBanners.length > 0) {
+         checkForChanges();
+      }
+   }, [banners, originalBanners]);
 
    const toggleExpanded = () => {
       setExpanded(!expanded);
@@ -127,10 +162,13 @@ const BannerSection = ({ initialBanners = [] }) => {
 
          const res = await updateHomeContent(formattedData);
          console.log('Response:', res);
-         // For now, just show success message
+         
          setTimeout(() => {
             toast.success('Banner settings updated successfully');
             setLoading(false);
+            // Update original banners after successful update
+            setOriginalBanners(JSON.parse(JSON.stringify(banners)));
+            setHasChanges(false);
          }, 800);
 
       } catch (error) {
@@ -161,7 +199,7 @@ const BannerSection = ({ initialBanners = [] }) => {
                <button
                   type="button"
                   onClick={updateBanners}
-                  disabled={loading}
+                  disabled={loading || !hasChanges}
                   className="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-600 rounded-md font-medium text-sm transition-colors duration-200 flex items-center"
                >
                   {loading ? (
@@ -170,7 +208,7 @@ const BannerSection = ({ initialBanners = [] }) => {
                         <span>Updating...</span>
                      </>
                   ) : (
-                     <span>Update</span>
+                     <span>{hasChanges ? "Update" : "No Changes"}</span>
                   )}
                </button>
             </div>

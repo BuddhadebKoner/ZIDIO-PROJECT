@@ -6,36 +6,53 @@ const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
    const [scrolled, setScrolled] = useState(false);
 
    // Default data if not provided
-   const defaultCategories = [
+   const defaultcategory = [
       {
          title: "T-SHIRTS",
          links: [
-            { name: "Relaxed Fit", path: "/categories/t-shirts/relaxed-fit" },
-            { name: "Oversize Fit", path: "/categories/t-shirts/oversize-fit" },
-            { name: "Full Sleeves", path: "/categories/t-shirts/full-sleeves" },
-            { name: "Sleeveless", path: "/categories/t-shirts/sleeveless" },
+            { name: "Oversized", path: "/category/t-shirt?subCategory=Oversized" },
+            { name: "Acid Wash", path: "/category/t-shirt?subCategory=Acid+Wash" },
+            { name: "Graphic Printed", path: "/category/t-shirt?subCategory=Graphic+Printed" },
+            { name: "Solid Color", path: "/category/t-shirt?subCategory=Solid+Color" },
+            { name: "Polo T-Shirts", path: "/category/t-shirt?subCategory=Polo+T-Shirts" },
+            { name: "Sleeveless", path: "/category/t-shirt?subCategory=Sleeveless" },
+            { name: "Long Sleeve", path: "/category/t-shirt?subCategory=Long+Sleeve" },
+            { name: "Henley", path: "/category/t-shirt?subCategory=Henley" },
+            { name: "Hooded", path: "/category/t-shirt?subCategory=Hooded" }
          ]
       },
       {
          title: "SHIRTS",
          links: [
-            { name: "Relaxed Fit", path: "/categories/shirts/relaxed-fit" },
-            { name: "Oversize Fit", path: "/categories/shirts/oversize-fit" },
-            { name: "Full Sleeves", path: "/categories/shirts/full-sleeves" },
-            { name: "Sleeveless", path: "/categories/shirts/sleeveless" },
+            { name: "Oversized", path: "/category/shirt?subCategory=Oversized" },
+            { name: "Acid Wash", path: "/category/shirt?subCategory=Acid+Wash" },
+            { name: "Graphic Printed", path: "/category/shirt?subCategory=Graphic+Printed" },
+            { name: "Solid Color", path: "/category/shirt?subCategory=Solid+Color" },
+            { name: "Polo T-Shirts", path: "/category/shirt?subCategory=Polo+T-Shirts" },
+            { name: "Sleeveless", path: "/category/shirt?subCategory=Sleeveless" },
+            { name: "Long Sleeve", path: "/category/shirt?subCategory=Long+Sleeve" },
+            { name: "Henley", path: "/category/shirt?subCategory=Henley" },
+            { name: "Hooded", path: "/category/shirt?subCategory=Hooded" }
          ]
       },
       {
          title: "WOMEN",
          links: [
-            { name: "Crop Tops", path: "/categories/women/crop-tops" },
-            { name: "Sleeveless", path: "/categories/women/sleeveless" },
+            { name: "Oversized", path: "/category/women?subCategory=Oversized" },
+            { name: "Acid Wash", path: "/category/women?subCategory=Acid+Wash" },
+            { name: "Graphic Printed", path: "/category/women?subCategory=Graphic+Printed" },
+            { name: "Solid Color", path: "/category/women?subCategory=Solid+Color" },
+            { name: "Polo T-Shirts", path: "/category/women?subCategory=Polo+T-Shirts" },
+            { name: "Sleeveless", path: "/category/women?subCategory=Sleeveless" },
+            { name: "Long Sleeve", path: "/category/women?subCategory=Long+Sleeve" },
+            { name: "Henley", path: "/category/women?subCategory=Henley" },
+            { name: "Hooded", path: "/category/women?subCategory=Hooded" }
          ]
       },
       {
          title: "WINTER WEAR",
          links: [
-            { name: "Sweatshirt", path: "/categories/winter-wear/sweatshirt" },
+            { name: "Sweatshirt", path: "/category/winter-wear?subCategory=Sweatshirt" },
          ]
       }
    ];
@@ -88,7 +105,7 @@ const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
          displayData = dropdownData || defaultOffers;
          break;
       default:
-         displayData = dropdownData || defaultCategories;
+         displayData = dropdownData || defaultcategory;
    }
 
    return (

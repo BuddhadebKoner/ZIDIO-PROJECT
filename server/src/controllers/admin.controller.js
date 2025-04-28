@@ -762,13 +762,8 @@ export const updateOffer = async (req, res) => {
 
 export const getHomeContent = async (req, res) => {
    try {
-      let homeContent = await HomeContent.findOne()
-         .populate('exclusiveProducts.productId')
-         .populate('newArrivals.productId')
-         .populate('collections.collectionId')
-         .populate('offerFeatured.offer')
-         .populate('alltimeBestSellers')
-         .populate('womenFeatured.productId');
+      // Find home content without populating relationships
+      let homeContent = await HomeContent.findOne();
 
       if (!homeContent) {
          homeContent = await HomeContent.create({
@@ -782,10 +777,24 @@ export const getHomeContent = async (req, res) => {
          });
       }
 
+      // Transform the response to include only IDs
+      const responseData = {
+         heroBannerImages: homeContent.heroBannerImages || [],
+         exclusiveProducts: homeContent.exclusiveProducts?.map(item => item.productId) || [],
+         newArrivals: homeContent.newArrivals?.map(item => item.productId) || [],
+         collections: homeContent.collections?.map(item => item.collectionId) || [],
+         offerFeatured: homeContent.offerFeatured?.map(item => item.offer) || [],
+         alltimeBestSellers: homeContent.alltimeBestSellers || null,
+         womenFeatured: homeContent.womenFeatured?.map(item => item.productId) || [],
+         _id: homeContent._id,
+         createdAt: homeContent.createdAt,
+         updatedAt: homeContent.updatedAt
+      };
+
       return res.status(200).json({
          success: true,
          message: "Home content fetched successfully",
-         homeContent
+         homeContent: responseData
       });
    } catch (error) {
       console.error("Error fetching home content:", error);

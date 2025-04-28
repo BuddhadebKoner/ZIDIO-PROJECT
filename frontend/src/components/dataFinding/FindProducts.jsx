@@ -6,19 +6,6 @@ import { toast } from 'react-toastify';
 import { useInView } from 'react-intersection-observer';
 import ProductDataLable from '../common/ProductDataLable';
 
-/**
- * Dynamic reusable product finder component
- * @param {Object} props - Component properties
- * @param {function} props.onSelectProducts - Callback function when products are selected
- * @param {Array} props.selectedProductIds - Array of pre-selected product IDs
- * @param {string} props.title - Optional custom title for the component
- * @param {string} props.emptyStateMessage - Optional custom message for empty state
- * @param {number} props.maxSelections - Optional maximum number of products that can be selected
- * @param {boolean} props.allowMultiple - Whether multiple products can be selected (default: true)
- * @param {boolean} props.showAddButton - Whether to show the add button (default: true)
- * @param {boolean} props.showCount - Whether to show the count badge (default: true)
- * @param {string} props.className - Additional CSS classes
- */
 const FindProducts = ({
   onSelectProducts,
   selectedProductIds = [],
