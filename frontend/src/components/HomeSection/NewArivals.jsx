@@ -3,7 +3,7 @@ import ProductCard from '../cards/ProductCard'
 
 const NewArivals = ({ products }) => {
 
-   console.log('New Arrivals:', products);
+   // console.log('New Arrivals:', products);
 
    return (
       <>

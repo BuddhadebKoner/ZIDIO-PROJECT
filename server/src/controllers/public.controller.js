@@ -79,6 +79,14 @@ export const getHomeContentDetails = async (req, res) => {
                as: "womenFeaturedDetails"
             }
          },
+         {
+            $lookup: {
+               from: "offers",
+               localField: "womenFeaturedDetails.offer",
+               foreignField: "_id",
+               as: "womenFeaturedOffers"
+            }
+         },
 
          // Transform and restructure the data
          {
@@ -260,7 +268,88 @@ export const getHomeContentDetails = async (req, res) => {
                // Keep other fields with their populated data
                offerFeatured: 1,
                alltimeBestSellers: 1,
-               womenFeatured: 1
+               womenFeatured: {
+                  $map: {
+                     input: "$womenFeatured",
+                     as: "womenItem",
+                     in: {
+                        $mergeObjects: [
+                           "$$womenItem",
+                           {
+                              productId: {
+                                 $let: {
+                                    vars: {
+                                       prod: {
+                                          $arrayElemAt: [
+                                             {
+                                                $filter: {
+                                                   input: "$womenFeaturedDetails",
+                                                   as: "p",
+                                                   cond: { $eq: ["$$p._id", "$$womenItem.productId"] }
+                                                }
+                                             },
+                                             0
+                                          ]
+                                       },
+                                       productOffer: {
+                                          $arrayElemAt: [
+                                             {
+                                                $filter: {
+                                                   input: "$womenFeaturedOffers",
+                                                   as: "o",
+                                                   cond: {
+                                                      $let: {
+                                                         vars: {
+                                                            product: {
+                                                               $arrayElemAt: [
+                                                                  {
+                                                                     $filter: {
+                                                                        input: "$womenFeaturedDetails",
+                                                                        as: "p",
+                                                                        cond: { $eq: ["$$p._id", "$$womenItem.productId"] }
+                                                                     }
+                                                                  },
+                                                                  0
+                                                               ]
+                                                            }
+                                                         },
+                                                         in: { $eq: ["$$o._id", "$$product.offer"] }
+                                                      }
+                                                   }
+                                                }
+                                             },
+                                             0
+                                          ]
+                                       }
+                                    },
+                                    in: {
+                                       _id: "$$prod._id",
+                                       title: "$$prod.title",
+                                       price: "$$prod.price",
+                                       slug: "$$prod.slug",
+                                       image: { $arrayElemAt: ["$$prod.images", 0] },
+                                       offer: {
+                                          $cond: {
+                                             if: {
+                                                $and: [
+                                                   { $ne: ["$$productOffer", null] },
+                                                   { $eq: ["$$productOffer.offerStatus", true] }
+                                                ]
+                                             },
+                                             then: {
+                                                discountValue: "$$productOffer.discountValue"
+                                             },
+                                             else: "$$REMOVE"
+                                          }
+                                       }
+                                    }
+                                 }
+                              }
+                           }
+                        ]
+                     }
+                  }
+               }
             }
          }
       ];
