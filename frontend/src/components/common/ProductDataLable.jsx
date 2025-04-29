@@ -19,7 +19,7 @@ const ProductDataLable = ({
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 bg-gray-800 rounded-md overflow-hidden flex-shrink-0">
           <img
-            src={product.bannerImageUrl || product.images?.[0]?.imageUrl}
+            src={product.images?.[0]?.imageUrl}
             alt={product.title}
             className="w-full h-full object-cover"
             onError={(e) => {

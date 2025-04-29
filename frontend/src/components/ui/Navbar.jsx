@@ -29,8 +29,8 @@ const Navbar = ({ toggleSidebar }) => {
    }, [scrolled]);
 
    return (
-      <section className="z-40 relative">
-         <nav className={`${scrolled ? 'fixed' : 'absolute'} top-0 left-0 right-0 z-50 flex justify-between items-center px-4 md:px-8 lg:px-30 py-4 text-white 
+      <section className="z-30 relative">
+         <nav className={`${scrolled ? 'fixed' : 'absolute'} top-0 left-0 right-0 flex justify-between items-center px-4 md:px-8 lg:px-30 py-4 text-white 
                        transition-all duration-300 ease-in-out 
                        ${scrolled
                ? 'glass-morphism py-3 shadow-lg'

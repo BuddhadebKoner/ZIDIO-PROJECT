@@ -54,7 +54,7 @@ const ProductCard = ({ product }) => {
          >
             <Link
                to={`/product/${product.slug}`}>
-               <div className="relative w-full h-[200px] xs:h-[220px] sm:h-[250px] md:h-[280px] overflow-hidden">
+               <div className="relative w-full h-[450px] sm:h-[400px] md:h-[400px] overflow-hidden">
 
                   {/* First image (shown by default) */}
                   <img

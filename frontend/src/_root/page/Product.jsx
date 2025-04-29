@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom'
 import ProductImageGallery from '../../components/product/ProductImageGallery'
 import ProductReviews from '../../components/product/ProductReviews'
 import { Heart, ShoppingCart, Minus, Plus, Truck, X } from 'lucide-react'
+import { useGetProductById } from '../../lib/query/queriesAndMutation'
 
 // Lazy load the SplineModel component
 const LazySplineModel = lazy(() => import('../../components/ui/SplineModel'));
@@ -15,7 +16,18 @@ const Product = () => {
   const [selectedSize, setSelectedSize] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [isFavorite, setIsFavorite] = useState(false)
-  const [isModelPopupOpen, setIsModelPopupOpen] = useState(false); // Add this state
+  const [isModelPopupOpen, setIsModelPopupOpen] = useState(false);
+
+  const {
+    data: productData,
+    isLoading: productLoading,
+    isError: productError,
+  } = useGetProductById(slug)
+
+  // Extract product from data
+  const product = productData?.product || {}
+
+  // console.log('Product Data:', product)
 
   // Handle quantity changes
   const decreaseQuantity = () => {
@@ -26,83 +38,27 @@ const Product = () => {
     setQuantity(quantity + 1)
   }
 
-  // Dummy authentication data
-  const [currentUser, setCurrentUser] = useState({
-    id: 'user123',
-    cart: { id: 'cart123', products: [] }
-  })
-  const [isAuthLoading, setIsAuthLoading] = useState(false)
+  // Calculate values based on product data and offer
+  const hasOffer = product.offer &&
+    product.offer.offerStatus === true &&
+    product.offer.products.includes(product._id);
 
-  // Dummy product data based on the provided schema
-  const [product, setProduct] = useState({
-    slug: slug || 'modern-t-shirt-design',
-    title: 'Modern T-Shirt Design',
-    subTitle: 'Premium quality cotton t-shirt with stylish design',
-    description: 'A high-quality cotton t-shirt with unique graphic design. Perfect for casual wear or as a gift.',
-    productAbout: 'This premium t-shirt is made from 100% combed ring-spun cotton, providing exceptional comfort and durability. The design is printed using eco-friendly water-based inks that won\'t ',
-    price: 2039,
-    images: [
-      { imageUrl: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=3314&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', imageId: 'img1' },
-      { imageUrl: 'https://images.unsplash.com/photo-1622445275463-afa2ab738c34?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D', imageId: 'img2' },
-      { imageUrl: 'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fHQlMjBzaGlydHxlbnwwfHwwfHx8MA%3D%3D', imageId: 'img3' }
-    ],
-    category: { type: 't-shirt', genre: 'casual' },
-    size: [
-      { size: 'Small', stock: 15 },
-      { size: 'Medium', stock: 20 },
-      { size: 'Large', stock: 10 },
-      { size: 'XL', stock: 0 }
-    ],
-    offerStatus: true,
-    discount: 20,
-    offerStartDate: '2025-04-01T00:00:00Z',
-    offerEndDate: '2025-04-30T23:59:59Z',
-    isFeatured: true,
-    totalSold: 128,
-    totalRating: 4.8,
-    totalSumOfRating: 480,
-    websiteAge: 65,
-    technologyStack: ['100% Cotton', 'Water-based ink', 'Pre-shrunk'],
-    tags: ['Cotton', 'Graphic Tee', 'Unisex', 'Sale'],
-    liveLink: 'https://prod.spline.design/EZUAfN-6EUmTLic0/scene.splinecode',
-    reviews: [
-      {
-        userId: 'user1',
-        name: 'John Smith',
-        rating: 5,
-        comment: 'Excellent t-shirt, very comfortable!',
-        createdAt: '2025-03-25T14:32:22Z'
-      },
-      {
-        userId: 'user2',
-        name: 'Sarah Johnson',
-        rating: 4,
-        comment: 'Great design, just a bit tight around the shoulders.',
-        createdAt: '2025-03-20T09:15:43Z'
-      }
-    ],
-    collections: ['Featured', 'Best Sellers', 'Summer Collection'],
-    createdAt: '2025-02-05T10:00:00Z',
-    updatedAt: '2025-04-10T16:45:12Z'
-  })
+  const isOfferActive = hasOffer &&
+    new Date() >= new Date(product.offer.startDate) &&
+    new Date() <= new Date(product.offer.endDate);
 
-  // Calculate values based on product data
-  const isOfferActive = product.offerStatus &&
-    new Date(product.offerStartDate) <= new Date() &&
-    new Date(product.offerEndDate) >= new Date();
-
-  const discountedPriceInRupees = isOfferActive
-    ? product.price - (product.price * product.discount) / 100
+  const discountPercentage = isOfferActive ? product.offer.discountValue : 0;
+  const discountedPrice = isOfferActive
+    ? product.price - (product.price * (discountPercentage / 100))
     : product.price;
 
   const formattedPrice = `₹${Math.round(product.price).toLocaleString('en-IN')}`;
-  const formattedDiscountedPrice = `₹${Math.round(discountedPriceInRupees).toLocaleString('en-IN')}`;
-  const productType = product.category?.type || 't-shirt';
-  const statusColorClass = isOfferActive ? 'text-green-500' : 'text-gray-500';
+  const formattedDiscountedPrice = `₹${Math.round(discountedPrice).toLocaleString('en-IN')}`;
+  const productType = product.categories?.[0]?.main || 't-shirt';
 
-  const isInCart = currentUser?.cart?.products?.some(item => item.productId === product.slug) || false;
 
-  const sizes = product?.size || [];
+  // Convert size array from strings to objects with size and stock properties
+  const sizes = product?.size?.map(size => ({ size, stock: 1 })) || [];
 
   useEffect(() => {
     console.log(`Fetching product data for slug: ${slug}`);
@@ -187,7 +143,7 @@ const Product = () => {
             {/* Price display */}
             <div className="flex items-center space-x-4">
               <span className="text-2xl font-bold text-primary-300">
-                {formattedDiscountedPrice}
+                {isOfferActive ? formattedDiscountedPrice : formattedPrice}
               </span>
 
               {isOfferActive && (
@@ -196,7 +152,7 @@ const Product = () => {
                     {formattedPrice}
                   </span>
                   <span className="px-2 py-1 bg-primary-500 text-white text-sm rounded">
-                    {product.discount}% OFF
+                    {discountPercentage}% OFF
                   </span>
                 </>
               )}
@@ -308,11 +264,11 @@ const Product = () => {
               {activeTab === 'description' && (
                 <div className="text-gray-300 space-y-4">
                   <h3 className="text-lg font-semibold text-white">About This Product</h3>
-                  <p>{product.productAbout}</p>
+                  <p>{product.description}</p>
 
                   <h4 className="text-base font-medium text-white mt-4">Materials & Features</h4>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {product.technologyStack.map((tech, index) => (
+                    {product.technologyStack?.map((tech, index) => (
                       <span key={index} className="bg-surface px-3 py-1 rounded-full text-sm">
                         {tech}
                       </span>
@@ -334,7 +290,7 @@ const Product = () => {
                     </div>
                   </div>
 
-                  {product.liveLink && (
+                  {product.productModelLink && (
                     <div className="mt-6">
                       <button
                         onClick={() => setIsModelPopupOpen(true)}
@@ -361,11 +317,11 @@ const Product = () => {
             {activeTab === 'description' && (
               <div className="text-gray-300 space-y-4">
                 <h3 className="text-lg font-semibold text-white">About This Product</h3>
-                <p>{product.productAbout}</p>
+                <p>{product.description}</p>
 
                 <h4 className="text-base font-medium text-white mt-4">Materials & Features</h4>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {product.technologyStack.map((tech, index) => (
+                  {product.technologyStack?.map((tech, index) => (
                     <span key={index} className="bg-surface px-3 py-1 rounded-full text-sm">
                       {tech}
                     </span>
@@ -409,7 +365,7 @@ const Product = () => {
           </div>
         }>
           <LazySplineModel
-            url={product.liveLink}
+            url={product.productModelLink}
             setIsModelPopupOpen={setIsModelPopupOpen}
           />
         </Suspense>

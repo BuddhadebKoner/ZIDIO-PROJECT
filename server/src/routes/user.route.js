@@ -17,7 +17,7 @@ userRouter.patch('/update-address', userAuth, updateAddress);
 // get home content for admin panal 
 userRouter.get('/home-content', userAuth, getHomeContent);
 // get home content for user panal
-userRouter.get('/home-content-details', userAuth, getHomeContentDetails);
+userRouter.get('/home-content-details', getHomeContentDetails);
 
 
 export default userRouter;

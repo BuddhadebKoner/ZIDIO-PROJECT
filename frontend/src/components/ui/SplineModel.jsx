@@ -8,6 +8,13 @@ const SplineModel = ({
    setIsModelPopupOpen,
 }) => {
    const [isLoading, setIsLoading] = useState(true);
+   // Create a cache-busting URL with timestamp
+   const cacheBustUrl = `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+
+   // Reset loading state whenever URL changes
+   useEffect(() => {
+      setIsLoading(true);
+   }, [url]);
 
    // improved scroll lock when modal is open
    useEffect(() => {
@@ -79,7 +86,8 @@ const SplineModel = ({
                         </div>
                      )}
                      <LazySpline
-                        scene="https://prod.spline.design/EZUAfN-6EUmTLic0/scene.splinecode"
+                        key={cacheBustUrl} // Add key to force re-render
+                        scene={cacheBustUrl} // Use cache-busting URL
                         onLoad={() => setIsLoading(false)}
                         className={isLoading ? "opacity-0" : "opacity-100"}
                      />

@@ -284,14 +284,7 @@ export const getProductById = async (req, res) => {
          },
          {
             $addFields: {
-               offer: {
-                  $cond: {
-                     if: { $gt: [{ $size: "$offerData" }, 0] },
-                     then: { $arrayElemAt: ["$offerData", 0] },
-                     else: null
-                  }
-               },
-               isOfferValid: {
+               isOfferActive: {
                   $cond: {
                      if: { $gt: [{ $size: "$offerData" }, 0] },
                      then: {
@@ -308,9 +301,16 @@ export const getProductById = async (req, res) => {
          },
          {
             $addFields: {
+               offer: {
+                  $cond: {
+                     if: "$isOfferActive",
+                     then: { $arrayElemAt: ["$offerData", 0] },
+                     else: null
+                  }
+               },
                finalPrice: {
                   $cond: {
-                     if: "$isOfferValid",
+                     if: "$isOfferActive",
                      then: {
                         $round: [
                            {
@@ -334,7 +334,7 @@ export const getProductById = async (req, res) => {
                },
                discountAmount: {
                   $cond: {
-                     if: "$isOfferValid",
+                     if: "$isOfferActive",
                      then: {
                         $round: [
                            {
@@ -353,7 +353,8 @@ export const getProductById = async (req, res) => {
          },
          {
             $project: {
-               offerData: 0
+               offerData: 0,
+               isOfferActive: 0
             }
          }
       ]);

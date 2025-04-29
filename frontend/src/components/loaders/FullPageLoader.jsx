@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import ElementLoader from './ElementLoader';
 
-const FullPageLoader = () => {
+const    FullPageLoader = () => {
    const [isGifLoaded, setIsGifLoaded] = useState(false);
 
    useEffect(() => {
@@ -11,7 +11,7 @@ const FullPageLoader = () => {
    }, []);
 
    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
          <div className="flex flex-col items-center">
             {isGifLoaded ? (
                <img

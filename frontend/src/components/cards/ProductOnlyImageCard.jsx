@@ -13,7 +13,7 @@ const ProductOnlyImageCard = ({ product }) => {
 
    return (
       <div
-         className="cursor-pointer w-full max-w-[400px] sm:max-w-[220px] md:max-w-[400px] lg:max-w-[280px] "
+         className="cursor-pointer w-full max-w-[400px] sm:max-w-[220px] md:max-w-[400px] lg:max-w-[280px]"
          radius="lg"
          shadow="sm"
       >

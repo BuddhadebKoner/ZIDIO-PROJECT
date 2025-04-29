@@ -60,7 +60,7 @@ const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
    const defaultCollections = [
       {
          title: "MARVEL 2025",
-         path: "/collections/marvel-2025/"
+         path: "/collections/marvel-collections"
       },
       {
          title: "DC 2025",

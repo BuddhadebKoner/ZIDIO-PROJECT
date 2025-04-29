@@ -5,8 +5,8 @@ import { useUser } from "@clerk/clerk-react";
 import { getAddAddress, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
 import { addProduct } from "../api/admin.api";
-import { getAllCollections, searchCollections } from "../api/collection.api";
-import { filterProducts, getAllProducts, searchProducts } from "../api/product.api";
+import { getAllCollections, getCollectionById, searchCollections } from "../api/collection.api";
+import { filterProducts, getAllProducts, getProductById, searchProducts } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
 
 export const useIsAuthenticated = () => {
@@ -219,6 +219,22 @@ export const useGetHomeContent = () => {
    return useQuery({
       queryKey: [QUERY_KEYS.HOME.GET_HOME_CONTENT],
       queryFn: () => getHomeContentDetails(),
+      refetchOnWindowFocus: false,
+   });
+}
+
+export const useGetProductById = (slug) => { 
+   return useQuery({
+      queryKey: [QUERY_KEYS.PRODUCTS.GET_PRODUCT_BY_ID, slug],
+      queryFn: () => getProductById(slug),
+      refetchOnWindowFocus: false,
+   });
+};
+
+export const useGetCollectionById = (slug) => { 
+   return useQuery({
+      queryKey: [QUERY_KEYS.COLLECTIONS.GET_COLLECTIONS_BY_ID, slug],
+      queryFn: () => getCollectionById(slug),
       refetchOnWindowFocus: false,
    });
 }
