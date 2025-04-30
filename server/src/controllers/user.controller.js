@@ -1,6 +1,9 @@
 import { avatars } from "../constant.js";
 import { Address } from "../models/address.model.js";
 import { User } from "../models/user.model.js";
+import { Product } from "../models/product.model.js";
+import { Collection } from "../models/collection.model.js";
+import { Offer } from "../models/offer.model.js";
 
 export const updateAvatar = async (req, res) => {
    try {
@@ -298,3 +301,71 @@ export const updateAddress = async (req, res) => {
       });
    }
 }
+
+// extream search
+export const extreamSearch = async (req, res) => {
+   try {
+      const { searchTerm } = req.query;
+
+      if (!searchTerm) {
+         return res.status(400).json({
+            success: false,
+            message: "Search term is required"
+         });
+      }
+
+      // Create the search pattern
+      const searchPattern = new RegExp(searchTerm, 'i');
+
+      // Search in Products (highest priority)
+      const products = await Product.find({
+         $or: [
+            { title: searchPattern },
+            { subTitle: searchPattern },
+            { description: searchPattern },
+            { tags: searchPattern },
+            { technologyStack: searchPattern },
+            { slug: searchPattern }
+         ]
+      }).limit(10)
+
+      // Search in Collections (second priority)
+      const collections = await Collection.find({
+         $or: [
+            { name: searchPattern },
+            { subtitle: searchPattern },
+            { slug: searchPattern }
+         ]
+      }).limit(5)
+
+      // Search in Offers (lowest priority)
+      const offers = await Offer.find({
+         $or: [
+            { offerName: searchPattern },
+            { offerCode: searchPattern }
+         ]
+      }).limit(5)
+
+      // Calculate total count of results
+      const totalCount = products.length + collections.length + offers.length;
+
+      return res.status(200).json({
+         success: true,
+         message: "Search completed successfully",
+         data: {
+            totalCount,
+            products,
+            collections,
+            offers
+         }
+      });
+
+   } catch (error) {
+      console.error("Error during extreme search:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Internal server error",
+         error: error.message
+      });
+   }
+};

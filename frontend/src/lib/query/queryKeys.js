@@ -22,5 +22,6 @@ export const QUERY_KEYS = {
    },
    HOME: {
       GET_HOME_CONTENT: 'getHomeContent',
-   }
+   },
+   EXTREAM_SEARCH: "extreamSearch"
 };

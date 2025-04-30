@@ -60,10 +60,6 @@ const Product = () => {
   // Convert size array from strings to objects with size and stock properties
   const sizes = product?.size?.map(size => ({ size, stock: 1 })) || [];
 
-  useEffect(() => {
-    console.log(`Fetching product data for slug: ${slug}`);
-  }, [slug]);
-
   return (
     <div className="min-h-screen px-4 md:px-8 lg:px-30 py-4 mt-20">
       <div className="mx-auto">

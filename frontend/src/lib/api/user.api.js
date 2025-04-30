@@ -131,3 +131,16 @@ export const getHomeContentDetails = async () => {
       throw error;
    }
 };
+
+// extream search
+export const getExtreamSearch = async (search) => {
+   try {
+      const response = await axiosInstance.get('/user/extream-search', {
+         params: { searchTerm: search },
+      });
+      return response.data.data;
+   } catch (error) {
+      console.error('Error Fetching Extream Search', error);
+      throw error;
+   }
+};

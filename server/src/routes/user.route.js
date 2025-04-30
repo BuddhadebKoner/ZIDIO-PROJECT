@@ -1,6 +1,6 @@
 import express from 'express';
 import { userAuth } from '../middlewares/userAuth.middleware.js';
-import { addAddress, updateAddress, updateAvatar, updateUserDetails } from '../controllers/user.controller.js';
+import { addAddress, extreamSearch, updateAddress, updateAvatar, updateUserDetails } from '../controllers/user.controller.js';
 import { getHomeContent } from '../controllers/admin.controller.js';
 import { getHomeContentDetails } from '../controllers/public.controller.js';
 
@@ -18,6 +18,8 @@ userRouter.patch('/update-address', userAuth, updateAddress);
 userRouter.get('/home-content', userAuth, getHomeContent);
 // get home content for user panal
 userRouter.get('/home-content-details', getHomeContentDetails);
+// extream search whole database
+userRouter.get('/extream-search', extreamSearch);
 
 
 export default userRouter;

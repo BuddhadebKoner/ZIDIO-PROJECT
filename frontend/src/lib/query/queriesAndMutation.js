@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tansta
 import { isAuthenticated } from "../api/auth.api";
 import { QUERY_KEYS } from "./queryKeys";
 import { useUser } from "@clerk/clerk-react";
-import { getAddAddress, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
+import { getAddAddress, getExtreamSearch, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
 import { addProduct } from "../api/admin.api";
 import { getAllCollections, getCollectionById, searchCollections } from "../api/collection.api";
@@ -223,7 +223,7 @@ export const useGetHomeContent = () => {
    });
 }
 
-export const useGetProductById = (slug) => { 
+export const useGetProductById = (slug) => {
    return useQuery({
       queryKey: [QUERY_KEYS.PRODUCTS.GET_PRODUCT_BY_ID, slug],
       queryFn: () => getProductById(slug),
@@ -231,10 +231,19 @@ export const useGetProductById = (slug) => {
    });
 };
 
-export const useGetCollectionById = (slug) => { 
+export const useGetCollectionById = (slug) => {
    return useQuery({
       queryKey: [QUERY_KEYS.COLLECTIONS.GET_COLLECTIONS_BY_ID, slug],
       queryFn: () => getCollectionById(slug),
       refetchOnWindowFocus: false,
    });
 }
+
+export const useExtreamSearch = (search) => {
+   return useQuery({
+      queryKey: [QUERY_KEYS.EXTREAM_SEARCH, search],
+      queryFn: () => getExtreamSearch(search),
+      refetchOnWindowFocus: false,
+      enabled: !!search, 
+   });
+};
