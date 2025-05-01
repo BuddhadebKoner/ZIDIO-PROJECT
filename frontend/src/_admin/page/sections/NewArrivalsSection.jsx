@@ -8,7 +8,7 @@ const NewArrivalsSection = ({ initialProducts }) => {
    const [products, setProducts] = useState(initialProducts || []);
    const [errors, setErrors] = useState(null);
    const [loading, setLoading] = useState(false);
-   const [expanded, setExpanded] = useState(true);
+   const [expanded, setExpanded] = useState(false);
    const [hasChanges, setHasChanges] = useState(false);
 
    // Helper function to extract product IDs for comparison
@@ -104,7 +104,7 @@ const NewArrivalsSection = ({ initialProducts }) => {
                <button
                   type="button"
                   onClick={toggleExpanded}
-                  className="p-2 text-gray-400 hover:text-white rounded-md transition-colors"
+                  className="p-2 text-gray-400 hover:text-white rounded-md transition-colors cursor-pointer"
                   aria-expanded={expanded}
                   aria-label={expanded ? "Collapse New Arrivals section" : "Expand New Arrivals section"}
                >
@@ -128,7 +128,7 @@ const NewArrivalsSection = ({ initialProducts }) => {
             </div>
          </div>
 
-         <div className={`transition-all duration-300 ${expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+         <div className={`transition-all duration-300 ${expanded ? 'max-h-fit opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
             <div className="p-5 border-t border-gray-800">
                <div className="space-y-4">
                   <p className="text-gray-300 mb-4">

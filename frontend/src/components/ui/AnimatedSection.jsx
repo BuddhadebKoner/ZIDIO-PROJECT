@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 
-// Section wrapper component with animation and lazy loading
 export const AnimatedSection = ({ children, delay = 0 }) => {
    const [isVisible, setIsVisible] = useState(false);
    const [isLoaded, setIsLoaded] = useState(false);

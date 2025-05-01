@@ -41,7 +41,7 @@ const AdminLayout = () => {
    }
 
    return (
-      <div className="w-full flex min-h-screen">
+      <div className="w-full flex">
          {/* Sidebar */}
          <AdminSidebar onToggle={handleSidebarToggle} />
 

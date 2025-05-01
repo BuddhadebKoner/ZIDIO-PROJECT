@@ -257,3 +257,21 @@ export const getHomeContent = async () => {
       throw error;
    }
 };
+
+// delete image from cloudinary by public_id
+export const deleteImage = async (public_id) => {
+   try {
+      const response = await axiosInstance.delete('/admin/delete-image', {
+         data: { public_id }
+      });
+
+      return {
+         success: true,
+         message: response.data.message || "Image deleted successfully",
+         data: response.data,
+      };
+   } catch (error) {
+      console.error('Error deleting image:', error);
+      throw error;
+   }
+}

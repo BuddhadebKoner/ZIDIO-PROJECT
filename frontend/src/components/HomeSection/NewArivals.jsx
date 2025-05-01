@@ -1,5 +1,6 @@
 import React from 'react'
 import ProductCard from '../cards/ProductCard'
+import { Link } from 'react-router-dom'
 
 const NewArivals = ({ products }) => {
 
@@ -23,8 +24,8 @@ const NewArivals = ({ products }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                {products.map(product => (
                   <div key={product._id} className="flex items-center justify-center">
-                     <ProductCard 
-                        product={product.productId} 
+                     <ProductCard
+                        product={product.productId}
                         parentId={product._id}
                      />
                   </div>
@@ -33,9 +34,11 @@ const NewArivals = ({ products }) => {
 
             {/* explore more */}
             <div className='flex items-center justify-center mt-10'>
-               <button className='bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition duration-300'>
+               <Link
+                  to={'/category'}
+                  className='bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition duration-300'>
                   Explore More
-               </button>
+               </Link>
             </div>
          </section>
       </>

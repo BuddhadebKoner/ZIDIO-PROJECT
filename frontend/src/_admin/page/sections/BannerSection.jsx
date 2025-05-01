@@ -12,14 +12,12 @@ const BannerSection = ({ initialBanners = [] }) => {
    const [hasChanges, setHasChanges] = useState(false);
    const [errors, setErrors] = useState({});
    const [loading, setLoading] = useState(false);
-   const [expanded, setExpanded] = useState(true);
+   const [expanded, setExpanded] = useState(false);
 
-   // Store the initial banners for comparison
    useEffect(() => {
       setOriginalBanners(JSON.parse(JSON.stringify(banners)));
    }, []);
 
-   // Check for changes whenever banners are modified
    useEffect(() => {
       const checkForChanges = () => {
          if (originalBanners.length !== banners.length) {
@@ -30,16 +28,16 @@ const BannerSection = ({ initialBanners = [] }) => {
          for (let i = 0; i < banners.length; i++) {
             const current = banners[i];
             const original = originalBanners[i];
-            
-            if (!original || 
-                current.imageUrl !== original.imageUrl || 
-                current.imageId !== original.imageId || 
-                current.path !== original.path) {
+
+            if (!original ||
+               current.imageUrl !== original.imageUrl ||
+               current.imageId !== original.imageId ||
+               current.path !== original.path) {
                setHasChanges(true);
                return;
             }
          }
-         
+
          setHasChanges(false);
       };
 
@@ -64,7 +62,6 @@ const BannerSection = ({ initialBanners = [] }) => {
          return updatedBanners;
       });
 
-      // Clear errors for this field if they exist
       clearFieldError(`banners[${index}].imageUrl`);
    };
 
@@ -89,7 +86,6 @@ const BannerSection = ({ initialBanners = [] }) => {
          return updatedBanners;
       });
 
-      // Clear errors for this field if they exist
       clearFieldError(`banners[${index}].path`);
    };
 
@@ -110,7 +106,6 @@ const BannerSection = ({ initialBanners = [] }) => {
    const handleRemoveBanner = (index) => {
       setBanners(prevBanners => prevBanners.filter((_, i) => i !== index));
 
-      // Clean up any errors for the removed banner
       const newErrors = { ...errors };
       Object.keys(newErrors).forEach(key => {
          if (key.startsWith(`banners[${index}]`)) {
@@ -130,7 +125,6 @@ const BannerSection = ({ initialBanners = [] }) => {
             isValid = false;
          }
 
-         // Path is optional but if provided should be valid
          if (banner.path && !banner.path.startsWith('/')) {
             newErrors[`banners[${index}].path`] = 'Path must start with /';
             isValid = false;
@@ -162,7 +156,7 @@ const BannerSection = ({ initialBanners = [] }) => {
 
          const res = await updateHomeContent(formattedData);
          console.log('Response:', res);
-         
+
          setTimeout(() => {
             toast.success('Banner settings updated successfully');
             setLoading(false);
@@ -190,7 +184,7 @@ const BannerSection = ({ initialBanners = [] }) => {
                <button
                   type="button"
                   onClick={toggleExpanded}
-                  className="p-2 text-gray-400 hover:text-white rounded-md transition-colors"
+                  className="p-2 text-gray-400 hover:text-white rounded-md transition-colors cursor-pointer"
                   aria-expanded={expanded}
                   aria-label={expanded ? "Collapse Banner section" : "Expand Banner section"}
                >
@@ -214,7 +208,7 @@ const BannerSection = ({ initialBanners = [] }) => {
             </div>
          </div>
 
-         <div className={`transition-all duration-300 ${expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+         <div className={`transition-all duration-300 ${expanded ? 'max-h-fit opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
             <div className="p-5 border-t border-gray-800">
                <div className="space-y-6">
                   {banners.map((banner, index) => (

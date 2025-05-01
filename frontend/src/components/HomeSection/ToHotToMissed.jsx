@@ -11,52 +11,11 @@ import 'swiper/css/navigation';
 import { Pagination, Autoplay, Navigation } from 'swiper/modules';
 import OfferFeaturedCard from '../cards/OfferFeaturedCard';
 
-const ToHotToMissed = () => {
+const ToHotToMissed = ({ featured }) => {
    const offersRef = useRef(null);
 
+   // console.log("featured", featured);
 
-   const productOffers = [
-      {
-         id: 1,
-         title: "SUMMER READY",
-         subTitle: "PRINTED SHIRT",
-         discount: 50,
-         endDate: "2025-04-15T00:00:00.000+00:00",
-         imageUrl: "https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?q=80&w=3870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-         id: 2,
-         title: "WINTER SALE",
-         subTitle: "JACKETS",
-         discount: 30,
-         endDate: "2025-05-01T00:00:00.000+00:00",
-         imageUrl: "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?q=80&w=3870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-         id: 3,
-         title: "SPRING COLLECTION",
-         subTitle: "NEW ARRIVALS",
-         discount: 20,
-         endDate: "2025-06-15T00:00:00.000+00:00",
-         imageUrl: "https://images.unsplash.com/photo-1620336655052-b57986f5a26a?q=80&w=3870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-         id: 4,
-         title: "FALL FASHION",
-         subTitle: "ACCESSORIES",
-         discount: 40,
-         endDate: "2025-07-01T00:00:00.000+00:00",
-         imageUrl: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=1474&auto=format&fit=crop",
-      },
-      {
-         id: 5,
-         title: "SUMMER READY",
-         subTitle: "PRINTED SHIRT",
-         discount: 50,
-         endDate: "2025-04-15T00:00:00.000+00:00",
-         imageUrl: "https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?q=80&w=3870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      }
-   ]
 
    return (
       <>
@@ -115,9 +74,9 @@ const ToHotToMissed = () => {
                   },
                }}
             >
-               {productOffers.map((offer) => (
+               {featured.map((offer) => (
                   <SwiperSlide key={offer.id}>
-                     <OfferFeaturedCard product={offer} />
+                     <OfferFeaturedCard offer={offer} />
                   </SwiperSlide>
                ))}
             </Swiper>

@@ -12,7 +12,7 @@ const CollectionsSection = ({ initialCollections = [] }) => {
    const [hasChanges, setHasChanges] = useState(false);
    const [errors, setErrors] = useState({});
    const [loading, setLoading] = useState(false);
-   const [expanded, setExpanded] = useState(true);
+   const [expanded, setExpanded] = useState(false);
 
    // console.log('Collections:', initialCollections);
 
@@ -192,7 +192,7 @@ const CollectionsSection = ({ initialCollections = [] }) => {
                <button
                   type="button"
                   onClick={toggleExpanded}
-                  className="p-2 text-gray-400 hover:text-white rounded-md transition-colors"
+                  className="p-2 text-gray-400 hover:text-white rounded-md transition-colors cursor-pointer"
                   aria-expanded={expanded}
                   aria-label={expanded ? "Collapse Collections section" : "Expand Collections section"}
                >
@@ -216,7 +216,7 @@ const CollectionsSection = ({ initialCollections = [] }) => {
             </div>
          </div>
 
-         <div className={`transition-all duration-300 ${expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+         <div className={`transition-all duration-300 ${expanded ? 'max-h-fit opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
             <div className="p-5 border-t border-gray-800">
                <div className="space-y-6">
                   {collections.map((collection, index) => (

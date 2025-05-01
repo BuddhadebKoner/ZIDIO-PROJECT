@@ -9,22 +9,37 @@ import OfferFeaturedSection from './sections/OfferFeaturedSection.jsx';
 import BestSellersSection from './sections/BestSellersSection.jsx';
 import WomenFeaturedSection from './sections/WomenFeaturedSection.jsx';
 import { getHomeContent } from '../../lib/api/admin.api.js';
+import { LoaderCircle } from 'lucide-react';
 
 const AdminSettings = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [initialData, setInitialData] = useState(null);
 
-  // Fetch initial data
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'Asia/Kolkata'
+    });
+    const formattedTime = date.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Kolkata'
+    });
+    return `${formattedDate} ${formattedTime}`;
+  };
+
   useEffect(() => {
     const fetchHomeContent = async () => {
       try {
         const res = await getHomeContent();
 
-        // console.log('Response:', res.data.homeContent.collections);
-
         if (res?.data?.success) {
           setInitialData(res.data.homeContent);
-          // console.log('Initial data:', res.data.homeContent);
         } else {
           toast.error(res?.data?.message || "Failed to load home content settings");
         }
@@ -39,43 +54,36 @@ const AdminSettings = () => {
     fetchHomeContent();
   }, []);
 
-  // Loading overlay for initial data fetch
   if (initialLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh]">
-        <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex flex-col items-center justify-center h-fit mt-20">
+        <LoaderCircle className="w-10 h-10 animate-spin" />
         <p className="mt-4 text-gray-300">Loading home content settings...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 max-w-[1200px] mx-auto pb-16">
-      <div>
-        <h1 className="text-3xl font-bold text-white mb-1">Home Content Settings</h1>
-        <p className="text-gray-400">Customize your homepage sections and featured content</p>
+    <div className="space-y-8 max-w-[1200px] mx-auto pb-16 h-fit">
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-1">Home Content Settings</h1>
+          <p className="text-gray-400">Customize your homepage sections and featured content</p>
+        </div>
+        <div className="text-right text-gray-400">
+          {initialData?.updatedAt && (
+            <p>Last updated at : {formatDateTime(initialData.updatedAt)}</p>
+          )}
+        </div>
       </div>
 
-      {/* Banner Information */}
-      <BannerSection initialBanners={initialData.heroBannerImages} />
-
-      {/* Exclusive Products */}
-      <ExclusiveProductsSection initialProducts={initialData.exclusiveProducts} />
-
-      {/* New Arrivals */}
-      <NewArrivalsSection initialProducts={initialData.newArrivals} />
-
-      {/* Featured Collection */}
-      <CollectionsSection initialCollections={initialData.collections} />
-
-      {/* Offer Featured */}
-      <OfferFeaturedSection initialOffers={initialData.offerFeatured} />
-
-      {/* Best Sellers */}
-      <BestSellersSection initialBestSeller={initialData.alltimeBestSellers} />
-
-      {/* Women Featured */}
-      <WomenFeaturedSection initialProducts={initialData.womenFeatured} />
+      <BannerSection initialBanners={initialData?.heroBannerImages || []} />
+      <ExclusiveProductsSection initialProducts={initialData?.exclusiveProducts || []} />
+      <NewArrivalsSection initialProducts={initialData?.newArrivals || []} />
+      <CollectionsSection initialCollections={initialData?.collections || []} />
+      <OfferFeaturedSection initialOffers={initialData?.offerFeatured || []} />
+      <BestSellersSection initialBestSeller={initialData?.alltimeBestSellers || []} />
+      <WomenFeaturedSection initialProducts={initialData?.womenFeatured || []} />
     </div>
   );
 };

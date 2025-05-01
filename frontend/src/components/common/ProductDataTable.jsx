@@ -33,7 +33,7 @@ const ProductDataTable = ({
     <div className="glass-morphism rounded-lg shadow-lg overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-700" role="grid" aria-label="Products table">
-          <thead style={{ background: 'rgba(30, 30, 30, 0.8)' }}>
+          <thead className="bg-surface">
             <tr>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">
                 Product Title
@@ -64,7 +64,7 @@ const ProductDataTable = ({
               </tr>
             ) : isError ? (
               <tr>
-                <td colSpan="5" className="px-6 py-8 text-center" style={{ color: 'var(--color-error)' }}>
+                <td colSpan="5" className="px-6 py-8 text-center text-error">
                   Error: {error?.message || "Failed to load products"}
                 </td>
               </tr>

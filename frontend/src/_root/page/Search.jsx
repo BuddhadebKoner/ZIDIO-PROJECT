@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useExtreamSearch } from '../../lib/query/queriesAndMutation';
 import ProductCard from '../../components/cards/ProductCard';
 import { LoaderCircle, PackageSearch } from 'lucide-react';
@@ -10,9 +10,7 @@ const Search = () => {
   const [collections, setCollections] = useState([]);
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
-  // Get query parameter
   const query = searchParams.get('q') || '';
 
   const {
@@ -21,7 +19,6 @@ const Search = () => {
     isError: errorSearchResults,
   } = useExtreamSearch(query);
 
-  // Update products state when search results change
   useEffect(() => {
     if (searchResults) {
       setProducts(searchResults.products || []);
@@ -31,19 +28,16 @@ const Search = () => {
     }
   }, [searchResults]);
 
-  // Update loading state based on API loading state
   useEffect(() => {
     setLoading(loadingSearchResults);
   }, [loadingSearchResults]);
 
-  // Log any errors
   useEffect(() => {
     if (errorSearchResults) {
       console.error('Error fetching search results:', errorSearchResults);
     }
   }, [errorSearchResults]);
 
-  // Handle search input change
   const handleSearch = (e) => {
     e.preventDefault();
     const searchValue = e.target.search.value.trim();

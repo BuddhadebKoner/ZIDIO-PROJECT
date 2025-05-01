@@ -820,8 +820,6 @@ export const updateHomeContent = async (req, res) => {
          womenFeatured
       } = req.body;
 
-      console.log("Update Home Content Request Body:", req.body);
-
       let homeContent = await HomeContent.findOne();
 
       if (!homeContent) {
