@@ -51,9 +51,8 @@ const HomeContentSchema = new mongoose.Schema({
          imageId: {
             type: String, required: true
          },
-         offer: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Offer'
+         path: {
+            type: String, default: '/'
          }
       }
    ],
@@ -71,4 +70,4 @@ const HomeContentSchema = new mongoose.Schema({
    ],
 }, { timestamps: true });
 
-export const HomeContent = mongoose.model('HomeContent', HomeContentSchema);
+export const HomeContent = mongoose.model('HomeContent', HomeContentSchema);  

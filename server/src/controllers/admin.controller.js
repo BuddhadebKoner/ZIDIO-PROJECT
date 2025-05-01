@@ -3,6 +3,7 @@ import { Product } from "../models/product.model.js";
 import { Offer } from "../models/offer.model.js";
 import { sanitizedCollection, sanitizedOffer, sanitizedProduct } from "../utils/checkValidation.js";
 import { HomeContent } from "../models/homecontent.model.js";
+import { deleteFromCloudinary } from "../utils/cloudinary.js";
 
 export const addProduct = async (req, res) => {
    try {
@@ -783,7 +784,7 @@ export const getHomeContent = async (req, res) => {
          exclusiveProducts: homeContent.exclusiveProducts?.map(item => item.productId) || [],
          newArrivals: homeContent.newArrivals?.map(item => item.productId) || [],
          collections: homeContent.collections || [],
-         offerFeatured: homeContent.offerFeatured?.map(item => item.offer) || [],
+         offerFeatured: homeContent.offerFeatured || [],
          alltimeBestSellers: homeContent.alltimeBestSellers || null,
          womenFeatured: homeContent.womenFeatured?.map(item => item.productId) || [],
          _id: homeContent._id,
@@ -819,6 +820,8 @@ export const updateHomeContent = async (req, res) => {
          womenFeatured
       } = req.body;
 
+      console.log("Update Home Content Request Body:", req.body);
+
       let homeContent = await HomeContent.findOne();
 
       if (!homeContent) {
@@ -848,6 +851,22 @@ export const updateHomeContent = async (req, res) => {
       return res.status(500).json({
          success: false,
          message: "Failed to update home content",
+         error: error.message || "Server error"
+      });
+   }
+};
+
+// remove image from cloudinary by public_id
+export const removeSingleImage = async (req, res) => {
+   try {
+      const { imageId } = req.params;
+      await deleteFromCloudinary(res.imageId);
+
+   } catch (error) {
+      console.error("Error removing image:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to remove image",
          error: error.message || "Server error"
       });
    }

@@ -1,6 +1,6 @@
 import express from 'express'
 import { adminAuth } from '../middlewares/adminAuth.middleware.js'
-import { addCollection, addOffer, addProduct, updateCollection, updateHomeContent, updateOffer, updateProduct } from '../controllers/admin.controller.js'
+import { addCollection, addOffer, addProduct, removeSingleImage, updateCollection, updateHomeContent, updateOffer, updateProduct } from '../controllers/admin.controller.js'
 
 const adminRouter = express.Router()
 
@@ -18,5 +18,7 @@ adminRouter.post('/add-offer', adminAuth, addOffer)
 adminRouter.put('/update-offer/:slug', adminAuth, updateOffer)
 // update home content
 adminRouter.put('/update-home', adminAuth, updateHomeContent);
+// delete image from cloudinary by public_id
+adminRouter.delete('/delete-image', adminAuth, removeSingleImage);
 
 export default adminRouter
