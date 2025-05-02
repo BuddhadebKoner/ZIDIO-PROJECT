@@ -267,7 +267,53 @@ export const getHomeContentDetails = async (req, res) => {
 
                // Keep other fields with their populated data
                offerFeatured: 1,
-               alltimeBestSellers: 1,
+               alltimeBestSellers: {
+                  $let: {
+                     vars: {
+                        bestSellerProduct: { $arrayElemAt: ["$alltimeBestSellersDetails", 0] },
+                        productOffer: {
+                           $arrayElemAt: [
+                              {
+                                 $filter: {
+                                    input: "$exclusiveProductsOffers", 
+                                    as: "o",
+                                    cond: {
+                                       $let: {
+                                          vars: {
+                                             product: { $arrayElemAt: ["$alltimeBestSellersDetails", 0] }
+                                          },
+                                          in: { $eq: ["$$o._id", "$$product.offer"] }
+                                       }
+                                    }
+                                 }
+                              },
+                              0
+                           ]
+                        }
+                     },
+                     in: {
+                        $mergeObjects: [
+                           "$$bestSellerProduct",
+                           {
+                              offer: {
+                                 $cond: {
+                                    if: {
+                                       $and: [
+                                          { $ne: ["$$productOffer", null] },
+                                          { $eq: ["$$productOffer.offerStatus", true] }
+                                       ]
+                                    },
+                                    then: {
+                                       discountValue: "$$productOffer.discountValue"
+                                    },
+                                    else: "$$REMOVE"
+                                 }
+                              }
+                           }
+                        ]
+                     }
+                  }
+               },
                womenFeatured: {
                   $map: {
                      input: "$womenFeatured",

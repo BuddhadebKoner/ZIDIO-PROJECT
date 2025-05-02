@@ -93,7 +93,7 @@ const AdminSidebar = () => {
       )}
 
       <aside
-        className={`w-64 h-screen glass-morphism fixed left-0 top-0 shadow-lg overflow-y-auto transition-transform duration-300 ease-in-out z-40 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`w-64 h-screen border-r border-gray-800 fixed left-0 top-0 shadow-lg overflow-y-auto transition-transform duration-300 ease-in-out z-40 ${isOpen ? 'translate-x-0' : '-translate-x-full'
           } md:translate-x-0`}
       >
         {/* Header */}
@@ -104,7 +104,7 @@ const AdminSidebar = () => {
               className='w-10 h-10'
               alt="logo" />
             <p className='text-xl font-bold text-white'>
-              Home
+              Admin Panel
             </p>
           </Link>
 
