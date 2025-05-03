@@ -1,8 +1,7 @@
-// CategoryDropdown.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
+const NavbarDropdown = ({ dropdownData, type = 'category' }) => {
    const [scrolled, setScrolled] = useState(false);
 
    // Default data if not provided
@@ -151,4 +150,4 @@ const CategoryDropdown = ({ dropdownData, type = 'category' }) => {
    );
 };
 
-export default CategoryDropdown;
+export default NavbarDropdown;

@@ -1,5 +1,6 @@
 import express from 'express';
-import { filterProducts, getProductById, getProducts, searchProducts } from '../controllers/product.controller.js';
+import { addToCart, addTowishlist, filterProducts, getProductById, getProducts, searchProducts } from '../controllers/product.controller.js';
+import { userAuth } from '../middlewares/userAuth.middleware.js';
 
 const productRouter = express.Router();
 
@@ -11,5 +12,9 @@ productRouter.get('/search', searchProducts);
 productRouter.get('/filter', filterProducts);
 // get product by id
 productRouter.get('/:slug', getProductById);
+// add to wishlist
+productRouter.post('/add-to-wishlist', userAuth, addTowishlist);
+// add to cart
+productRouter.post('/add-to-cart', userAuth, addToCart);
 
 export default productRouter;

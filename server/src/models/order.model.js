@@ -10,61 +10,6 @@ const orderSchema = new mongoose.Schema({
       type: String,
       required: true,
    },
-   shippingAddress: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Address",
-      required: true,
-   },
-   products: [
-      {
-         productId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Product"
-         },
-         quantity: {
-            type: Number,
-            required: true,
-            min: 1
-         },
-         title: {
-            type: String,
-            required: true
-         },
-         subTitle: {
-            type: String,
-            required: true
-         },
-         price: {
-            type: Number,
-            required: true
-         },
-         size: {
-            type: String,
-            required: true,
-            enum: ['S', 'M', 'L', 'XL', 'XXL'],
-         },
-         offerApplied: {
-            type: Boolean,
-            default: false
-         },
-         offerDetails: {
-            offerName: {
-               type: String
-            },
-            offerCode: {
-               type: String
-            },
-            discountValue: {
-               type: Number,
-               default: 0
-            }
-         },
-         imageUrl: {
-            type: String,
-            required: true
-         }
-      }
-   ],
    totalAmount: {
       type: Number,
       required: true
@@ -84,4 +29,4 @@ const orderSchema = new mongoose.Schema({
    }
 }, { timestamps: true });
 
-export const Order = mongoose.model("Order", orderSchema);
+export const Order = mongoose.model("Order", orderSchema);  

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import ElementLoader from './ElementLoader';
 
-const    FullPageLoader = () => {
+const FullPageLoader = () => {
    const [isGifLoaded, setIsGifLoaded] = useState(false);
 
    useEffect(() => {

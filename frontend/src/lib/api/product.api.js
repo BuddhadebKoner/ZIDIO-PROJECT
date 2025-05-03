@@ -56,7 +56,7 @@ export const filterProducts = async (filterParams) => {
    }
 }
 
-export const getProductById = async (slug) => { 
+export const getProductById = async (slug) => {
    try {
       const response = await axiosInstance.get(`/products/${slug}`);
       if (response.data && response.data.success) {
@@ -67,5 +67,51 @@ export const getProductById = async (slug) => {
    } catch (error) {
       console.error("Error fetching product:", error);
       throw error;
+   }
+}
+
+// add to wishlist
+export const addToWishlist = async (slug) => {
+   try {
+      const response = await axiosInstance.post(`/products/add-to-wishlist`, { slug });
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to add to wishlist");
+      }
+   } catch (error) {
+      if (error.response) {
+         // The request was made and the server 
+         const errorMessage = error.response.data?.message || "Failed to add to wishlist";
+         console.error("Server error adding to wishlist:", errorMessage);
+
+         throw {
+            message: errorMessage,
+            response: error.response
+         };
+      } else if (error.request) {
+         console.error("Network error adding to wishlist:", error.request);
+         throw new Error("Network error. Please check your connection.");
+      } else {
+         console.error("Error adding to wishlist:", error.message);
+         throw error;
+      }
+   }
+}
+
+// add to cart
+export const addTocart = async (productId, quantity = 1) => {
+   try {
+      const response = await axiosInstance.post(`/products/add-to-cart`, { productId, quantity });
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to add to cart");
+      }
+   } catch (error) {
+      return {
+         message: error.message || "Failed to add to cart",
+         response: error.response
+      };
    }
 }

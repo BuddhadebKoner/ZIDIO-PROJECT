@@ -2,11 +2,11 @@ import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tansta
 import { isAuthenticated } from "../api/auth.api";
 import { QUERY_KEYS } from "./queryKeys";
 import { useUser } from "@clerk/clerk-react";
-import { getAddAddress, getExtreamSearch, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
+import { getAddAddress, getCartProducts, getExtreamSearch, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
 import { addProduct } from "../api/admin.api";
-import { getAllCollections, getCollectionById, searchCollections } from "../api/collection.api";
-import { filterProducts, getAllProducts, getProductById, searchProducts } from "../api/product.api";
+import { getAllCollections, getCollectionById, getProductsByCollectionSlug, searchCollections } from "../api/collection.api";
+import { addTocart, addToWishlist, filterProducts, getAllProducts, getProductById, searchProducts } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
 
 export const useIsAuthenticated = () => {
@@ -244,6 +244,63 @@ export const useExtreamSearch = (search) => {
       queryKey: [QUERY_KEYS.EXTREAM_SEARCH, search],
       queryFn: () => getExtreamSearch(search),
       refetchOnWindowFocus: false,
-      enabled: !!search, 
+      enabled: !!search,
    });
 };
+
+export const useGetCollectionProducts = (slug, page = 1, limit = 5) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.COLLECTIONS.GET_COLLECTION_PRODUCTS, slug, page, limit],
+      queryFn: ({ pageParam = 1 }) => getProductsByCollectionSlug(slug, pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      refetchOnWindowFocus: false,
+   });
+}
+
+// add to wishlist
+export const useAddToWishlist = () => {
+   const queryClient = useQueryClient();
+
+   return useMutation({
+      mutationFn: (slug) => addToWishlist(slug),
+      onSuccess: () => {
+         queryClient.invalidateQueries([
+            QUERY_KEYS.AUTH.IS_AUTHENTICATED,
+         ]);
+      },
+      onError: (error) => {
+         const errorMessage = error?.response?.data?.message || "Error adding product to wishlist";
+      },
+   });
+}
+
+// add to cart
+export const useAddToCart = () => {
+   const queryClient = useQueryClient();
+
+   return useMutation({
+      mutationFn: (productId, quantity) => addTocart(productId, quantity),
+      onSuccess: () => {
+         queryClient.invalidateQueries([
+            QUERY_KEYS.AUTH.IS_AUTHENTICATED,
+         ]);
+      },
+      onError: (error) => {
+         const errorMessage = error?.response?.data?.message || "Error adding product to cart";
+      },
+   });
+}
+
+// get cart products
+export const useGetCartProducts = () => {
+   return useQuery({
+      queryKey: [QUERY_KEYS.PRODUCTS.GET_CART_PRODUCTS],
+      queryFn: () => getCartProducts(),
+      refetchOnWindowFocus: false,
+   });
+}

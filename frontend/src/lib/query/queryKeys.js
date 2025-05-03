@@ -10,11 +10,13 @@ export const QUERY_KEYS = {
       GET_ALL_PRODUCTS: 'getAllProducts',
       FILTER_PRODUCTS: 'filterProducts',
       GET_PRODUCT_BY_ID: 'getProductById',
+      GET_CART_PRODUCTS: 'getCartProducts',
    },
    COLLECTIONS: {
       GET_ALL_COLLECTIONS: 'getCollections',
       SEARCH_COLLECTIONS: 'searchCollections',
       GET_COLLECTIONS_BY_ID: 'getCollectionById',
+      GET_COLLECTION_PRODUCTS: 'getCollectionProducts',
    },
    OFFERS: {
       GET_ALL_OFFERS: 'getAllOffers',

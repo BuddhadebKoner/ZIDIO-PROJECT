@@ -144,3 +144,18 @@ export const getExtreamSearch = async (search) => {
       throw error;
    }
 };
+
+// get cart products
+export const getCartProducts = async () => {
+   try {
+      const response = await axiosInstance.get('/user/cart-products');
+
+      if (response.data.success) {
+         return response.data.cartData;
+       }
+      return [];
+   } catch (error) {
+      console.error('Error Fetching Cart Products', error);
+      throw error;
+   }
+};

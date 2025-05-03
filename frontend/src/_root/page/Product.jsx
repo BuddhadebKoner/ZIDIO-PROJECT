@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react'
 import { useParams, Link } from 'react-router-dom'
-// Import components
+
 import ProductImageGallery from '../../components/product/ProductImageGallery'
 import ProductReviews from '../../components/product/ProductReviews'
 import { Heart, ShoppingCart, Minus, Plus, Truck, X } from 'lucide-react'

@@ -53,3 +53,21 @@ export const getCollectionById = async (slug) => {
       throw error;
    }
 }
+
+// get products by collection id
+export const getProductsByCollectionSlug = async (slug, page = 1, limit = 5) => {
+   try {
+      const response = await axiosInstance.get(
+         `/collections/${slug}/products?page=${page}&limit=${limit}`
+      );
+
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to fetch products");
+      }
+   } catch (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+   }
+};

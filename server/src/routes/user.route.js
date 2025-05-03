@@ -1,6 +1,6 @@
 import express from 'express';
 import { userAuth } from '../middlewares/userAuth.middleware.js';
-import { addAddress, extreamSearch, updateAddress, updateAvatar, updateUserDetails } from '../controllers/user.controller.js';
+import { addAddress, extreamSearch, getCartProducts, updateAddress, updateAvatar, updateUserDetails } from '../controllers/user.controller.js';
 import { getHomeContent } from '../controllers/admin.controller.js';
 import { getHomeContentDetails } from '../controllers/public.controller.js';
 
@@ -20,6 +20,8 @@ userRouter.get('/home-content', userAuth, getHomeContent);
 userRouter.get('/home-content-details', getHomeContentDetails);
 // extream search whole database
 userRouter.get('/extream-search', extreamSearch);
+// get cart products
+userRouter.get('/cart-products', userAuth, getCartProducts);
 
 
 export default userRouter;

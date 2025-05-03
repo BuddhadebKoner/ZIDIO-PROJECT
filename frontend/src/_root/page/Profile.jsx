@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { User, ShoppingBag, MapPin, LogOut, ChevronUp, ChevronDown, Camera, Loader2, AlertCircle, X } from 'lucide-react';
+import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
+import { User, ShoppingBag, MapPin, LogOut, ChevronUp, ChevronDown, Camera, Loader2, AlertCircle, X, Star } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { avatars, getAvatarUrl } from '../../utils/constant';
 import { useUpdateAvatar } from '../../lib/query/queriesAndMutation';
@@ -154,11 +154,15 @@ const Profile = () => {
     if (currentUser.avatar) {
       return (
         <div className={`${sizeClasses[size]} rounded-full relative overflow-hidden`}>
-          <img
-            src={getAvatarUrl(currentUser.avatar)}
-            alt="User avatar"
-            className="w-full h-full object-cover"
-          />
+          <Link
+            to={"/profile"}
+          >
+            <img
+              src={getAvatarUrl(currentUser.avatar)}
+              alt="User avatar"
+              className="w-full h-full object-cover"
+            />
+          </Link>
         </div>
       );
     } else {
@@ -213,6 +217,10 @@ const Profile = () => {
                   title: "Address",
                   path: "/profile/address",
                   icon: <MapPin className="w-5 h-5" />
+                }, {
+                  title: "Wishlist",
+                  path: "/profile/wishlist",
+                  icon: <Star className="w-5 h-5" />
                 }
               ].map((item) => (
                 <NavLink

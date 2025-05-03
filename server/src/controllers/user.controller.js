@@ -369,3 +369,166 @@ export const extreamSearch = async (req, res) => {
       });
    }
 };
+
+// get cart products with offer validation
+export const getCartProducts = async (req, res) => { 
+   try {
+      const userId = req.userId;
+      
+      const user = await User.findOne({ clerkId: userId });
+      if (!user) {
+         return res.status(404).json({
+            success: false,
+            message: "User not found"
+         });
+      }
+
+      if (!user.cart || user.cart.length === 0) {
+         return res.status(200).json({
+            success: true,
+            message: "Cart is empty",
+            cartData: {
+               items: [],
+               totalItems: 0,
+               cartTotal: 0,
+               totalProducts: 0
+            }
+         });
+      }
+
+      const cartItems = await User.aggregate([
+         { $match: { _id: user._id } },
+         
+         { $unwind: "$cart" },
+         
+         {
+            $lookup: {
+               from: "products",
+               localField: "cart.productId",
+               foreignField: "_id",
+               as: "productDetails"
+            }
+         },
+         
+         { $unwind: "$productDetails" },
+         {
+            $lookup: {
+               from: "offers",
+               localField: "productDetails.offer",
+               foreignField: "_id",
+               as: "offerDetails"
+            }
+         },
+         
+         {
+            $addFields: {
+               offerDetails: { $arrayElemAt: ["$offerDetails", 0] },
+               quantity: "$cart.quantity"
+            }
+         },
+         
+         {
+            $addFields: {
+               hasValidOffer: {
+                  $cond: {
+                     if: {
+                        $and: [
+                           { $ne: ["$offerDetails", null] },
+                           { $eq: ["$offerDetails.offerStatus", true] },
+                           { $lte: ["$offerDetails.startDate", new Date()] },
+                           { $gte: ["$offerDetails.endDate", new Date()] }
+                        ]
+                     },
+                     then: true,
+                     else: false
+                  }
+               }
+            }
+         },
+         
+         {
+            $addFields: {
+               discountedPrice: {
+                  $cond: {
+                     if: "$hasValidOffer",
+                     then: {
+                        $round: [
+                           {
+                              $subtract: [
+                                 "$productDetails.price",
+                                 {
+                                    $multiply: [
+                                       "$productDetails.price",
+                                       { $divide: ["$offerDetails.discountValue", 100] }
+                                    ]
+                                 }
+                              ]
+                           },
+                           0
+                        ]
+                     },
+                     else: "$productDetails.price"
+                  }
+               }
+            }
+         },
+         
+         {
+            $project: {
+               _id: 0,
+               productId: "$productDetails._id",
+               title: "$productDetails.title",
+               slug: "$productDetails.slug",
+               subTitle: "$productDetails.subTitle",
+               price: "$productDetails.price",
+               quantity: 1,
+               subTotal: { 
+                  $multiply: [
+                     { $cond: { if: "$hasValidOffer", then: "$discountedPrice", else: "$productDetails.price" } },
+                     "$quantity" 
+                  ] 
+               },
+               images: "$productDetails.images",
+               hasValidOffer: 1,
+               discountedPrice: 1,
+               discountValue: {
+                  $cond: {
+                     if: "$hasValidOffer",
+                     then: "$offerDetails.discountValue",
+                     else: 0
+                  }
+               },
+               offerCode: {
+                  $cond: {
+                     if: "$hasValidOffer",
+                     then: "$offerDetails.offerCode",
+                     else: null
+                  }
+               }
+            }
+         }
+      ]);
+
+      const cartTotal = cartItems.reduce((sum, item) => sum + item.subTotal, 0);
+      const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+      return res.status(200).json({
+         success: true,
+         message: "Cart products retrieved successfully",
+         cartData: {
+            items: cartItems,
+            totalItems,
+            cartTotal,
+            totalProducts: cartItems.length
+         }
+      });
+
+   } catch (error) {
+      console.error("Error retrieving cart products:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Internal server error",
+         error: error.message
+      });
+   }
+}
