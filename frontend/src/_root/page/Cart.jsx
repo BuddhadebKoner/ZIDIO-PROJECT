@@ -12,7 +12,7 @@ const Cart = () => {
     isError,
   } = useGetCartProducts();
 
-  console.log("Cart data: ", data);
+  // console.log("Cart data: ", data);
 
   if (isLoading) return (
     <>

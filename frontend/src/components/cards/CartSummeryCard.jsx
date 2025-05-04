@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Shield, Tag, Truck, ChevronDown, ChevronUp, ShoppingBag } from 'lucide-react';
+import { formatIndianCurrency } from '../../utils/amountFormater';
 
 const CartSummaryCard = ({ cartData }) => {
   const [isItemsOpen, setIsItemsOpen] = useState(false);
@@ -75,7 +76,7 @@ const CartSummaryCard = ({ cartData }) => {
           onClick={toggleItems}
           className="w-full flex items-center justify-between py-2 border-b text-left"
         >
-          <div className="flex items-center">
+          <div className="flex items-center cursor-pointer">
             <ShoppingBag size={16} className="mr-2" />
             <span>Items in Cart ({cartData.totalItems})</span>
           </div>
@@ -88,7 +89,7 @@ const CartSummaryCard = ({ cartData }) => {
               <div key={item._id} className="text-sm border-b pb-3">
                 <div className="flex justify-between mb-1">
                   <div className="font-medium text-text">{item.title}</div>
-                  <div className="text-text">₹{(item.price * item.quantity).toFixed(2)}</div>
+                  <div className="text-text">{formatIndianCurrency(item.price * item.quantity)}</div>
                 </div>
                 <div className="flex justify-between text-text-muted">
                   <div className="flex flex-col">
@@ -99,7 +100,7 @@ const CartSummaryCard = ({ cartData }) => {
                     {item.hasDiscount && item.offer && item.offer.active && (
                       <div className="flex flex-col">
                         <span className="line-through text-text-muted">
-                          ₹{(item.originalPrice * item.quantity).toFixed(2)}
+                          {formatIndianCurrency(item.originalPrice * item.quantity)}
                         </span>
                         <span className="text-success text-xs">
                           {item.offer.discountValue}% off
@@ -120,7 +121,7 @@ const CartSummaryCard = ({ cartData }) => {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-text-muted">Total MRP</span>
-            <span className="text-text">₹{summaryData.totalOriginalAmount.toFixed(2)}</span>
+            <span className="text-text">{formatIndianCurrency(summaryData.totalOriginalAmount)}</span>
           </div>
 
           {summaryData.totalSavings > 0 && (
@@ -129,13 +130,13 @@ const CartSummaryCard = ({ cartData }) => {
                 <Tag className="mr-1" size={14} />
                 <span>Discount on Products</span>
               </div>
-              <span>-₹{summaryData.totalSavings.toFixed(2)}</span>
+              <span>-{formatIndianCurrency(summaryData.totalSavings)}</span>
             </div>
           )}
 
           <div className="flex justify-between">
             <span className="text-text-muted">Cart Value</span>
-            <span className="text-text">₹{cartData.cartTotal.toFixed(2)}</span>
+            <span className="text-text">{formatIndianCurrency(cartData.cartTotal)}</span>
           </div>
 
           <div className="flex justify-between">
@@ -146,13 +147,13 @@ const CartSummaryCard = ({ cartData }) => {
             {summaryData.isFreeDelivery ? (
               <span className="text-success">FREE</span>
             ) : (
-              <span className="text-text">₹{summaryData.deliveryCharge.toFixed(2)}</span>
+              <span className="text-text">{formatIndianCurrency(summaryData.deliveryCharge)}</span>
             )}
           </div>
 
           {summaryData.isFreeDelivery && (
             <div className="text-xs text-success italic text-right">
-              Free delivery on orders above ₹1000
+              Free delivery on orders above ₹1,000
             </div>
           )}
 
@@ -160,12 +161,12 @@ const CartSummaryCard = ({ cartData }) => {
 
           <div className="flex justify-between font-semibold">
             <span className="text-text">Order Total</span>
-            <span className="text-text">₹{summaryData.finalTotal.toFixed(2)}</span>
+            <span className="text-text">{formatIndianCurrency(summaryData.finalTotal)}</span>
           </div>
 
           {summaryData.totalSavings > 0 && (
             <div className="bg-primary-950 p-2 rounded text-xs text-success font-medium text-center">
-              You're saving ₹{summaryData.totalSavings.toFixed(2)} ({summaryData.discountPercentage}%) on this order!
+              You're saving {formatIndianCurrency(summaryData.totalSavings)} ({summaryData.discountPercentage}%) on this order!
             </div>
           )}
         </div>
@@ -173,7 +174,7 @@ const CartSummaryCard = ({ cartData }) => {
 
       <button className="w-full py-3 rounded-md bg-primary-600 hover:bg-primary-700 text-bg-white font-medium transition-all flex items-center justify-center">
         <span className="mr-2">Proceed to Checkout</span>
-        <span>₹{summaryData.finalTotal.toFixed(2)}</span>
+        <span>{formatIndianCurrency(summaryData.finalTotal)}</span>
       </button>
 
       <a href="/" className="block text-center text-secondary-500 hover:text-secondary-400 mt-4 transition-all">

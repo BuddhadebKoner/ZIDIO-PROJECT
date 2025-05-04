@@ -173,6 +173,7 @@ export const filterProducts = async (req, res) => {
          slug: 1,
          title: 1,
          subTitle: 1,
+         size: 1,
          description: 1,
          price: 1,
          'images': 1,
@@ -215,6 +216,7 @@ export const filterProducts = async (req, res) => {
             _id: product._id,
             slug: product.slug,
             title: product.title,
+            size: product.size,
             subTitle: product.subTitle || product.description,
             price: finalPrice,
             images: product.images?.slice(0, 2) || [], // Only include first 2 images

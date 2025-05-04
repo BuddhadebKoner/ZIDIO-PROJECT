@@ -22,7 +22,7 @@ const DesktopNavLinks = () => {
    };
 
    const navItems = [
-      { type: 'category', label: 'Shop By Category', path: '/categories' },
+      { type: 'category', label: 'Shop By Category', path: '/category' },
       { type: 'collection', label: 'Shop By Collection', path: '/collections' },
       { type: 'offers', label: 'Offers', path: '/offers', noDropdown: true },
    ];

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from 'react'
 import { useRemoveFromCart, useUpdateCart } from '../../lib/query/queriesAndMutation'
 import { toast } from 'react-toastify'
 import FullPageLoader from '../loaders/FullPageLoader'
+import { formatIndianCurrency } from '../../utils/amountFormater'
 
 const CartProductCard = ({ item }) => {
   if (!item || typeof item !== 'object') {
@@ -180,14 +181,14 @@ const CartProductCard = ({ item }) => {
           <div className="flex items-center mt-3">
             {hasValidOffer ? (
               <>
-                <span className="text-xl font-medium text-text">₹{price}</span>
-                <span className="text-text-muted line-through ml-2">₹{originalPrice}</span>
+                <span className="text-xl font-medium text-text">{formatIndianCurrency(price)}</span>
+                <span className="text-text-muted line-through ml-2">{formatIndianCurrency(originalPrice)}</span>
                 <span className="ml-2 bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded">
                   {discountValue}% OFF
                 </span>
               </>
             ) : (
-              <span className="text-xl font-medium text-text">₹{price}</span>
+              <span className="text-xl font-medium text-text">{formatIndianCurrency(price)}</span>
             )}
           </div>
 
@@ -235,7 +236,7 @@ const CartProductCard = ({ item }) => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <span className="font-semibold text-lg text-text">₹{subTotal}</span>
+            <span className="font-semibold text-lg text-text">{formatIndianCurrency(subTotal)}</span>
 
             {showConfirmation ? (
               <div className="flex items-center space-x-2">
