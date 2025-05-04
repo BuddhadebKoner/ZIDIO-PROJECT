@@ -71,38 +71,43 @@ export const getProductById = async (slug) => {
 }
 
 // add to wishlist
-export const addToWishlist = async (slug) => {
+export const addToWishlist = async (productId) => {
    try {
-      const response = await axiosInstance.post(`/products/add-to-wishlist`, { slug });
+      const response = await axiosInstance.post(`/products/add-to-wishlist`, { productId });
       if (response.data && response.data.success) {
          return response.data;
       } else {
          throw new Error(response.data?.message || "Failed to add to wishlist");
       }
    } catch (error) {
-      if (error.response) {
-         // The request was made and the server 
-         const errorMessage = error.response.data?.message || "Failed to add to wishlist";
-         console.error("Server error adding to wishlist:", errorMessage);
+      return {
+         message: error.message || "Failed to add to wishlist",
+         response: error.response
+      };
+   }
+}
 
-         throw {
-            message: errorMessage,
-            response: error.response
-         };
-      } else if (error.request) {
-         console.error("Network error adding to wishlist:", error.request);
-         throw new Error("Network error. Please check your connection.");
+// remove from wishlist
+export const removeFromWishlist = async (productId) => {
+   try {
+      const response = await axiosInstance.post(`/products/remove-from-wishlist`, { productId });
+      if (response.data && response.data.success) {
+         return response.data;
       } else {
-         console.error("Error adding to wishlist:", error.message);
-         throw error;
+         throw new Error(response.data?.message || "Failed to remove from wishlist");
       }
+   } catch (error) {
+      return {
+         message: error.message || "Failed to remove from wishlist",
+         response: error.response
+      };
    }
 }
 
 // add to cart
-export const addTocart = async (productId, quantity = 1) => {
+export const addToCart = async (data) => {
    try {
-      const response = await axiosInstance.post(`/products/add-to-cart`, { productId, quantity });
+      const response = await axiosInstance.post(`/products/add-to-cart`, data);
       if (response.data && response.data.success) {
          return response.data;
       } else {
@@ -111,6 +116,40 @@ export const addTocart = async (productId, quantity = 1) => {
    } catch (error) {
       return {
          message: error.message || "Failed to add to cart",
+         response: error.response
+      };
+   }
+}
+
+// remove from cart
+export const removeFromCart = async (productId) => {
+   try {
+      const response = await axiosInstance.post(`/products/remove-from-cart`, { productId });
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to remove from cart");
+      }
+   } catch (error) {
+      return {
+         message: error.message || "Failed to remove from cart",
+         response: error.response
+      };
+   }
+}
+
+// update cart quantity and size
+export const updateCart = async (data) => { 
+   try {
+      const response = await axiosInstance.post(`/products/update-cart`, data);
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to update cart");
+      }
+   } catch (error) {
+      return {
+         message: error.message || "Failed to update cart",
          response: error.response
       };
    }

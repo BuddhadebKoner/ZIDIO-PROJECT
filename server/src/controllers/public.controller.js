@@ -154,6 +154,7 @@ export const getHomeContentDetails = async (req, res) => {
                                        title: "$$prod.title",
                                        price: "$$prod.price",
                                        slug: "$$prod.slug",
+                                       size: "$$prod.size",
                                        image: { $arrayElemAt: ["$$prod.images", 0] },
                                        offer: {
                                           $cond: {
@@ -239,6 +240,7 @@ export const getHomeContentDetails = async (req, res) => {
                                        subTitle: "$$prod.subTitle",
                                        price: "$$prod.price",
                                        slug: "$$prod.slug",
+                                       size: "$$prod.size",
                                        isUnderHotDeals: "$$prod.isUnderHotDeals",
                                        images: { $slice: ["$$prod.images", 2] },
                                        offer: {
@@ -275,7 +277,7 @@ export const getHomeContentDetails = async (req, res) => {
                            $arrayElemAt: [
                               {
                                  $filter: {
-                                    input: "$exclusiveProductsOffers", 
+                                    input: "$exclusiveProductsOffers",
                                     as: "o",
                                     cond: {
                                        $let: {
@@ -373,6 +375,7 @@ export const getHomeContentDetails = async (req, res) => {
                                        title: "$$prod.title",
                                        price: "$$prod.price",
                                        slug: "$$prod.slug",
+                                       size: "$$prod.size",
                                        image: { $arrayElemAt: ["$$prod.images", 0] },
                                        offer: {
                                           $cond: {

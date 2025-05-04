@@ -169,6 +169,7 @@ export const filterProducts = async (req, res) => {
 
       // Only select fields needed for the ProductCard component
       const selectedFields = {
+         _id: 1,
          slug: 1,
          title: 1,
          subTitle: 1,
@@ -185,7 +186,7 @@ export const filterProducts = async (req, res) => {
          .select(selectedFields)
          .populate({
             path: 'offer',
-            select: 'offerStatus discountValue startDate endDate'
+            select: 'offerStatus discountValue startDate endDate _id'
          })
          .skip(skip)
          .limit(limit)
@@ -211,6 +212,7 @@ export const filterProducts = async (req, res) => {
 
          // Return only necessary fields with limited images
          return {
+            _id: product._id,
             slug: product.slug,
             title: product.title,
             subTitle: product.subTitle || product.description,
@@ -386,7 +388,7 @@ export const getProductById = async (req, res) => {
 export const addTowishlist = async (req, res) => {
    try {
       const userId = req.userId;
-      const { slug } = req.body;
+      const { productId } = req.body;
 
       if (!userId) {
          return res.status(401).json({
@@ -395,14 +397,14 @@ export const addTowishlist = async (req, res) => {
          });
       }
 
-      if (!slug) {
+      if (!productId) {
          return res.status(400).json({
             success: false,
-            message: "Product slug is required.",
+            message: "Product ID is required.",
          });
       }
 
-      const product = await Product.findOne({ slug });
+      const product = await Product.findById(productId);
       if (!product) {
          return res.status(404).json({
             success: false,
@@ -452,14 +454,90 @@ export const addTowishlist = async (req, res) => {
    }
 };
 
+export const removeFromWishlist = async (req, res) => {
+   try {
+      const userId = req.userId;
+      const { productId } = req.body;
+
+      // Authentication validation
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "User not authenticated.",
+         });
+      }
+
+      // Input validation
+      if (!productId) {
+         return res.status(400).json({
+            success: false,
+            message: "Product ID is required.",
+         });
+      }
+
+      // Find product by ID
+      const product = await Product.findById(productId);
+      if (!product) {
+         return res.status(404).json({
+            success: false,
+            message: "Product not found.",
+         });
+      }
+
+      // Find user
+      const user = await User.findOne({ clerkId: userId });
+      if (!user) {
+         return res.status(404).json({
+            success: false,
+            message: "User not found.",
+         });
+      }
+
+      // Initialize wishlist if it doesn't exist
+      if (!user.wishlist) {
+         user.wishlist = [];
+         return res.status(400).json({
+            success: false,
+            message: "Wishlist is already empty.",
+         });
+      }
+
+      // Check if product is in wishlist
+      const productInWishlist = user.wishlist.some(id => id.equals(product._id));
+
+      if (!productInWishlist) {
+         return res.status(400).json({
+            success: false,
+            message: "Product is not in your wishlist.",
+         });
+      }
+
+      // Remove product from wishlist
+      user.wishlist = user.wishlist.filter(id => !id.equals(product._id));
+      await user.save();
+
+      return res.status(200).json({
+         success: true,
+         message: "Product removed from wishlist successfully",
+         inWishlist: false
+      });
+   } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Internal Server Error",
+      });
+   }
+};
+
 export const addToCart = async (req, res) => {
    try {
       const userId = req.userId;
-      const { productId, quantity = 1 } = req.body;
+      const { productId, quantity = 1, size } = req.body;
 
       // Validate request
       if (!userId) {
-         return res.status(401).json({ 
+         return res.status(401).json({
             success: false,
             message: "User not authenticated"
          });
@@ -478,6 +556,15 @@ export const addToCart = async (req, res) => {
          return res.status(400).json({
             success: false,
             message: "Quantity must be a positive number"
+         });
+      }
+
+      // Validate size
+      const validSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+      if (!validSizes.includes(size)) {
+         return res.status(400).json({
+            success: false,
+            message: "Invalid size"
          });
       }
 
@@ -512,7 +599,8 @@ export const addToCart = async (req, res) => {
       if (existingCartItemIndex >= 0) {
          // Update quantity if product already in cart
          user.cart[existingCartItemIndex].quantity = quantityNum;
-         
+         user.cart[existingCartItemIndex].size = size;
+
          await user.save();
          return res.status(200).json({
             success: true,
@@ -523,9 +611,10 @@ export const addToCart = async (req, res) => {
          // Add new product to cart
          user.cart.push({
             productId,
-            quantity: quantityNum
+            quantity: quantityNum,
+            size: size
          });
-         
+
          await user.save();
          return res.status(201).json({
             success: true,
@@ -535,6 +624,184 @@ export const addToCart = async (req, res) => {
       }
    } catch (error) {
       console.error("Error adding to cart:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Internal Server Error",
+         error: error.message
+      });
+   }
+};
+
+// remove from cart
+export const removeFromCart = async (req, res) => {
+   try {
+      const userId = req.userId;
+      const { productId } = req.body;
+
+      // Validate request
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "User not authenticated"
+         });
+      }
+
+      if (!productId) {
+         return res.status(400).json({
+            success: false,
+            message: "Product ID is required"
+         });
+      }
+
+      // Check if product exists
+      const product = await Product.findById(productId);
+      if (!product) {
+         return res.status(404).json({
+            success: false,
+            message: "Product not found"
+         });
+      }
+
+      // Find user and update cart
+      const user = await User.findOne({ clerkId: userId });
+      if (!user) {
+         return res.status(404).json({
+            success: false,
+            message: "User not found"
+         });
+      }
+
+      // Check if cart exists
+      if (!user.cart || user.cart.length === 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Cart is already empty"
+         });
+      }
+
+      // Check if product is in cart
+      const existingCartItemIndex = user.cart.findIndex(
+         item => item.productId && item.productId.toString() === productId
+      );
+
+      if (existingCartItemIndex < 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Product is not in your cart"
+         });
+      }
+
+      // Remove product from cart
+      user.cart.splice(existingCartItemIndex, 1);
+      await user.save();
+
+      return res.status(200).json({
+         success: true,
+         message: "Product removed from cart successfully",
+         cart: user.cart
+      });
+   }
+   catch (error) {
+      console.error("Error removing from cart:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Internal Server Error",
+         error: error.message
+      });
+   }
+}
+
+// update cart quantity and size
+export const updateCart = async (req, res) => {
+   try {
+      const userId = req.userId;
+      const { productId, quantity, size } = req.body;
+
+      // Validate request
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "User not authenticated"
+         });
+      }
+
+      if (!productId) {
+         return res.status(400).json({
+            success: false,
+            message: "Product ID is required"
+         });
+      }
+
+      // Validate quantity is a positive number
+      const quantityNum = Number(quantity);
+      if (isNaN(quantityNum) || quantityNum <= 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Quantity must be a positive number"
+         });
+      }
+
+      // Validate size
+      const validSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+      if (!validSizes.includes(size)) {
+         return res.status(400).json({
+            success: false,
+            message: "Invalid size"
+         });
+      }
+
+      // Check if product exists
+      const product = await Product.findById(productId);
+      if (!product) {
+         return res.status(404).json({
+            success: false,
+            message: "Product not found"
+         });
+      }
+
+      // Find user and update cart
+      const user = await User.findOne({ clerkId: userId });
+      if (!user) {
+         return res.status(404).json({
+            success: false,
+            message: "User not found"
+         });
+      }
+
+      // Check if cart exists
+      if (!user.cart || user.cart.length === 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Cart is already empty"
+         });
+      }
+
+      // Check if product is in cart
+      const existingCartItemIndex = user.cart.findIndex(
+         item => item.productId && item.productId.toString() === productId
+      );
+
+      if (existingCartItemIndex < 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Product is not in your cart"
+         });
+      }
+
+      // Update product in cart
+      user.cart[existingCartItemIndex].quantity = quantityNum;
+      user.cart[existingCartItemIndex].size = size;
+
+      await user.save();
+
+      return res.status(200).
+      json({
+         success: true,
+         message: "Cart updated successfully",
+         cart: user.cart
+      });
+   } catch (error) {
+      console.error("Error updating cart:", error);
       return res.status(500).json({
          success: false,
          message: "Internal Server Error",

@@ -9,7 +9,7 @@ const AccountWishlist = () => {
   const { currentUser, isLoading } = useAuth();
   const [wishlist] = useState(currentUser?.wishlist || []);
 
-  console.log('wishlist', wishlist);
+  // console.log('wishlist', wishlist);
 
   if (isLoading) {
     return <FullPageLoader />

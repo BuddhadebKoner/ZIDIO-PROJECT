@@ -52,6 +52,7 @@ const ProfileDropdown = () => {
       { label: "Profile", path: "/profile" },
       ...(isAdmin ? [{ label: "Dashboard", path: "/admin" }] : []),
       { label: "Orders", path: "/profile/orders" },
+      { label: "Wishlist", path: "/profile/wishlist" },
       { label: "Your Cart", path: "/cart" },
    ];
 

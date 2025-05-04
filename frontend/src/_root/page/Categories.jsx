@@ -166,6 +166,8 @@ const Categories = () => {
     isFetchingNextPage
   } = useFilterProducts(filters);
 
+  console.log(data);
+
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -346,7 +348,7 @@ const Categories = () => {
         </div>
       )}
 
-      <div className="container mx-auto px-4 md:px-8 lg:px-30 py-4 mt-2">
+      <div className="container mt-2">
         {isLoading && allProducts.length === 0 ? (
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>

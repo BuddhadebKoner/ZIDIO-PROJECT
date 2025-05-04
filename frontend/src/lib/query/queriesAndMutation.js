@@ -6,7 +6,7 @@ import { getAddAddress, getCartProducts, getExtreamSearch, getHomeContentDetails
 import { toast } from "react-toastify";
 import { addProduct } from "../api/admin.api";
 import { getAllCollections, getCollectionById, getProductsByCollectionSlug, searchCollections } from "../api/collection.api";
-import { addTocart, addToWishlist, filterProducts, getAllProducts, getProductById, searchProducts } from "../api/product.api";
+import { addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
 
 export const useIsAuthenticated = () => {
@@ -220,6 +220,8 @@ export const useGetHomeContent = () => {
       queryKey: [QUERY_KEYS.HOME.GET_HOME_CONTENT],
       queryFn: () => getHomeContentDetails(),
       refetchOnWindowFocus: false,
+      // meoised for 10 minutes
+      staleTime: 10 * 60 * 1000,
    });
 }
 
@@ -267,7 +269,7 @@ export const useAddToWishlist = () => {
    const queryClient = useQueryClient();
 
    return useMutation({
-      mutationFn: (slug) => addToWishlist(slug),
+      mutationFn: (productId) => addToWishlist(productId),
       onSuccess: () => {
          queryClient.invalidateQueries([
             QUERY_KEYS.AUTH.IS_AUTHENTICATED,
@@ -279,12 +281,29 @@ export const useAddToWishlist = () => {
    });
 }
 
+// remove from wishlist
+export const useRemoveFromWishlist = () => {
+   const queryClient = useQueryClient();
+
+   return useMutation({
+      mutationFn: (productId) => removeFromWishlist(productId),
+      onSuccess: () => {
+         queryClient.invalidateQueries([
+            QUERY_KEYS.AUTH.IS_AUTHENTICATED,
+         ]);
+      },
+      onError: (error) => {
+         const errorMessage = error?.response?.data?.message || "Error removing product from wishlist";
+      },
+   });
+}
+
 // add to cart
 export const useAddToCart = () => {
    const queryClient = useQueryClient();
 
    return useMutation({
-      mutationFn: (productId, quantity) => addTocart(productId, quantity),
+      mutationFn: (productId, quantity, size) => addToCart(productId, quantity, size),
       onSuccess: () => {
          queryClient.invalidateQueries([
             QUERY_KEYS.AUTH.IS_AUTHENTICATED,
@@ -296,11 +315,51 @@ export const useAddToCart = () => {
    });
 }
 
+// remove from cart
+export const useRemoveFromCart = () => {
+   const queryClient = useQueryClient();
+
+   return useMutation({
+      mutationFn: (productId) => removeFromCart(productId),
+      onSuccess: () => {
+         queryClient.invalidateQueries([
+            QUERY_KEYS.AUTH.IS_AUTHENTICATED,
+         ]);
+      },
+      onError: (error) => {
+         const errorMessage = error?.response?.data?.message || "Error removing product from cart";
+      },
+   });
+}
+
+// update cart quantity
+export const useUpdateCartQuantity = () => {
+
+}
+
 // get cart products
 export const useGetCartProducts = () => {
    return useQuery({
       queryKey: [QUERY_KEYS.PRODUCTS.GET_CART_PRODUCTS],
       queryFn: () => getCartProducts(),
       refetchOnWindowFocus: false,
+   });
+}
+
+// update cart quantity and size
+export const useUpdateCart = () => {
+   const queryClient = useQueryClient();
+
+   return useMutation({
+      mutationFn: (data) => updateCart(data),
+      onSuccess: () => {
+         queryClient.invalidateQueries([
+            QUERY_KEYS.PRODUCTS.GET_CART_PRODUCTS,
+            QUERY_KEYS.AUTH.IS_AUTHENTICATED,
+         ]);
+      },
+      onError: (error) => {
+         const errorMessage = error?.response?.data?.message || "Error updating cart";
+      },
    });
 }

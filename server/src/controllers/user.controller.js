@@ -398,9 +398,7 @@ export const getCartProducts = async (req, res) => {
 
       const cartItems = await User.aggregate([
          { $match: { _id: user._id } },
-         
          { $unwind: "$cart" },
-         
          {
             $lookup: {
                from: "products",
@@ -409,7 +407,6 @@ export const getCartProducts = async (req, res) => {
                as: "productDetails"
             }
          },
-         
          { $unwind: "$productDetails" },
          {
             $lookup: {
@@ -419,14 +416,12 @@ export const getCartProducts = async (req, res) => {
                as: "offerDetails"
             }
          },
-         
          {
             $addFields: {
                offerDetails: { $arrayElemAt: ["$offerDetails", 0] },
                quantity: "$cart.quantity"
             }
          },
-         
          {
             $addFields: {
                hasValidOffer: {
@@ -445,10 +440,9 @@ export const getCartProducts = async (req, res) => {
                }
             }
          },
-         
          {
             $addFields: {
-               discountedPrice: {
+               finalPrice: {
                   $cond: {
                      if: "$hasValidOffer",
                      then: {
@@ -472,36 +466,35 @@ export const getCartProducts = async (req, res) => {
                }
             }
          },
-         
          {
             $project: {
-               _id: 0,
-               productId: "$productDetails._id",
-               title: "$productDetails.title",
+               _id: "$productDetails._id",
                slug: "$productDetails.slug",
-               subTitle: "$productDetails.subTitle",
-               price: "$productDetails.price",
+               title: "$productDetails.title",
+               size: "$productDetails.size",
+               subTitle: { 
+                  $cond: { 
+                     if: { $ne: ["$productDetails.subTitle", null] }, 
+                     then: "$productDetails.subTitle", 
+                     else: "$productDetails.description" 
+                  } 
+               },
+               price: "$finalPrice",
+               originalPrice: "$productDetails.price",
                quantity: 1,
-               subTotal: { 
-                  $multiply: [
-                     { $cond: { if: "$hasValidOffer", then: "$discountedPrice", else: "$productDetails.price" } },
-                     "$quantity" 
-                  ] 
-               },
-               images: "$productDetails.images",
-               hasValidOffer: 1,
-               discountedPrice: 1,
-               discountValue: {
+               selectedSize: "$cart.size",
+               subTotal: { $multiply: ["$finalPrice", "$quantity"] },
+               images: { $slice: ["$productDetails.images", 0, 1] },
+               isNewArrival: "$productDetails.isNewArrival",
+               isUnderHotDeals: "$productDetails.isUnderHotDeals",
+               hasDiscount: "$hasValidOffer",
+               offer: {
                   $cond: {
                      if: "$hasValidOffer",
-                     then: "$offerDetails.discountValue",
-                     else: 0
-                  }
-               },
-               offerCode: {
-                  $cond: {
-                     if: "$hasValidOffer",
-                     then: "$offerDetails.offerCode",
+                     then: {
+                        discountValue: "$offerDetails.discountValue",
+                        active: true
+                     },
                      else: null
                   }
                }

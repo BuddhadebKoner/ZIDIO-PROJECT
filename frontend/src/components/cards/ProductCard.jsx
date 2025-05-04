@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react'
 import Card from '../shared/Card'
 import CardFooter from '../shared/CardFooter'
 import AddToCart from '../buttons/AddToCart'
-import { Heart, LoaderCircle, ShoppingCart } from 'lucide-react'
+import { Heart, LoaderCircle, ShoppingCart, Check } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { useAddToWishlist, useAddToCart } from '../../lib/query/queriesAndMutation'
 import { toast } from 'react-toastify'
+import { useAddToCart, useAddToWishlist, useRemoveFromWishlist } from '../../lib/query/queriesAndMutation'
 
 const ProductCard = ({ product }) => {
    const navigate = useNavigate();
@@ -14,42 +14,67 @@ const ProductCard = ({ product }) => {
    const [isHeartActive, setIsHeartActive] = useState(false);
    const [isInCart, setIsInCart] = useState(false);
 
+   const { currentUser } = useAuth();
+
+   // console.log(currentUser.cart, currentUser.wishlist, product);
+
    const {
       mutate: addToWishlist,
       isLoading: isAddingToWishlist,
-      isError: isAddingToWishlistError,
-      isSuccess: isAddingToWishlistSuccess,
-   } = useAddToWishlist()
+   } = useAddToWishlist({
+      onSuccess: () => {
+         setIsHeartActive(true);
+         toast.success("Added to wishlist");
+      },
+      onError: () => {
+         toast.error("Failed to add to wishlist");
+      }
+   });
+
+   const {
+      mutate: removeFromWishlist,
+      isLoading: isRemovingFromWishlist,
+   } = useRemoveFromWishlist({
+      onSuccess: () => {
+         setIsHeartActive(false);
+         toast.success("Removed from wishlist");
+      },
+      onError: () => {
+         toast.error("Failed to remove from wishlist");
+      }
+   });
 
    const {
       mutate: addToCart,
       isLoading: isAddingToCart,
       isError: isAddingToCartError,
       isSuccess: isAddingToCartSuccess,
-   } = useAddToCart()
-
-   const { currentUser, isLoading } = useAuth()
+   } = useAddToCart();
 
    useEffect(() => {
-      if (currentUser && currentUser.wishlist && product) {
+      if (currentUser?.wishlist && product) {
          const isInWishlist = currentUser.wishlist.some(item =>
             item === product._id || item === product.slug ||
             (typeof item === 'object' && (item._id === product._id || item.slug === product.slug))
          );
          setIsHeartActive(isInWishlist);
       }
-   }, [currentUser, product]);
+   }, [currentUser?.wishlist, product]);
 
    useEffect(() => {
-      if (isAddingToWishlistSuccess) {
-         setIsHeartActive(prev => !prev);
+      if (currentUser?.cart && product) {
+         const cartItem = currentUser.cart.find(item => item.productId === product._id);
+         if (cartItem) {
+            setIsInCart(true);
+         } else {
+            setIsInCart(false);
+         }
       }
-   }, [isAddingToWishlistSuccess]);
+   }, [currentUser?.cart, product]);
 
    useEffect(() => {
       if (isAddingToCartSuccess) {
          setIsInCart(true);
-         toast.success("Product added to cart");
       }
    }, [isAddingToCartSuccess]);
 
@@ -58,15 +83,6 @@ const ProductCard = ({ product }) => {
          toast.error("Failed to add to cart");
       }
    }, [isAddingToCartError]);
-
-   useEffect(() => {
-      if (currentUser && currentUser.cart && product) {
-         const isProductInCart = currentUser.cart.some(item =>
-            item.productId === product._id
-         );
-         setIsInCart(isProductInCart);
-      }
-   }, [currentUser, product]);
 
    const firstImage = product.images && product.images.length > 0
       ? product.images[0].imageUrl
@@ -93,17 +109,21 @@ const ProductCard = ({ product }) => {
       e.preventDefault();
       e.stopPropagation();
 
-      if (isAddingToWishlist) return;
+      if (isAddingToWishlist || isRemovingFromWishlist) return;
 
       if (!currentUser) {
-         toast.error("Please login to add items to your wishlist");
+         toast.error("Please login to manage your wishlist");
          return;
       }
 
       try {
-         addToWishlist(product.slug);
+         if (isHeartActive) {
+            removeFromWishlist(product._id);
+         } else {
+            addToWishlist(product._id);
+         }
       } catch (error) {
-         toast.error("Failed to add to wishlist");
+         toast.error("Failed to update wishlist");
       }
    };
 
@@ -119,7 +139,45 @@ const ProductCard = ({ product }) => {
       if (isInCart) {
          navigate('/cart');
       } else {
-         addToCart(product._id);
+         // Get the first size from the product array if available
+         let sizeToSend = null;
+         if (product?.size?.length > 0) {
+            const firstSize = product.size[0];
+            sizeToSend = typeof firstSize === 'object' ? firstSize.value : firstSize;
+            sizeToSend = sizeToSend.toString();
+         }
+
+         addToCart({ productId: product._id, quantity: 1, size: sizeToSend });
+      }
+   };
+
+   const getCartButtonContent = () => {
+      if (isAddingToCart) {
+         return (
+            <>
+               <LoaderCircle className="w-4 h-4 animate-spin" />
+               <span>Adding...</span>
+            </>
+         );
+      } else if (isInCart) {
+         return (
+            <>
+               <Link
+                  to={`/cart`}
+                  className='cursor-pointer flex items-center gap-2'
+               >
+                  <Check className="w-4 h-4" />
+                  <span>View in Cart</span>
+               </Link>
+            </>
+         );
+      } else {
+         return (
+            <>
+               <ShoppingCart className="w-4 h-4" />
+               <span>Add to Cart</span>
+            </>
+         );
       }
    };
 
@@ -140,7 +198,6 @@ const ProductCard = ({ product }) => {
             <Link
                to={`/product/${product.slug}`}>
                <div className="relative w-full h-[450px] sm:h-[400px] md:h-[400px] overflow-hidden">
-
                   <img
                      src={firstImage}
                      alt={`${product.title} - view 1`}
@@ -160,46 +217,51 @@ const ProductCard = ({ product }) => {
                </div>
             </Link>
 
-            {product.isUnderHotDeals && (
-               <span className="absolute top-3 left-3 text-green-500 text-xs font-medium bg-white px-2 py-1 rounded z-10 
-                              shadow-md backdrop-blur-sm">
-                  Hot Deal
-               </span>
-            )}
+            <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
+               {product.isUnderHotDeals && (
+                  <span className="text-green-500 text-xs font-medium bg-white px-2 py-1 rounded shadow-md backdrop-blur-sm">
+                     Hot Deal
+                  </span>
+               )}
 
-            <div className="absolute top-3 right-3 z-10">
-               {isAddingToWishlist ? (
-                  <div className="w-8 h-8 rounded-full bg-gray-900/80 backdrop-blur-sm flex items-center justify-center">
-                     <LoaderCircle className='w-4 h-4 text-primary-500 animate-spin' />
-                  </div>
-               ) : (
-                  <button
-                     className="bg-gray-900/80 hover:bg-gray-900 text-white backdrop-blur-sm
-                              w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-300
-                              transform hover:scale-110 active:scale-90"
-                     onClick={toggleHeart}
-                  >
-                     <Heart className={`w-4 h-4 transition-colors duration-300 ${isHeartActive ? 'fill-primary-500 text-primary-500' : 'text-white'}`} />
-                  </button>
+               {product.isNewArrival && (
+                  <span className="text-blue-500 text-xs font-medium bg-white px-2 py-1 rounded shadow-md backdrop-blur-sm">
+                     New
+                  </span>
                )}
             </div>
 
+            <div className="absolute top-3 right-3 z-10">
+               <button
+                  className={`${isAddingToWishlist || isRemovingFromWishlist ? 'bg-gray-900/90' : 'bg-gray-900/80 hover:bg-gray-900'} 
+                           text-white backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center 
+                           transition-all duration-300 transform ${isAddingToWishlist || isRemovingFromWishlist ? '' : 'hover:scale-110 active:scale-90'}`}
+                  onClick={toggleHeart}
+                  disabled={isAddingToWishlist || isRemovingFromWishlist}
+               >
+                  {(isAddingToWishlist || isRemovingFromWishlist) ? (
+                     <LoaderCircle className="w-4 h-4 text-primary-500 animate-spin" />
+                  ) : (
+                     <Heart
+                        className={`w-4 h-4 transition-colors duration-300 
+                                 ${isHeartActive ? 'fill-primary-500 text-primary-500' : 'text-white'}`}
+                     />
+                  )}
+               </button>
+            </div>
             <div className={`absolute bottom-4 left-0 right-0 flex justify-center transition-all duration-300 ease-in-out 
-                          transform ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+                          transform ${isHovered || isInCart ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
                <AddToCart
                   className={`${isInCart
                      ? 'bg-green-500 hover:bg-green-600'
                      : 'bg-primary-500 hover:bg-primary-600'} 
-                     text-sm px-4 py-2 rounded-full font-medium shadow-md transition-all duration-300 flex items-center gap-1.5`}
+                     text-sm px-5 py-2 rounded-full font-medium shadow-md transition-all duration-300 
+                     flex items-center gap-2 text-white min-w-[140px] justify-center
+                     ${isAddingToCart ? 'opacity-90 cursor-wait' : ''}`}
                   onPress={handleCartAction}
                   disabled={isAddingToCart}
                >
-                  {isAddingToCart ? (
-                     <LoaderCircle className="w-4 h-4 animate-spin mr-1" />
-                  ) : (
-                     <ShoppingCart className="w-4 h-4" />
-                  )}
-                  {isAddingToCart ? 'Adding...' : isInCart ? 'View in Cart' : 'Add to Cart'}
+                  {getCartButtonContent()}
                </AddToCart>
             </div>
          </div>
@@ -221,9 +283,12 @@ const ProductCard = ({ product }) => {
                   <span className="text-gray-100 font-semibold text-xs sm:text-sm">₹{product.price}</span>
                )}
 
-               <div className="flex gap-1.5 ml-auto">
-                  {product.isNewArrival && (
-                     <span className="text-blue-500 text-xs font-medium bg-white px-1.5 py-0.5 rounded">New</span>
+               <div className="ml-auto">
+                  {isInCart && (
+                     <span className="text-xs text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Check className="w-3 h-3" />
+                        <span className="hidden sm:inline">In Cart</span>
+                     </span>
                   )}
                </div>
             </div>

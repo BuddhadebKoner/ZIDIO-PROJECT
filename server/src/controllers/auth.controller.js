@@ -52,7 +52,78 @@ export const isAuthenticated = async (req, res) => {
                from: "products",
                let: { wishlistIds: "$wishlist" },
                pipeline: [
-                  { $match: { $expr: { $in: ["$_id", "$$wishlistIds"] } } }
+                  { $match: { $expr: { $in: ["$_id", "$$wishlistIds"] } } },
+                  // Lookup offers for each product
+                  {
+                     $lookup: {
+                        from: "offers",
+                        localField: "offer",
+                        foreignField: "_id",
+                        as: "offerDetails"
+                     }
+                  },
+                  {
+                     $addFields: {
+                        offerDetails: { $arrayElemAt: ["$offerDetails", 0] },
+                        // Limit images to first 2
+                        images: { $slice: ["$images", 2] }
+                     }
+                  },
+                  {
+                     $addFields: {
+                        isOfferActive: {
+                           $cond: [
+                              { $eq: ["$offerDetails", null] },
+                              false,
+                              {
+                                 $and: [
+                                    "$offerDetails.offerStatus",
+                                    { $lte: ["$offerDetails.startDate", new Date()] },
+                                    { $gte: ["$offerDetails.endDate", new Date()] }
+                                 ]
+                              }
+                           ]
+                        },
+                        finalPrice: {
+                           $cond: [
+                              {
+                                 $and: [
+                                    { $ne: ["$offerDetails", null] },
+                                    "$offerDetails.offerStatus",
+                                    { $lte: ["$offerDetails.startDate", new Date()] },
+                                    { $gte: ["$offerDetails.endDate", new Date()] }
+                                 ]
+                              },
+                              { $subtract: ["$price", { $multiply: ["$price", { $divide: ["$offerDetails.discountValue", 100] }] }] },
+                              "$price"
+                           ]
+                        }
+                     }
+                  },
+                  {
+                     $project: {
+                        _id: 1,
+                        slug: 1,
+                        title: 1,
+                        size: 1,
+                        subTitle: { $ifNull: ["$subTitle", "$description"] },
+                        price: "$finalPrice",
+                        images: 1,
+                        isNewArrival: 1,
+                        isUnderHotDeals: 1,
+                        hasDiscount: { $ne: ["$offerDetails", null] },
+                        offer: {
+                           $cond: [
+                              { $eq: ["$offerDetails", null] },
+                              null,
+                              {
+                                 discountValue: "$offerDetails.discountValue",
+                                 active: "$isOfferActive"
+                              }
+                           ]
+                        }
+                     }
+                  }
                ],
                as: "wishlistDetails"
             }
