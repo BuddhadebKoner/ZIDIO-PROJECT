@@ -4,6 +4,7 @@ import { Offer } from "../models/offer.model.js";
 import { sanitizedCollection, sanitizedOffer, sanitizedProduct } from "../utils/checkValidation.js";
 import { HomeContent } from "../models/homecontent.model.js";
 import { deleteFromCloudinary } from "../utils/cloudinary.js";
+import { Inventory } from "../models/inventory.model.js";
 
 export const addProduct = async (req, res) => {
    try {
@@ -48,6 +49,41 @@ export const addProduct = async (req, res) => {
 
       const newProduct = new Product(sanitizedProductData);
       const savedProduct = await newProduct.save();
+
+      const defaultSize = ["S", "M", "L", "XL", "XXL"];
+
+      // make a copy of the product in inventory
+      const newInventory = await Inventory.create({
+         productId: savedProduct._id,
+         stocks: defaultSize.map(size => ({
+            size: size,
+            quantity: 0
+         })),
+         totalQuantity: 0
+      });
+
+      if (!newInventory) {
+         return res.status(400).json({
+            success: false,
+            message: "Failed to save product inventory",
+         });
+      }
+
+      // update product with inventory id
+      const updatedProduct = await Product.findByIdAndUpdate(
+         savedProduct._id,
+         { inventory: newInventory._id },
+         { new: true }
+      );
+
+      if (!updatedProduct) {
+         // Clean up the created inventory if product update fails
+         await Inventory.findByIdAndDelete(newInventory._id);
+         return res.status(400).json({
+            success: false,
+            message: "Failed to update product with inventory ID",
+         });
+      }
 
       return res.status(201).json({
          success: true,

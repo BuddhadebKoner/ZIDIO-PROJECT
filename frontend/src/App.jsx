@@ -13,8 +13,8 @@ import AdminLayout from "./_admin/AdminLayout";
 import AuthCallback from "./_auth/page/AuthCallback";
 
 // pages
-import { AccountDetails, AccountWishlist, Address, Cart, Categories, Collections, Home, Offers, Orders, Product, Profile, Search, SosCallBack } from "./_root/page";
-import { AdminAddCollection, AdminAddOffer, AdminAddProduct, AdminCategory, AdminCollection, AdminCustomers, AdminDashboard, AdminOffer, AdminOrders, AdminProduct, AdminReviews, AdminSettings, AdminUpdateCollection, AdminUpdateOffer, AdminUpdateProduct } from "./_admin/page";
+import { AccountDetails, AccountPaymentDetails, AccountWishlist, Address, Cart, Categories, Collections, Home, Offers, Orders, Product, Profile, Search, SosCallBack } from "./_root/page";
+import { AdminAddCollection, AdminAddOffer, AdminAddProduct, AdminCategory, AdminCollection, AdminCustomers, AdminDashboard, AdminInventory, AdminOffer, AdminOrders, AdminProduct, AdminReviews, AdminSettings, AdminUpdateCollection, AdminUpdateOffer, AdminUpdateProduct } from "./_admin/page";
 
 export const SmoothScrollContext = createContext();
 
@@ -139,6 +139,7 @@ const App = () => {
             <Route path="/profile/address" element={<Address />} />
             <Route path="/profile/account-details" element={<AccountDetails />} />
             <Route path="/profile/wishlist" element={<AccountWishlist />} />
+            <Route path="/profile/payment-details" element={<AccountPaymentDetails />} />
           </Route>
           <Route path="/search" element={<Search />} />
           <Route path="/product/:slug" element={<Product />} />
@@ -165,6 +166,8 @@ const App = () => {
           <Route path="/admin/add-offer" element={<AdminAddOffer />} />
           {/* admin settings */}
           <Route path="/admin/settings" element={<AdminSettings />} />
+          {/* inventory manage */}
+          <Route path="/admin/inventory" element={<AdminInventory />} />
           {/* orders */}
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/orders/:slug" element={<AdminOrders />} />

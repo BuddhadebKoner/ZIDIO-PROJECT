@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
-import { User, ShoppingBag, MapPin, LogOut, ChevronUp, ChevronDown, Camera, Loader2, AlertCircle, X, Star } from 'lucide-react';
+import { User, ShoppingBag, MapPin, LogOut, ChevronUp, ChevronDown, Camera, Loader2, AlertCircle, X, Star, CreditCard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { avatars, getAvatarUrl } from '../../utils/constant';
 import { useUpdateAvatar } from '../../lib/query/queriesAndMutation';
@@ -217,10 +217,16 @@ const Profile = () => {
                   title: "Address",
                   path: "/profile/address",
                   icon: <MapPin className="w-5 h-5" />
-                }, {
+                },
+                {
                   title: "Wishlist",
                   path: "/profile/wishlist",
                   icon: <Star className="w-5 h-5" />
+                },
+                {
+                  title: "Payment Details",
+                  path: "/profile/payment-details",
+                  icon: <CreditCard className="w-5 h-5" />
                 }
               ].map((item) => (
                 <NavLink

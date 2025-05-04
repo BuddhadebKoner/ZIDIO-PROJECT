@@ -61,7 +61,8 @@ const AdminSidebar = () => {
       category: "Sales",
       links: [
         { to: "/admin/orders", icon: <ShoppingBag size={20} />, text: "Orders" },
-        { to: "/admin/customers", icon: <Users size={20} />, text: "Customers" }
+        { to: "/admin/customers", icon: <Users size={20} />, text: "Customers" },
+        { to: "/admin/inventory", icon: <Package size={20} />, text: "Inventory" }
       ]
     },
     {

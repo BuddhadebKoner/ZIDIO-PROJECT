@@ -288,6 +288,14 @@ export const getProductById = async (req, res) => {
             }
          },
          {
+            $lookup: {
+               from: "inventories",
+               localField: "inventory",
+               foreignField: "_id",
+               as: "inventoryData"
+            }
+         },
+         {
             $addFields: {
                isOfferActive: {
                   $cond: {
@@ -301,7 +309,8 @@ export const getProductById = async (req, res) => {
                      },
                      else: false
                   }
-               }
+               },
+               inventory: { $arrayElemAt: ["$inventoryData", 0] }
             }
          },
          {
@@ -359,7 +368,8 @@ export const getProductById = async (req, res) => {
          {
             $project: {
                offerData: 0,
-               isOfferActive: 0
+               isOfferActive: 0,
+               inventoryData: 0,
             }
          }
       ]);
@@ -797,11 +807,11 @@ export const updateCart = async (req, res) => {
       await user.save();
 
       return res.status(200).
-      json({
-         success: true,
-         message: "Cart updated successfully",
-         cart: user.cart
-      });
+         json({
+            success: true,
+            message: "Cart updated successfully",
+            cart: user.cart
+         });
    } catch (error) {
       console.error("Error updating cart:", error);
       return res.status(500).json({

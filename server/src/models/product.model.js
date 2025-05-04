@@ -135,6 +135,12 @@ const productSchema = new mongoose.Schema({
       ref: 'Offer',
       default: null,
    },
+   // inventory structure
+   inventory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Inventory',
+      default: null,
+   }
 }, { timestamps: true });
 
 export const Product = mongoose.model('Product', productSchema);

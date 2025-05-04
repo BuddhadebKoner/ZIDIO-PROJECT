@@ -42,6 +42,7 @@ const AdminUpdateProduct = () => {
   const [error, setError] = useState('');
   const [fetchError, setFetchError] = useState('');
   const [offerData, setOfferData] = useState(null);
+  const [inventoryData, setInventoryData] = useState(null);
   const [originalData, setOriginalData] = useState(null);
   const [dirtyFields, setDirtyFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -61,6 +62,7 @@ const AdminUpdateProduct = () => {
         setFetchError('');
 
         const response = await getProductById(slug);
+        // console.log("Product data response:", response);
 
         if (!response || !response.product) {
           throw new Error("Product not found or invalid response format");
@@ -71,6 +73,11 @@ const AdminUpdateProduct = () => {
 
         if (productData.offer) {
           setOfferData(productData.offer);
+        }
+
+        if (productData.inventory) {
+          // console.log("Inventory data:", productData.inventory);
+          setInventoryData(productData.inventory);
         }
 
         const processedData = processProductData(productData);
@@ -566,12 +573,13 @@ const AdminUpdateProduct = () => {
                         [...formData.collections, collectionId]);
                     }
                   }}
-                  selectedCollectionId={formData.collections} 
+                  selectedCollectionId={formData.collections}
                 />
               </div>
             </div>
           </div>
 
+          {/* offer */}
           <div className="md:col-span-2">
             <h2 className="text-xl font-semibold mb-4 text-primary-300">Offer</h2>
             <div className="mb-4">
@@ -599,6 +607,56 @@ const AdminUpdateProduct = () => {
                     <p className="text-gray-400">This product is not part of any offer</p>
                     <Link to="/admin/offer" className="btn-secondary text-sm">
                       Manage Offers
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* inventory */}
+          <div className="md:col-span-2">
+            <h2 className="text-xl font-semibold mb-4 text-primary-300">Inventory</h2>
+            <div className="mb-4">
+              <p className="text-sm text-gray-400 mb-3">
+                Manage the inventory for this product. You can set the available quantity and track stock levels.
+              </p>
+              <div className="border border-gray-700 rounded-md p-4">
+                {inventoryData ? (
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="font-medium">Current Stock Levels</p>
+                      <Link to="/admin/inventory/" className="btn-secondary text-sm">
+                        Manage Inventory
+                      </Link>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-gray-700">
+                            <th className="text-left py-2 px-4">Size</th>
+                            <th className="text-right py-2 px-4">Quantity</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {inventoryData.stocks.map((stock) => (
+                            <tr key={stock._id} className="border-b border-gray-700/50">
+                              <td className="py-2 px-4">{stock.size}</td>
+                              <td className="py-2 px-4 text-right">{stock.quantity}</td>
+                            </tr>
+                          ))}
+                          <tr className="font-medium">
+                            <td className="py-2 px-4">Total</td>
+                            <td className="py-2 px-4 text-right">{inventoryData.totalQuantity}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <p className="text-gray-400">No inventory data available for this product</p>
+                    <Link to="/admin/inventory" className="btn-secondary text-sm">
+                      Manage Inventory
                     </Link>
                   </div>
                 )}
