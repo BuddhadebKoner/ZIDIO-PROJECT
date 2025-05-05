@@ -905,3 +905,59 @@ export const removeSingleImage = async (req, res) => {
       });
    }
 };
+
+// get all inventory
+export const getInventorys = async (req, res) => {
+   try {
+      let { page, limit } = req.query;
+      page = parseInt(page) || 1;
+      limit = parseInt(limit) || 5;
+
+      if (page < 1 || limit < 1) {
+         return res.status(400).json({
+            success: false,
+            message: "Invalid pagination parameters.",
+         });
+      }
+
+      const skip = (page - 1) * limit;
+
+      const inventory = await Inventory.find()
+         .populate({ path: "productId", select: "title slug" })
+         .skip(skip)
+         .limit(limit)
+         .sort({ createdAt: -1 })
+
+      if (!inventory || inventory.length === 0) {
+         return res.status(404).json({
+            success: false,
+            message: "No inventory found",
+         });
+      }
+
+      const totalInventory = await Inventory.countDocuments();
+      if (!totalInventory) {
+         return res.status(404).json({
+            success: false,
+            message: "No inventory found",
+         });
+      }
+
+      return res.status(200).json({
+         success: true,
+         message: "Inventory fetched successfully",
+         inventory,
+         totalPages: Math.ceil(totalInventory / limit),
+         currentPage: page,
+         totalItems: totalInventory
+      });
+
+   } catch (error) {
+      console.error("Error fetching inventory:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to fetch inventory",
+         error: error.message || "Server error"
+      });
+   }
+};

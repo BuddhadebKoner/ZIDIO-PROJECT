@@ -275,3 +275,14 @@ export const deleteImage = async (public_id) => {
       throw error;
    }
 }
+
+// get all inventorys
+export const getInventorys = async (page = 1, limit = 10) => {
+   try {
+      const response = await axiosInstance.get(`/admin/get-inventory?page=${page}&limit=${limit}`);
+      return response.data;
+   } catch (error) {
+      console.error('Error fetching inventory:', error);
+      throw error;
+   }
+}

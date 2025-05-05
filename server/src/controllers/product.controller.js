@@ -21,6 +21,13 @@ export const getProducts = async (req, res) => {
          .limit(limit)
          .sort({ createdAt: -1 })
          .lean();
+      
+      if (!products || products.length === 0) { 
+         return res.status(404).json({
+            success: false,
+            message: "No products found.",
+         });
+      }
 
       const totalProducts = await Product.countDocuments();
 

@@ -14,7 +14,7 @@ import AuthCallback from "./_auth/page/AuthCallback";
 
 // pages
 import { AccountDetails, AccountPaymentDetails, AccountWishlist, Address, Cart, Categories, Collections, Home, Offers, Orders, Product, Profile, Search, SosCallBack } from "./_root/page";
-import { AdminAddCollection, AdminAddOffer, AdminAddProduct, AdminCategory, AdminCollection, AdminCustomers, AdminDashboard, AdminInventory, AdminOffer, AdminOrders, AdminProduct, AdminReviews, AdminSettings, AdminUpdateCollection, AdminUpdateOffer, AdminUpdateProduct } from "./_admin/page";
+import { AdminAddCollection, AdminAddOffer, AdminAddProduct, AdminCategory, AdminCollection, AdminCustomers, AdminDashboard, AdminInventory, AdminOffer, AdminOrders, AdminProduct, AdminReviews, AdminSettings, AdminUpdateCollection, AdminUpdateInventory, AdminUpdateOffer, AdminUpdateProduct } from "./_admin/page";
 
 export const SmoothScrollContext = createContext();
 
@@ -168,6 +168,7 @@ const App = () => {
           <Route path="/admin/settings" element={<AdminSettings />} />
           {/* inventory manage */}
           <Route path="/admin/inventory" element={<AdminInventory />} />
+          <Route path="/admin/inventory/:slug" element={<AdminUpdateInventory />} />
           {/* orders */}
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/orders/:slug" element={<AdminOrders />} />

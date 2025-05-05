@@ -12,6 +12,9 @@ export const QUERY_KEYS = {
       GET_PRODUCT_BY_ID: 'getProductById',
       GET_CART_PRODUCTS: 'getCartProducts',
    },
+   INVENTORY: {
+      GET_ALL_INVENTORY: 'getAllInventory',
+   },
    COLLECTIONS: {
       GET_ALL_COLLECTIONS: 'getCollections',
       SEARCH_COLLECTIONS: 'searchCollections',

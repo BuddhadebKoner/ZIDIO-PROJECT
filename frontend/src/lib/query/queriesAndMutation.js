@@ -4,7 +4,7 @@ import { QUERY_KEYS } from "./queryKeys";
 import { useUser } from "@clerk/clerk-react";
 import { getAddAddress, getCartProducts, getExtreamSearch, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
-import { addProduct } from "../api/admin.api";
+import { addProduct, getInventorys } from "../api/admin.api";
 import { getAllCollections, getCollectionById, getProductsByCollectionSlug, searchCollections } from "../api/collection.api";
 import { addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
@@ -363,3 +363,18 @@ export const useUpdateCart = () => {
       },
    });
 }
+
+// get all inventorys
+export const useGetAllInventorys = (pageParam = 1, limit = 10) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.INVENTORY.GET_ALL_INVENTORY, limit],
+      queryFn: ({ pageParam }) => getInventorys(pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      refetchOnWindowFocus: false,
+   });
+};
