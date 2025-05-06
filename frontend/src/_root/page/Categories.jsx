@@ -166,7 +166,7 @@ const Categories = () => {
     isFetchingNextPage
   } = useFilterProducts(filters);
 
-  console.log(data);
+  // console.log(data);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {

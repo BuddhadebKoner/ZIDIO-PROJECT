@@ -230,6 +230,8 @@ export const useGetProductById = (slug) => {
       queryKey: [QUERY_KEYS.PRODUCTS.GET_PRODUCT_BY_ID, slug],
       queryFn: () => getProductById(slug),
       refetchOnWindowFocus: false,
+      // meoised for 10 minutes
+      staleTime: 10 * 60 * 1000,
    });
 };
 
@@ -238,6 +240,8 @@ export const useGetCollectionById = (slug) => {
       queryKey: [QUERY_KEYS.COLLECTIONS.GET_COLLECTIONS_BY_ID, slug],
       queryFn: () => getCollectionById(slug),
       refetchOnWindowFocus: false,
+      // meoised for 10 minutes
+      staleTime: 10 * 60 * 1000,
    });
 }
 

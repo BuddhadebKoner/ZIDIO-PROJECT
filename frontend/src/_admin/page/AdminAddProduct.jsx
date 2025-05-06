@@ -16,15 +16,12 @@ const AdminAddProduct = () => {
     images: [
       { imageUrl: '', imageId: '' },
     ],
-    bannerImageUrl: '',
-    bannerImageId: '',
     sizes: [],
     tags: '',
     technologyStack: '',
     productModelLink: '',
     categoryName: '',
     subCategory: '',
-    path: '',
     collections: [] 
   });
 
@@ -59,16 +56,6 @@ const AdminAddProduct = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
-    console.log("Form data before submission:", formData.bannerImageUrl);
-
-    // Validate required fields
-    if (!formData.bannerImageUrl || !formData.bannerImageId) {
-      setError('Please upload a banner image');
-      toast.error('Banner image is required');
-      setLoading(false);
-      return;
-    }
 
     if (formData.images.length === 0) {
       setError('Please upload at least one product image');
@@ -233,25 +220,6 @@ const AdminAddProduct = () => {
             </div>
           </div>
 
-          {/* Banner Image Section */}
-          <div className="md:col-span-2">
-            <h2 className="text-xl font-semibold mb-4 text-primary-300">Banner Image</h2>
-            <SingleImageUploader
-              setImageUrl={(url) => setFormData({ ...formData, bannerImageUrl: url })}
-              setImageId={(id) => {
-                console.log("Setting banner ID:", id);
-                setFormData(prevState => ({
-                  ...prevState,
-                  bannerImageId: id
-                }));
-              }}
-              label="Banner Image"
-              currentImageUrl={formData.bannerImageUrl}
-              disabled={loading}
-              path="products"
-            />
-          </div>
-
           {/* Product Images Section - Updated with SingleImageUploader for each image */}
           <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-4">
@@ -398,16 +366,6 @@ const AdminAddProduct = () => {
                   <option value="Henley">Henley</option>
                   <option value="Hooded">Hooded</option>
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Path</label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-3 bg-surface border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-text placeholder-text-muted"
-                  placeholder="/t-shirts/oversized"
-                  value={formData.path}
-                  onChange={(e) => setFormData({ ...formData, path: e.target.value })}
-                />
               </div>
             </div>
           </div>

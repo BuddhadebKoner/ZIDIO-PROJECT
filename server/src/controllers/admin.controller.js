@@ -961,3 +961,127 @@ export const getInventorys = async (req, res) => {
       });
    }
 };
+
+// get inventory by slug
+export const getInventoryBySlug = async (req, res) => {
+   try {
+      const { slug } = req.params;
+      if (!slug) {
+         return res.status(400).json({
+            success: false,
+            message: "Product slug is required"
+         });
+      }
+
+      const inventory = await Inventory.findById(slug)
+         .populate({ path: "productId", select: "title slug" });
+
+      if (!inventory) {
+         return res.status(404).json({
+            success: false,
+            message: "Inventory not found"
+         });
+      }
+
+      return res.status(200).json({
+         success: true,
+         message: "Inventory fetched successfully",
+         inventory
+      });
+
+   } catch (error) {
+      return res.status(500).json({
+         success: false,
+         message: "Internal server error",
+      });
+   }
+};
+
+// update inventory by slug
+export const updateInventory = async (req, res) => {
+   try {
+      const userId = req.userId;
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "Unauthorized: Authentication required"
+         });
+      }
+
+      const { slug } = req.params;
+      if (!slug) {
+         return res.status(400).json({
+            success: false,
+            message: "Product slug is required"
+         });
+      }
+
+      const { stocks } = req.body;
+      if (!stocks || !Array.isArray(stocks) || stocks.length === 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Stocks data is required and must be a non-empty array"
+         });
+      }
+
+      const validSizes = ["S", "M", "L", "XL", "XXL"];
+      const errors = [];
+
+      for (const item of stocks) {
+         if (!item.size || !validSizes.includes(item.size)) {
+            errors.push(`Invalid size: ${item.size}. Must be one of: S, M, L, XL, XXL`);
+         }
+
+         if (item.quantity === undefined || isNaN(parseInt(item.quantity)) || parseInt(item.quantity) < 0) {
+            errors.push(`Invalid quantity for size ${item.size}: ${item.quantity}. Must be a non-negative number`);
+         }
+      }
+
+      if (errors.length > 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Validation errors",
+            errors
+         });
+      }
+
+      const inventory = await Inventory.findById(slug)
+      if (!inventory) {
+         return res.status(404).json({
+            success: false,
+            message: "Inventory not found for this product"
+         });
+      }
+
+      for (const newStock of stocks) {
+         const stockIndex = inventory.stocks.findIndex(s => s.size === newStock.size);
+
+         if (stockIndex >= 0) {
+            inventory.stocks[stockIndex].quantity = parseInt(newStock.quantity);
+         } else {
+            // Add new size if it doesn't exist
+            inventory.stocks.push({
+               size: newStock.size,
+               quantity: parseInt(newStock.quantity)
+            });
+         }
+      }
+
+      inventory.totalQuantity = inventory.stocks.reduce((total, stock) => total + stock.quantity, 0);
+
+      await inventory.save();
+
+      return res.status(200).json({
+         success: true,
+         message: "Inventory updated successfully",
+         inventory
+      });
+   } catch (error) {
+      console.error("Error updating inventory:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to update inventory",
+         error: error.message || "Internal server error"
+      });
+   }
+}

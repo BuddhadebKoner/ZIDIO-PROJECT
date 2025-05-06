@@ -1,6 +1,6 @@
 import express from 'express'
 import { adminAuth } from '../middlewares/adminAuth.middleware.js'
-import { addCollection, addOffer, addProduct, getInventorys, removeSingleImage, updateCollection, updateHomeContent, updateOffer, updateProduct } from '../controllers/admin.controller.js'
+import { addCollection, addOffer, addProduct, getInventoryBySlug, getInventorys, removeSingleImage, updateCollection, updateHomeContent, updateInventory, updateOffer, updateProduct } from '../controllers/admin.controller.js'
 
 const adminRouter = express.Router()
 
@@ -22,5 +22,9 @@ adminRouter.put('/update-home', adminAuth, updateHomeContent);
 adminRouter.delete('/delete-image', adminAuth, removeSingleImage);
 // get all inventorys
 adminRouter.get('/get-inventory', adminAuth, getInventorys);
+// get inventory by slug
+adminRouter.get('/get-inventory/:slug', adminAuth, getInventoryBySlug);
+// update inventory by slug
+adminRouter.put('/update-inventory/:slug', adminAuth, updateInventory);
 
 export default adminRouter

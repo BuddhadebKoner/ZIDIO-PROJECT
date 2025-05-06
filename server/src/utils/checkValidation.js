@@ -61,19 +61,6 @@ export const sanitizedProduct = (product) => {
          errors.images = "Images must be in array format";
       }
 
-      // Validate and sanitize banner image
-      if (!product.bannerImageUrl || typeof product.bannerImageUrl !== 'string' || !product.bannerImageUrl.trim()) {
-         errors.bannerImageUrl = "Banner image URL is required";
-      } else {
-         sanitizedProduct.bannerImageUrl = product.bannerImageUrl.trim();
-      }
-
-      if (!product.bannerImageId || typeof product.bannerImageId !== 'string' || !product.bannerImageId.trim()) {
-         errors.bannerImageId = "Banner image ID is required";
-      } else {
-         sanitizedProduct.bannerImageId = product.bannerImageId.trim();
-      }
-
       // Validate and sanitize sizes
       const validSizes = ['S', 'M', 'L', 'XL', 'XXL'];
       if (Array.isArray(product.sizes) && product.sizes.length > 0) {
@@ -140,13 +127,12 @@ export const sanitizedProduct = (product) => {
       }
 
       // Validate and sanitize category fields
-      if (!product.categoryName || !product.subCategory || !product.path) {
-         errors.category = "Category name, subcategory, and path are required";
+      if (!product.categoryName || !product.subCategory) {
+         errors.category = "Category name, subcategory, are required";
       } else {
          sanitizedProduct.categories = [{
             main: String(product.categoryName).trim(),
             sub: String(product.subCategory).trim(),
-            path: String(product.path).trim()
          }];
       }
 

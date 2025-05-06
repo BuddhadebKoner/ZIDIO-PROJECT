@@ -1,18 +1,21 @@
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useRemoveFromCart, useUpdateCart } from '../../lib/query/queriesAndMutation'
 import { toast } from 'react-toastify'
-import FullPageLoader from '../loaders/FullPageLoader'
 import { formatIndianCurrency } from '../../utils/amountFormater'
 
-const CartProductCard = ({ item }) => {
+const CartProductCard = ({ item, setProductAbliability }) => {
   if (!item || typeof item !== 'object') {
     return <div className="text-error p-4">Invalid product data</div>
   }
+
+  // console.log('CartProductCard item:', item)
 
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [selectedSize, setSelectedSize] = useState(
     item.selectedSize || (Array.isArray(item.size) && item.size.length > 0 ? item.size[0] : '')
   )
+  const [isInStock, setIsInStock] = useState(true)
+  const [availableQuantity, setAvailableQuantity] = useState(0)
 
   // Add debounce timer refs for rate limiting
   const incrementTimerRef = useRef(null)
@@ -34,6 +37,30 @@ const CartProductCard = ({ item }) => {
 
   const images = Array.isArray(item.images) ? item.images : []
   const primaryImage = images.length > 0 ? images[0].imageUrl : '/placeholder-image.jpg'
+
+  // Get inventory data
+  const inventory = item.inventory || { totalQuantity: 0, stocks: [] }
+
+  // Check stock availability based on selected size and update parent component
+  useEffect(() => {
+    if (!selectedSize || !inventory || !inventory.stocks) {
+      setIsInStock(false);
+      setAvailableQuantity(0);
+      setProductAbliability?.(false);
+      return;
+    }
+
+    const stockItem = inventory.stocks.find(stock => stock.size === selectedSize);
+
+    if (!stockItem || stockItem.quantity < quantity) {
+      setIsInStock(false);
+      setAvailableQuantity(stockItem?.quantity || 0);
+      setProductAbliability?.(false);
+    } else {
+      setIsInStock(true);
+      setAvailableQuantity(stockItem.quantity);
+    }
+  }, [selectedSize, quantity, inventory, setProductAbliability]);
 
   const removeFromCart = useRemoveFromCart()
   const {
@@ -62,6 +89,9 @@ const CartProductCard = ({ item }) => {
         onSuccess: () => {
           console.log('Item removed from cart successfully')
           setShowConfirmation(false)
+          if (!isInStock && typeof setProductAbliability === 'function') {
+            setProductAbliability(true)
+          }
         },
         onError: (error) => {
           toast.error(error?.message || 'Failed to remove item from cart')
@@ -69,7 +99,7 @@ const CartProductCard = ({ item }) => {
         }
       })
     }
-  }, [productId, onRemoveItem])
+  }, [productId, onRemoveItem, isInStock, setProductAbliability])
 
   const cancelRemove = useCallback(() => {
     setShowConfirmation(false)
@@ -86,6 +116,13 @@ const CartProductCard = ({ item }) => {
     const validQuantity = Math.max(1, Math.min(99, Number(newQuantity) || 1))
 
     if (validQuantity === quantity) return
+
+    // Check if requested quantity is available in stock
+    const stockItem = inventory.stocks.find(stock => stock.size === selectedSize);
+    if (!stockItem || stockItem.quantity < validQuantity) {
+      toast.error(`Only ${stockItem?.quantity || 0} items available in ${selectedSize} size.`);
+      return;
+    }
 
     isProcessingRef.current = true
 
@@ -107,11 +144,18 @@ const CartProductCard = ({ item }) => {
         }
       })
     }
-  }, [quantity, updateQuantity, selectedSize])
+  }, [quantity, updateQuantity, selectedSize, inventory.stocks])
 
   // Rate-limited increment handler
   const handleIncrement = useCallback(() => {
     if (incrementTimerRef.current || isProcessingRef.current) return
+
+    // Check stock before increment
+    const stockItem = inventory.stocks.find(stock => stock.size === selectedSize);
+    if (!stockItem || stockItem.quantity <= quantity) {
+      toast.warning(`Maximum available quantity for size ${selectedSize} is ${stockItem?.quantity || 0}`);
+      return;
+    }
 
     // Apply the update
     onUpdateQuantity(productId, quantity + 1)
@@ -120,7 +164,7 @@ const CartProductCard = ({ item }) => {
     incrementTimerRef.current = setTimeout(() => {
       incrementTimerRef.current = null
     }, buttonCooldown)
-  }, [productId, quantity, onUpdateQuantity])
+  }, [productId, quantity, onUpdateQuantity, selectedSize, inventory.stocks])
 
   // Rate-limited decrement handler
   const handleDecrement = useCallback(() => {
@@ -148,16 +192,25 @@ const CartProductCard = ({ item }) => {
     setSelectedSize(newSize)
 
     if (typeof updateQuantity === 'function' && productId) {
+      // Check if current quantity is available for new size
+      const stockItem = inventory.stocks.find(stock => stock.size === newSize);
+      const availableQty = stockItem?.quantity || 0;
+      const newQuantity = Math.min(quantity, availableQty);
+
+      if (newQuantity < quantity) {
+        toast.info(`Quantity adjusted to ${newQuantity} based on available stock for size ${newSize}`);
+      }
+
       updateQuantity({
         productId: productId,
-        quantity: quantity,
+        quantity: newQuantity,
         size: newSize
       }, {
         onSuccess: () => console.log('Size updated successfully'),
         onError: (error) => toast.error(error?.message || 'Failed to update size')
       })
     }
-  }, [productId, quantity, updateQuantity])
+  }, [productId, quantity, updateQuantity, inventory.stocks])
 
   const isDisabled = isRemovingItem || isUpdatingQuantity || isProcessingRef.current
 
@@ -209,6 +262,19 @@ const CartProductCard = ({ item }) => {
               </select>
             </div>
           )}
+
+          {/* Stock availability status */}
+          <div className="mt-2">
+            {isInStock ? (
+              <span className="text-green-500 text-sm">In Stock ({availableQuantity} available)</span>
+            ) : (
+              <span className="text-error text-sm font-medium">
+                {availableQuantity > 0
+                  ? `Only ${availableQuantity} available (You selected ${quantity})`
+                  : 'Out of Stock'}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end mt-5 gap-4">
@@ -227,7 +293,7 @@ const CartProductCard = ({ item }) => {
               <button
                 className="px-4 py-2 border-l border-gray-700 hover:bg-primary-900 transition-colors rounded-r-md cursor-pointer"
                 onClick={handleIncrement}
-                disabled={isDisabled}
+                disabled={isDisabled || quantity >= availableQuantity}
                 aria-label="Increase quantity"
               >
                 +

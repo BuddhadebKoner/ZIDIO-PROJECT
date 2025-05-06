@@ -25,15 +25,12 @@ const AdminUpdateProduct = () => {
     description: '',
     price: '',
     images: [],
-    bannerImageUrl: '',
-    bannerImageId: '',
     sizes: [],
     tags: '',
     technologyStack: '',
     productModelLink: '',
     categoryName: '',
     subCategory: '',
-    path: '',
     collections: []
   });
 
@@ -359,27 +356,6 @@ const AdminUpdateProduct = () => {
           </div>
 
           <div className="md:col-span-2">
-            <h2 className="text-xl font-semibold mb-4 text-primary-300">Banner Image</h2>
-            {validationErrors.bannerImage && (
-              <div className="mb-3 p-3 bg-red-900/30 text-red-400 rounded-md">
-                {validationErrors.bannerImage}
-              </div>
-            )}
-            <SingleImageUploader
-              setImageUrl={(url) => {
-                handleFieldChange('bannerImageUrl', url);
-              }}
-              setImageId={(id) => {
-                handleFieldChange('bannerImageId', id);
-              }}
-              label="Banner Image"
-              currentImageUrl={formData.bannerImageUrl}
-              disabled={loading}
-              path="products"
-            />
-          </div>
-
-          <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-primary-300">Product Images</h2>
               <button
@@ -543,19 +519,6 @@ const AdminUpdateProduct = () => {
                 />
                 <p className="mt-1 text-xs text-gray-500">Sub-category cannot be changed after creation</p>
               </div>
-              <div>
-                <div className="flex items-center mb-1">
-                  <label className="block text-sm font-medium">Path</label>
-                  <Lock className="w-4 h-4 ml-2 text-gray-400" title="Non-editable field" />
-                </div>
-                <input
-                  type="text"
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-400 cursor-not-allowed"
-                  value={formData.path}
-                  disabled
-                />
-                <p className="mt-1 text-xs text-gray-500">Path cannot be changed after creation</p>
-              </div>
             </div>
           </div>
 
@@ -625,7 +588,7 @@ const AdminUpdateProduct = () => {
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <p className="font-medium">Current Stock Levels</p>
-                      <Link to="/admin/inventory/" className="btn-secondary text-sm">
+                      <Link to={`/admin/inventory/${inventoryData._id}`} className="btn-secondary text-sm">
                         Manage Inventory
                       </Link>
                     </div>

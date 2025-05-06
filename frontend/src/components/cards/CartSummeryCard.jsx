@@ -1,15 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { Shield, Tag, Truck, ChevronDown, ChevronUp, ShoppingBag } from 'lucide-react';
+import { Shield, Tag, Truck, ChevronDown, ChevronUp, ShoppingBag, AlertTriangle } from 'lucide-react';
 import { formatIndianCurrency } from '../../utils/amountFormater';
+import { Link } from 'react-router-dom';
 
-const CartSummaryCard = ({ cartData }) => {
+const CartSummaryCard = ({ cartData, productAvailable }) => {
   const [isItemsOpen, setIsItemsOpen] = useState(false);
 
-  // Calculate all summary data with accurate discount calculations
   const summaryData = useMemo(() => {
     if (!cartData || !cartData.items) return {};
 
-    // Calculate totals with precise item-by-item approach
     let totalOriginalAmount = 0;
     let totalAfterDiscountAmount = 0;
     let totalSavings = 0;
@@ -21,15 +20,12 @@ const CartSummaryCard = ({ cartData }) => {
       totalOriginalAmount += itemOriginalTotal;
       totalAfterDiscountAmount += itemCurrentTotal;
 
-      // Only calculate savings for items with discounts
       if (item.hasDiscount && item.offer && item.offer.active) {
         const itemSavings = itemOriginalTotal - itemCurrentTotal;
         totalSavings += itemSavings;
       }
     });
 
-    // Verify that our calculated total matches the cartTotal
-    // If there's a small difference due to rounding, use the cartTotal
     if (Math.abs(totalAfterDiscountAmount - cartData.cartTotal) < 1) {
       totalAfterDiscountAmount = cartData.cartTotal;
     }
@@ -53,12 +49,20 @@ const CartSummaryCard = ({ cartData }) => {
   }, [cartData]);
 
   if (!cartData || !summaryData.totalOriginalAmount) {
-    return <div>Loading summary...</div>;
+    return <div className="p-6 rounded-lg shadow-sm text-center">Loading summary...</div>;
   }
 
-  const toggleItems = () => {
-    setIsItemsOpen(!isItemsOpen);
-  };
+  const toggleItems = () => setIsItemsOpen(!isItemsOpen);
+
+  const handleCheckout = () => {
+    // check if product is available
+    if (productAvailable) {
+      // Proceed to checkout
+      console.log("Proceeding to checkout...");
+    } else {
+      console.log("Some items are out of stock");
+    }
+  }
 
   return (
     <div className="rounded-lg p-6 shadow-sm sticky top-20 glass-morphism">
@@ -70,7 +74,13 @@ const CartSummaryCard = ({ cartData }) => {
         </div>
       </div>
 
-      {/* Items dropdown */}
+      {!productAvailable && (
+        <div className="mb-4 p-2 bg-red-50 border border-red-200 rounded-md flex items-center text-red-600">
+          <AlertTriangle size={16} className="mr-2" />
+          <span className="text-sm font-medium">Some items are out of stock</span>
+        </div>
+      )}
+
       <div className="mb-4">
         <button
           onClick={toggleItems}
@@ -115,7 +125,6 @@ const CartSummaryCard = ({ cartData }) => {
         )}
       </div>
 
-      {/* Calculation breakdown */}
       <div className="pb-10">
         <div className="text-sm font-medium mb-2 text-text">Price Details</div>
         <div className="space-y-2 text-sm">
@@ -172,14 +181,24 @@ const CartSummaryCard = ({ cartData }) => {
         </div>
       </div>
 
-      <button className="w-full py-3 rounded-md bg-primary-600 hover:bg-primary-700 text-bg-white font-medium transition-all flex items-center justify-center">
-        <span className="mr-2">Proceed to Checkout</span>
-        <span>{formatIndianCurrency(summaryData.finalTotal)}</span>
+      <button
+        className={`w-full py-3 rounded-md font-medium transition-all flex items-center justify-center ${productAvailable
+          ? "bg-primary-600 hover:bg-primary-700 text-bg-white cursor-pointer"
+          : "bg-gray-400 text-gray-200 cursor-not-allowed"
+          }`}
+        disabled={!productAvailable}
+        onClick={handleCheckout}
+        title={!productAvailable ? "Some items are out of stock" : "Proceed to checkout"}
+      >
+        <span className="mr-2">{productAvailable ? "Proceed to Checkout" : "Items Unavailable"}</span>
+        {productAvailable && <span>{formatIndianCurrency(summaryData.finalTotal)}</span>}
       </button>
 
-      <a href="/" className="block text-center text-secondary-500 hover:text-secondary-400 mt-4 transition-all">
+      <Link
+        to={"/category"}
+        className="block text-center text-secondary-500 hover:text-secondary-400 mt-4 transition-all">
         Continue Shopping
-      </a>
+      </Link>
     </div>
   );
 };

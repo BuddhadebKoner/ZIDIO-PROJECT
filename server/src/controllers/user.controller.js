@@ -417,8 +417,17 @@ export const getCartProducts = async (req, res) => {
             }
          },
          {
+            $lookup: {
+               from: "inventories",
+               localField: "productDetails.inventory",
+               foreignField: "_id",
+               as: "inventoryDetails"
+            }
+         },
+         {
             $addFields: {
                offerDetails: { $arrayElemAt: ["$offerDetails", 0] },
+               inventoryDetails: { $arrayElemAt: ["$inventoryDetails", 0] },
                quantity: "$cart.quantity"
             }
          },
@@ -488,6 +497,11 @@ export const getCartProducts = async (req, res) => {
                isNewArrival: "$productDetails.isNewArrival",
                isUnderHotDeals: "$productDetails.isUnderHotDeals",
                hasDiscount: "$hasValidOffer",
+               // Include inventory data in the response
+               inventory: {
+                  totalQuantity: "$inventoryDetails.totalQuantity",
+                  stocks: "$inventoryDetails.stocks"
+               },
                offer: {
                   $cond: {
                      if: "$hasValidOffer",

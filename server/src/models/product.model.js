@@ -39,16 +39,6 @@ const productSchema = new mongoose.Schema({
          },
       }
    ],
-   bannerImageUrl: {
-      type: String,
-      default: null,
-      required: true,
-   },
-   bannerImageId: {
-      type: String,
-      default: null,
-      required: true,
-   },
    size: [
       {
          type: String,
@@ -115,10 +105,6 @@ const productSchema = new mongoose.Schema({
             type: String,
             required: true
          },
-         path: {
-            type: String,
-            required: true
-         }
       }
    ],
    // collections structure

@@ -21,6 +21,6 @@ productRouter.post('/add-to-cart', userAuth, addToCart);
 // remove from cart
 productRouter.post('/remove-from-cart', userAuth, removeFromCart);
 // update cart quantity and size
-productRouter.post('/update-cart', userAuth, updateCart);
+productRouter.put('/update-cart', userAuth, updateCart);
 
 export default productRouter;

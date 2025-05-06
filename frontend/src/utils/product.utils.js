@@ -80,10 +80,6 @@ export const validateProductForm = (formData) => {
       errors.price = "Price must be a valid positive number";
    }
 
-   if (!formData.bannerImageUrl) {
-      errors.bannerImage = "Banner image is required";
-   }
-
    const validImages = formData.images.filter(img => img.imageUrl && img.imageId);
    if (validImages.length === 0) {
       errors.images = "At least one product image is required";
@@ -146,8 +142,6 @@ export const processProductData = (productData) => {
          ? productData.price.toString()
          : '',
       images: imageArray,
-      bannerImageUrl: productData.bannerImageUrl || '',
-      bannerImageId: productData.bannerImageId || '',
       sizes: sizesArray,
       tags: tagsString,
       technologyStack: techStackString,

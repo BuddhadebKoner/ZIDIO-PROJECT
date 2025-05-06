@@ -159,7 +159,7 @@ const AllTimeBestSeller = ({ products: allTimeBestSeller }) => {
                         {/* Product Title */}
                         <div className='flex flex-col'>
                            <h2 className="text-2xl font-semibold text-white">{productData.title}</h2>
-                           <p className="text-gray-400 mt-2">{productData.description}</p>
+                           <p className="text-gray-400 mt-2">{productData.subTitle}</p>
                         </div>
 
                         <div className="flex items-center space-x-4">

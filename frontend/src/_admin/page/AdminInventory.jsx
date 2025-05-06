@@ -43,8 +43,8 @@ const AdminInventory = () => {
   const handleRefresh = () => {
     refetch();
   };
-
-  console.log('Inventory Items:', inventoryItems);
+  
+  // console.log('Inventory Items:', inventoryItems);
 
   return (
     <div className="px-auto py-6">

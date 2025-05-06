@@ -27,7 +27,7 @@ app.use(express.json());
 const allowedOrigins = [
   process.env.CLIENT_URL?.replace(/\/$/, ''),
   'http://localhost:5173',
-  'http://192.168.31.100:5173'
+  'https://zidio-project-nine.vercel.app'
 ].filter(Boolean);
 
 app.use(cors({

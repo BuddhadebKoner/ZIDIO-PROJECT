@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useGetCartProducts } from '../../lib/query/queriesAndMutation'
 import { Link } from 'react-router-dom'
 import CartProductCard from '../../components/cards/CartProductCard'
@@ -11,6 +11,8 @@ const Cart = () => {
     isLoading,
     isError,
   } = useGetCartProducts();
+
+  const [productAbliablity, setProductAbliability] = useState(true);
 
   // console.log("Cart data: ", data);
 
@@ -50,13 +52,16 @@ const Cart = () => {
             <CartProductCard
               key={item._id}
               item={item}
+              setProductAbliability={setProductAbliability}
             />
           ))}
         </div>
 
         {/* Cart Summary */}
         <div className="lg:w-1/3 mt-6 lg:mt-0">
-          <CartSummeryCard cartData={data} />
+          <CartSummeryCard
+            cartData={data}
+            productAvailable={productAbliablity} />
         </div>
       </div>
     </div>

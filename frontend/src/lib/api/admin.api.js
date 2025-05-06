@@ -286,3 +286,43 @@ export const getInventorys = async (page = 1, limit = 10) => {
       throw error;
    }
 }
+
+// get inventory by slug
+export const getInventoryBySlug = async (slug) => {
+   try {
+      const response = await axiosInstance.get(`/admin/get-inventory/${slug}`);
+      return response.data;
+   } catch (error) {
+      console.error('Error fetching inventory:', error);
+      throw error;
+   }
+}
+
+// update inventory by slug
+export const updateInventory = async (slug, inventoryData) => {
+   try {
+      const response = await axiosInstance.put(`/admin/update-inventory/${slug}`, inventoryData);
+
+      return {
+         success: true,
+         message: response.data.message || "Inventory updated successfully",
+         product: response.data.inventory,
+      };
+   } catch (error) {
+      console.error('Error updating inventory:', error);
+
+      if (error.response?.data?.fieldErrors) {
+         return {
+            success: false,
+            message: error.response.data.message || "Product validation failed",
+            fieldErrors: error.response.data.fieldErrors
+         };
+      }
+
+      return {
+         success: false,
+         message: error.response?.data?.message || "Failed to update inventory",
+         error: error.response?.data?.error || error.message
+      };
+   }
+}

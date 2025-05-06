@@ -141,7 +141,7 @@ export const removeFromCart = async (productId) => {
 // update cart quantity and size
 export const updateCart = async (data) => { 
    try {
-      const response = await axiosInstance.post(`/products/update-cart`, data);
+      const response = await axiosInstance.put(`/products/update-cart`, data);
       if (response.data && response.data.success) {
          return response.data;
       } else {
