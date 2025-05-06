@@ -21,9 +21,8 @@ app.use(clerkMiddleware({
   publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY,
   secretKey: process.env.CLERK_SECRET_KEY,
   authorizedParties: ['https://zidio-project-nine.vercel.app', 'http://localhost:5173'],
-  clockSkewInMs: 3000,
-  isSatellite: true,
   debug: true,
+  proxyUrl: process.env.PROXY_URL,
 }));
 
 app.use(express.json());
