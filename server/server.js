@@ -19,7 +19,11 @@ connectDB();
 // clerk middleware
 app.use(clerkMiddleware({
   publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY,
-  secretKey: process.env.CLERK_SECRET_KEY
+  secretKey: process.env.CLERK_SECRET_KEY,
+  authorizedParties: ['https://zidio-project-nine.vercel.app', 'http://localhost:5173'],
+  clockSkewInMs: 3000,
+  isSatellite: true,
+  debug: true,
 }));
 
 app.use(express.json());
@@ -27,7 +31,6 @@ app.use(express.json());
 const allowedOrigins = [
   process.env.CLIENT_URL?.replace(/\/$/, ''),
   'http://localhost:5173',
-  'https://zidio-project-nine.vercel.app'
 ].filter(Boolean);
 
 app.use(cors({

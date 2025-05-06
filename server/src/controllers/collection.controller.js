@@ -178,20 +178,20 @@ export const getProductsByCollectionSlug = async (req, res) => {
       // 4. Calculate pagination values
       const skip = (pageNumber - 1) * limitNumber;
       const currentDate = new Date();
-      
+
       // 5. Fetch products with optimized aggregation pipeline
       const Product = mongoose.model("Product");
       const products = await Product.aggregate([
          // Match only products in this collection (use index)
          { $match: { _id: { $in: collection.products } } },
-         
+
          // Apply sorting
          { $sort: { createdAt: -1 } },
-         
+
          // Apply pagination
          { $skip: skip },
          { $limit: limitNumber },
-         
+
          // Lookup offers in a single stage
          {
             $lookup: {
@@ -201,7 +201,7 @@ export const getProductsByCollectionSlug = async (req, res) => {
                as: "offerData"
             }
          },
-         
+
          // Process and transform data in a single stage
          {
             $addFields: {
@@ -226,7 +226,7 @@ export const getProductsByCollectionSlug = async (req, res) => {
                }
             }
          },
-         
+
          // Remove temporary fields
          { $project: { offerData: 0 } }
       ]);
@@ -248,11 +248,10 @@ export const getProductsByCollectionSlug = async (req, res) => {
          }
       });
    } catch (error) {
-      console.error("Error fetching products by collection slug:", error);
       return res.status(500).json({
          success: false,
          message: "Internal Server Error",
-         error: process.env.NODE_ENV === 'development' ? error.message : undefined
+         error: error.message
       });
    }
 };

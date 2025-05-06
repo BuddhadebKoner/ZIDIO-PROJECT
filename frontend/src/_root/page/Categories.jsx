@@ -266,7 +266,7 @@ const Categories = () => {
 
       {isFilterOpen && (
         <div className="w-full px-4 md:px-8 lg:px-30 mt-4" ref={dropdownRef}>
-          <div className="p-4 rounded-lg shadow-lg bg-gray-900 border border-gray-800">
+          <div className="p-4 rounded-lg shadow-lg border border-gray-800">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium text-white">Filter Products</h3>
               <button
@@ -348,7 +348,7 @@ const Categories = () => {
         </div>
       )}
 
-      <div className="container mt-2">
+      <div className="container mt-10">
         {isLoading && allProducts.length === 0 ? (
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
