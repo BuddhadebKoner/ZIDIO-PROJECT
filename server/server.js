@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from "./src/config/db.js";
-// import "./src/utils/offerStatusUpdater.js";
 import { clerkMiddleware } from '@clerk/express'
 import authRouter from './src/routes/auth.route.js';
 import userRouter from './src/routes/user.route.js';
@@ -14,13 +13,13 @@ import offerRouter from './src/routes/offer.route.js';
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 connectDB();
 // clerk middleware
 app.use(clerkMiddleware({
   publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY,
   secretKey: process.env.CLERK_SECRET_KEY,
-  authorizedParties: ['https://zidio-project-nine.vercel.app', 'http://localhost:5173'],
+  authorizedParties: [process.env.CLIENT_URL, 'http://localhost:5173'],
   debug: true,
   proxyUrl: process.env.PROXY_URL,
 }));
