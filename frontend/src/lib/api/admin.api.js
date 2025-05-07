@@ -2,11 +2,7 @@ import axiosInstance from "../../config/config";
 
 export const addProduct = async (productData) => {
    try {
-      const response = await axiosInstance.post('/admin/add-product', productData, {
-         headers: {
-            'Content-Type': 'application/json',
-         },
-      });
+      const response = await axiosInstance.post('/admin/add-product', productData);
 
       // Handle successful response
       return {

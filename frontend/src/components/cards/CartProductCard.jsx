@@ -215,7 +215,7 @@ const CartProductCard = ({ item, setProductAbliability }) => {
   const isDisabled = isRemovingItem || isUpdatingQuantity || isProcessingRef.current
 
   return (
-    <div className="glass-morphism flex flex-col md:flex-row rounded-lg p-4 mb-6">
+    <div className="glass-morphism flex flex-col md:flex-row rounded-lg p-4 mb-6 red-velvet-border">
       <div className="md:w-1/4 mb-4 md:mb-0">
         <div className="overflow-hidden rounded-lg">
           <img

@@ -21,7 +21,7 @@ userRouter.get('/home-content-details', getHomeContentDetails);
 // extream search whole database
 userRouter.get('/extream-search', extreamSearch);
 // get cart products
-userRouter.get('/cart-products', userAuth, getCartProducts);
+userRouter.get('/cart-products', userAuth, getCartProducts);               
 
 
 export default userRouter;
