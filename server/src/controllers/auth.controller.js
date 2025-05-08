@@ -21,19 +21,6 @@ export const isAuthenticated = async (req, res) => {
                as: "addressDetails"
             }
          },
-
-         // Lookup orders collection if not empty
-         {
-            $lookup: {
-               from: "orders",
-               let: { orderIds: "$orders" },
-               pipeline: [
-                  { $match: { $expr: { $in: ["$_id", "$$orderIds"] } } }
-               ],
-               as: "ordersDetails"
-            }
-         },
-
          // Lookup products for cart if not empty
          {
             $lookup: {
@@ -145,7 +132,6 @@ export const isAuthenticated = async (req, res) => {
          {
             $addFields: {
                address: { $cond: [{ $gt: [{ $size: "$addressDetails" }, 0] }, { $arrayElemAt: ["$addressDetails", 0] }, "$address"] },
-               orders: { $cond: [{ $gt: [{ $size: "$ordersDetails" }, 0] }, "$ordersDetails", "$orders"] },
                cart: { $cond: [{ $gt: [{ $size: "$cartDetails" }, 0] }, "$cartDetails", "$cart"] },
                wishlist: { $cond: [{ $gt: [{ $size: "$wishlistDetails" }, 0] }, "$wishlistDetails", "$wishlist"] },
                notifications: { $cond: [{ $gt: [{ $size: "$notificationsDetails" }, 0] }, "$notificationsDetails", "$notifications"] }
@@ -156,7 +142,6 @@ export const isAuthenticated = async (req, res) => {
          {
             $project: {
                addressDetails: 0,
-               ordersDetails: 0,
                cartDetails: 0,
                wishlistDetails: 0,
                notificationsDetails: 0

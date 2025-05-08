@@ -13,7 +13,7 @@ import AdminLayout from "./_admin/AdminLayout";
 import AuthCallback from "./_auth/page/AuthCallback";
 
 // pages
-import { AccountDetails, AccountPaymentDetails, AccountWishlist, Address, Cart, Categories, Collections, Home, Offers, Orders, Product, Profile, Search, SosCallBack } from "./_root/page";
+import { AccountDetails, AccountPaymentDetails, AccountWishlist, Address, Cart, Categories, Collections, Home, Offers, OrderDetails, Orders, Product, Profile, Search, SosCallBack, Verify } from "./_root/page";
 import { AdminAddCollection, AdminAddOffer, AdminAddProduct, AdminCategory, AdminCollection, AdminCustomers, AdminDashboard, AdminInventory, AdminOffer, AdminOrders, AdminProduct, AdminReviews, AdminSettings, AdminUpdateCollection, AdminUpdateInventory, AdminUpdateOffer, AdminUpdateProduct } from "./_admin/page";
 
 export const SmoothScrollContext = createContext();
@@ -136,6 +136,7 @@ const App = () => {
           <Route path="/offers" element={<Offers />} />
           <Route path="/profile" element={<Profile />} >
             <Route path="/profile/orders" element={<Orders />} />
+            <Route path="/profile/orders/:trackId" element={<OrderDetails />} />
             <Route path="/profile/address" element={<Address />} />
             <Route path="/profile/account-details" element={<AccountDetails />} />
             <Route path="/profile/wishlist" element={<AccountWishlist />} />
@@ -145,7 +146,6 @@ const App = () => {
           <Route path="/product/:slug" element={<Product />} />
           <Route path="/sso-callback" element={<SosCallBack />} />
         </Route>
-
         <Route path="/admin" element={<AdminLayout />}>
           {/*admin dashbord  */}
           <Route index element={<AdminDashboard />} />
@@ -179,6 +179,9 @@ const App = () => {
           <Route path="/admin/reviews" element={<AdminReviews />} />
           <Route path="/admin/reviews/:slug" element={<AdminReviews />} />
         </Route>
+
+        {/* secure */}
+        <Route path="/verify" element={<Verify />} />
       </Routes>
       {/* Toast notifications */}
       <ToastContainer

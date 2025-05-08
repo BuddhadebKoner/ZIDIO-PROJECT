@@ -3,8 +3,8 @@ import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom';
 import { X, AlertTriangle, MapPin, CreditCard, Wallet, DollarSign, CreditCard as CardIcon, CheckCircle } from 'lucide-react';
 import { formatIndianCurrency } from '../../utils/amountFormater';
-import { placeOrder } from '../../lib/api/payment/order';
 import { toast } from 'react-toastify';
+import { usePlaceOrder } from '../../lib/query/queriesAndMutation';
 
 const Checkout = ({ onClose, cartData, summaryData }) => {
    const { currentUser, isLoading } = useAuth();
@@ -15,6 +15,13 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
    const [addressErrors, setAddressErrors] = useState([]);
 
    const [addressData, setAddressData] = useState(currentUser?.address || {});
+
+   const {
+      mutateAsync: placeOrderAsync,
+      isLoading: isPlacingOrder,
+      isSuccess: isOrderPlaced,
+      isError: isOrderError,
+   } = usePlaceOrder();
 
    useEffect(() => {
       if (currentUser?.address) {
@@ -157,8 +164,8 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
          const paymentResponse = await handlePayment(orderData);
 
          if (paymentResponse.success) {
-            // Attempt to place the order and handle the response
-            const orderResponse = await placeOrder(orderData);
+            // Use mutateAsync to await the response
+            const orderResponse = await placeOrderAsync(orderData);
 
             if (orderResponse.success) {
                if (paymentMethod === 'cod') {

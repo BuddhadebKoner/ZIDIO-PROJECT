@@ -3,11 +3,16 @@ import { User } from "../models/user.model.js";
 import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
 
-const stripe = Stripe('sk_test_51RKVjH4SoabpG0PT2BhYNnaJPfo4XG2wcyqMMtH8EVHQnccgjSrMPNYiWkgGG5yNR4ZwaMNJRwkMyWsmcEI9Ky4L00yfG69KEA');
+// Initialize stripe only when needed
+const getStripe = () => {
+   return new Stripe(process.env.STRIPE_SECRET_KEY);
+};
 
 export const placeOrder = async (req, res) => {
    try {
       const userId = req.userId;
+      const stripe = getStripe();
+
       if (!userId) {
          return res.status(401).json({
             success: false,
@@ -92,6 +97,14 @@ export const placeOrder = async (req, res) => {
             },
          });
       } else if (orderType === 'COD') {
+
+         // update user's order 
+         await User.findByIdAndUpdate(isUserExist._id, {
+            $push: {
+               orders: newOrder._id,
+            }
+         }, { new: true });
+
          // For COD orders, no payment session needed
          return res.status(200).json({
             success: true,
@@ -203,3 +216,105 @@ export const verifyOrder = async (req, res) => {
       });
    }
 };
+
+export const getOrders = async (req, res) => {
+   try {
+      const userId = req.userId;
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+         });
+      }
+
+      // is user exist
+      const isUserExist = await User.findOne({ clerkId: userId });
+      if (!isUserExist) {
+         return res.status(404).json({
+            success: false,
+            message: "User not found"
+         });
+      }
+
+      let { page, limit } = req.query;
+      page = parseInt(page) || 1;
+      limit = parseInt(limit) || 5;
+
+      if (page < 1 || limit < 1) {
+         return res.status(400).json({
+            success: false,
+            message: "Invalid pagination parameters.",
+         });
+      }
+      const skip = (page - 1) * limit;
+
+      // Query orders directly using user's ID
+      const orders = await Order.find({ user: isUserExist._id })
+         .sort({ createdAt: -1 })
+         .skip(skip)
+         .limit(limit);
+
+      // Get total count for pagination
+      const totalOrders = await Order.countDocuments({ user: isUserExist._id });
+
+      return res.status(200).json({
+         success: true,
+         orders,
+         totalOrders,
+         currentPage: page,
+         totalPages: Math.ceil(totalOrders / limit)
+      });
+
+   } catch (error) {
+      return res.status(500).json({
+         success: false,
+         message: "Internal server error",
+         error: error.message
+      });
+   }
+}
+
+export const getOrderById = async (req, res) => {
+   try {
+      const userId = req.userId;
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+         });
+      }
+
+      // is user exist
+      const isUserExist = await User.findOne({ clerkId: userId });
+      if (!isUserExist) {
+         return res.status(404).json({
+            success: false,
+            message: "User not found"
+         });
+      }
+
+      const { trackId } = req.params;
+
+      // Find the order by trackId
+      const order = await Order.findOne({ trackId, user: isUserExist._id });
+
+      if (!order) {
+         return res.status(404).json({
+            success: false,
+            message: "Order not found"
+         });
+      }
+
+      return res.status(200).json({
+         success: true,
+         message: "Order fetched successfully",
+         order
+      });
+   } catch (error) {
+      return res.status(500).json({
+         success: false,
+         message: "Internal server error",
+         error: error.message
+      });
+   }
+}

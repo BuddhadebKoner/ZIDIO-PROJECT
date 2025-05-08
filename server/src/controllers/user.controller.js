@@ -68,29 +68,12 @@ export const updateUserDetails = async (req, res) => {
          });
       }
 
-      if (!user.profileUpdates) {
-         user.profileUpdates = [];
-      }
-
-      const now = new Date();
-      const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      user.profileUpdates = user.profileUpdates.filter(timestamp => new Date(timestamp) > twentyFourHoursAgo);
-
-      if (user.profileUpdates.length >= 3) {
-         return res.status(429).json({
-            success: false,
-            message: "Profile update limit reached. Please try again later."
-         });
-      }
-
       if (fullName) {
          user.fullName = fullName;
       }
       if (phone) {
          user.phone = phone;
       }
-
-      user.profileUpdates.push(now);
 
       await user.save();
 

@@ -9,6 +9,7 @@ const orderSchema = new mongoose.Schema({
    trackId: {
       type: String,
       required: true,
+      unque: true,
    },
    purchaseProducts: [
       {

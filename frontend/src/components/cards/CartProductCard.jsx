@@ -198,7 +198,7 @@ const CartProductCard = ({ item, setProductAbliability }) => {
       const newQuantity = Math.min(quantity, availableQty);
 
       if (newQuantity < quantity) {
-        toast.info(`Quantity adjusted to ${newQuantity} based on available stock for size ${newSize}`);
+        console.warn(`Quantity adjusted to ${newQuantity} for size ${newSize}`);  
       }
 
       updateQuantity({

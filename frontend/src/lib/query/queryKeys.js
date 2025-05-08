@@ -28,5 +28,9 @@ export const QUERY_KEYS = {
    HOME: {
       GET_HOME_CONTENT: 'getHomeContent',
    },
+   ORDERS: {
+      GET_ALL_ORDERS: 'getAllOrders',
+      GET_ORDER_BY_ID: 'getOrderById',
+   },
    EXTREAM_SEARCH: "extreamSearch"
 };
