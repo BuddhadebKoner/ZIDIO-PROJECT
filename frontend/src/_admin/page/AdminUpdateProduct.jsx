@@ -59,7 +59,7 @@ const AdminUpdateProduct = () => {
         setFetchError('');
 
         const response = await getProductById(slug);
-        // console.log("Product data response:", response);
+        console.log("Product data response:", response.product);
 
         if (!response || !response.product) {
           throw new Error("Product not found or invalid response format");

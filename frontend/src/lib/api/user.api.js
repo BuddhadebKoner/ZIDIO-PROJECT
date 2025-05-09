@@ -1,29 +1,22 @@
 import axiosInstance from "../../config/config";
 
 export const getUpdateAvatar = async (avatar) => {
-   try {
-      const response = await axiosInstance.patch('/user/update-avatar',
-         { avatar },
-         {
-            headers: {
-               'Content-Type': 'application/json',
-            },
-         }
-      );
 
-      if (response.status === 200) {
+   try {
+      // Change from patch to post
+      const response = await axiosInstance.post('/user/update-avatar', { avatar });
+
+      if (!response.data.success) {
          return {
-            success: true,
-            message: 'Avatar updated successfully',
-            user: response.data.user,
+            success: false,
+            message: 'Failed to update avatar',
          };
       }
 
       return {
-         success: false,
-         message: 'Failed to update avatar',
-         user: null,
-      }
+         success: true,
+         message: 'Avatar updated successfully',
+      };
    } catch (error) {
       console.error('Error Updating Avatar', error);
       return {
@@ -36,7 +29,7 @@ export const getUpdateAvatar = async (avatar) => {
 
 export const getUpdateUser = async (updateProfile) => {
    try {
-      const response = await axiosInstance.patch('/user/update-profile',
+      const response = await axiosInstance.post('/user/update-profile',
          { ...updateProfile },
          {
             headers: {
@@ -146,7 +139,7 @@ export const getCartProducts = async () => {
 
       if (response.data.success) {
          return response.data.cartData;
-       }
+      }
       return [];
    } catch (error) {
       console.error('Error Fetching Cart Products', error);

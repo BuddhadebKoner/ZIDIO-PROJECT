@@ -36,7 +36,7 @@ const Cart = () => {
       <div className="flex flex-col items-center justify-center min-h-[70vh]">
         <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
         <p className="text-base mb-6">Looks like you haven't added any items to your cart yet.</p>
-        <Link to="/" className="bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 transition-all">
+        <Link to="/category" className="bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 transition-all">
           Continue shopping
         </Link>
       </div>

@@ -7,9 +7,9 @@ import { getHomeContentDetails } from '../controllers/public.controller.js';
 const userRouter = express.Router();
 
 // update user profile
-userRouter.patch('/update-avatar', userAuth, updateAvatar);
+userRouter.post('/update-avatar', userAuth, updateAvatar);
 // update user details
-userRouter.patch('/update-profile', userAuth, updateUserDetails);
+userRouter.post('/update-profile', userAuth, updateUserDetails);
 // add address
 userRouter.post('/add-address', userAuth, addAddress);
 // update address

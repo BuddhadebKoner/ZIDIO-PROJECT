@@ -33,7 +33,7 @@ const AccountWishlist = () => {
           </div>
           <h2 className="text-2xl font-semibold mb-3 text-text">Your wishlist is empty</h2>
           <p className="text-text-muted mb-6 max-w-md mx-auto">Add items to your wishlist to save them for later or share them with friends.</p>
-          <Link to="/shop" className="btn-primary inline-block">
+          <Link to="/category" className="btn-primary inline-block">
             Explore Products
           </Link>
         </div>

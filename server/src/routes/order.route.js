@@ -4,6 +4,7 @@ import { getOrderById, getOrders, placeOrder, verifyPayment } from '../controlle
 
 const orderRouter = express.Router();
 
+// place order
 orderRouter.post('/place-order', userAuth, placeOrder);
 // get all orders
 orderRouter.get('/get-orders', userAuth, getOrders);

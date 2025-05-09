@@ -101,7 +101,7 @@ export async function findCustomerByEmail(email) {
          limit: 3
       });
       
-      console.log('Stripe customer search results:', customers.data);
+      // console.log('Stripe customer search results:', customers.data);
       return customers.data.length > 0 ? customers.data[0] : null;
    } catch (error) {
       console.error('Error finding customer by email:', error);

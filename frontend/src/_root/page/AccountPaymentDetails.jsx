@@ -49,7 +49,7 @@ const AccountPaymentDetails = () => {
                      name: currentUser.fullName,
                      email: currentUser.email
                   });
-                  console.log('Created new Stripe customer:', customer);
+                  // console.log('Created new Stripe customer:', customer);
                   customerId = customer.id;
                }
             } else {

@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import FullPageLoader from '../../components/loaders/FullPageLoader';
 import AccountOrderCard from '../../components/shared/AccountOrderCard';
 import { useGetAllOrders } from '../../lib/query/queriesAndMutation';
+import { Link } from 'react-router-dom';
 
 const Orders = () => {
   const {
@@ -60,7 +61,7 @@ const Orders = () => {
   if (isError) {
     return (
       <div className="container mx-auto px-4 py-6">
-        <div className="comic-border red-velvet-border p-8 text-center bg-surface rounded-lg">
+        <div className="glass-morphism red-velvet-border p-8 text-center bg-surface rounded-lg">
           <h3 className="text-xl font-bold mb-4">Error loading orders</h3>
           <p className="text-text-muted mb-6">
             {error?.message || 'Failed to load orders. Please try again later.'}
@@ -108,12 +109,13 @@ const Orders = () => {
           )}
         </div>
       ) : (
-        <div className="comic-border red-velvet-border p-8 text-center bg-surface rounded-lg">
+        <div className="glass-morphism red-velvet-border p-8 text-center bg-surface rounded-lg">
           <h3 className="text-xl font-bold mb-4">No orders yet</h3>
           <p className="text-text-muted mb-6">You haven't placed any orders yet.</p>
-          <a href="/shop" className="btn-primary inline-block">
+            <Link
+              to="/category" className="btn-primary inline-block">
             Start Shopping
-          </a>
+          </Link>
         </div>
       )}
     </div>

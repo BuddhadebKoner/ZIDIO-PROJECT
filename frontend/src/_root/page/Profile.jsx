@@ -118,7 +118,7 @@ const Profile = () => {
 
     updateAvatar(avatarName, {
       onSuccess: () => {
-        toast.success("Avatar updated successfully!")
+        console.log('Avatar updated successfully');
       },
       onError: (error) => {
         toast.error(error?.message || "Failed to update avatar")
