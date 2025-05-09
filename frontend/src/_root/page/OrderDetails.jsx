@@ -31,6 +31,8 @@ const OrderDetails = () => {
       error
    } = useGetOrderById(trackId);
 
+   console.log("Order Details Data: ", data);
+
    const handleCancelOrder = () => {
       console.log("Cancelling order...");
       // Add actual implementation logic here

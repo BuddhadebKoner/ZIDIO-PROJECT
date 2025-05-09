@@ -45,30 +45,24 @@ export const getUpdateUser = async (updateProfile) => {
          }
       );
 
-      return {
-         success: true,
-         message: 'User updated successfully',
-      };
-   } catch (error) {
-      console.error('Error Updating User', error);
-
-      if (error.response && error.response.status === 429) {
-         throw {
-            response: {
-               data: {
-                  message: error.response.data.message || 'Too many requests. Please try again later.'
-               }
-            }
+      if (response.status === 200) {
+         return {
+            success: true,
+            message: 'User updated successfully',
+            user: response.data.user,
          };
       }
 
-      // For other errors, throw a generic error
-      throw {
-         response: {
-            data: {
-               message: error.response?.data?.message || 'Failed to update user'
-            }
-         }
+      return {
+         success: false,
+         message: 'Failed to update user',
+         user: null,
+      }
+   } catch (error) {
+      console.error('Error Updating User', error);
+      return {
+         success: false,
+         message: 'Error Updating User',
       };
    }
 };

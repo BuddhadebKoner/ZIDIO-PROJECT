@@ -98,7 +98,14 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
          };
       });
 
-      const payableAmount = summaryData.finalTotal;
+      // Cart total without delivery charges
+      const cartTotal = cartData.cartTotal;
+      
+      // Get delivery charge from summary data
+      const deliveryCharge = summaryData.isFreeDelivery ? 0 : summaryData.deliveryCharge;
+      
+      // Total payable amount (cart total + delivery charge)
+      const payableAmount = cartTotal + deliveryCharge;
 
       const totalDiscount = cartData.items.reduce((total, item) => {
          if (item.hasDiscount && item.originalPrice && item.price) {
@@ -127,6 +134,8 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
          user: currentUser?._id,
          purchaseProducts: purchaseProducts,
          deliveryAddress: addressData._id,
+         cartTotal: cartTotal,
+         deliveryCharge: deliveryCharge, // Add separate delivery charge field
          payableAmount: payableAmount,
          totalDiscount: totalDiscount,
          orderType: orderType,

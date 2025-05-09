@@ -40,3 +40,17 @@ export const getOrderById = async (trackId) => {
       }
    }
 }
+
+// verify payment
+export const verifyPayment = async (verifyOrder) => {
+   try {
+      const response = await axiosInstance.post(`/orders/verify-payment`, verifyOrder);
+      return response.data;
+   } catch (error) {
+      return {
+         success: false,
+         message: "Failed to verify payment",
+         error: error.message
+      }
+   }
+}

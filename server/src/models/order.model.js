@@ -90,6 +90,10 @@ const orderSchema = new mongoose.Schema({
       required: true,
       default: 0
    },
+   deliveryCharge: {
+      type: Number,
+      required: true,
+   },
    paymentId: {
       type: String,
       default: null
