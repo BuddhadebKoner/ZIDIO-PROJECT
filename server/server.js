@@ -19,7 +19,8 @@ connectDB();
 
 // clerk middleware
 app.use(clerkMiddleware({
-  authorizedParties: ['https://zidio-project-nine.vercel.app']
+  authorizedParties: ['https://zidio-project-nine.vercel.app', 'http://localhost:5173'],
+  apiKey: process.env.CLERK_API_KEY,
 }));
 
 app.use(express.json());
