@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatIndianCurrency } from '../../utils/amountFormater';
 
 const OrderDetailsGrid = ({ products }) => {
    return (
@@ -42,7 +43,7 @@ const OrderDetailsGrid = ({ products }) => {
                      </div>
 
                      <div className="text-right">
-                        <span className="font-semibold text-primary-400">₹{product.payableAmount.toFixed(2)}</span>
+                        <span className="font-semibold text-primary-400">{formatIndianCurrency(product.payableAmount)}</span>
                      </div>
                   </div>
                </div>

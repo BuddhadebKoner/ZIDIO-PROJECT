@@ -31,7 +31,7 @@ const OrderProgressStatus = ({
    };
 
    return (
-      <div className="rounded-lg shadow-sm p-6 mb-20">
+      <div className="rounded-lg p-6 mb-20">
          <div className="flex items-center mb-6">
             {statusInfo.icon}
             <h2 className="text-lg font-semibold ml-2 text-text">{statusInfo.label}</h2>

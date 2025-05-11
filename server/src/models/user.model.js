@@ -38,6 +38,10 @@ const userSchema = new mongoose.Schema({
       ref: 'Address',
       default: null,
    },
+   stripeCustomerId: {
+      type: String,
+      unique: true,
+   },
    orders: [
       {
          type: mongoose.Schema.Types.ObjectId,

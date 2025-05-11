@@ -1,5 +1,5 @@
-import React from 'react';
 import { CreditCard, MapPin } from 'lucide-react';
+import { formatIndianCurrency } from '../../utils/amountFormater';
 
 const OrderPaymentAddressInfo = ({ order, paymentStatusInfo }) => {
    return (
@@ -34,32 +34,39 @@ const OrderPaymentAddressInfo = ({ order, paymentStatusInfo }) => {
                <div className="pt-3 border-t border-primary-800/30">
                   <div className="flex justify-between items-center">
                      <span className="text-text-muted">Subtotal</span>
-                     <span className="font-medium text-text">₹{(order.payableAmount + order.totalDiscount).toFixed(2)}</span>
+                     <span className="font-medium text-text">{formatIndianCurrency(order.payableAmount + order.totalDiscount)}</span>
                   </div>
 
                   <div className="flex justify-between items-center mt-1">
                      <span className="text-text-muted">Discount</span>
-                     <span className="font-medium text-success">-₹{order.totalDiscount.toFixed(2)}</span>
+                     <span className="font-medium text-success">-{formatIndianCurrency(order.totalDiscount)}</span>
                   </div>
 
                   <div className="flex justify-between items-center mt-3 pt-3 border-t border-primary-800/30">
                      <span className="font-semibold text-text">Total</span>
-                     <span className="font-bold text-text">₹{order.payableAmount.toFixed(2)}</span>
+                     <span className="font-bold text-text">{formatIndianCurrency(order.payableAmount)}</span>
                   </div>
                </div>
 
                {order.orderType.includes('COD') && (
                   <div className="flex justify-between items-center pt-3 border-t border-primary-800/30">
                      <span className="text-text-muted">Cash on Delivery</span>
-                     <span className="font-medium text-text">₹{order.payInCashAmount.toFixed(2)}</span>
+                     <span className="font-medium text-text">{formatIndianCurrency(order.payInCashAmount)}</span>
                   </div>
                )}
 
-               {order.orderType.includes('Online') && (
+               {(order.orderType.includes('ONLINE') && order.paymentStatus === 'paid') ? (
                   <div className="flex justify-between items-center">
-                     <span className="text-text-muted">Paid Online</span>
-                     <span className="font-medium text-text">₹{order.payInOnlineAmount.toFixed(2)}</span>
+                     <span className="text-text-muted">Paid ONLINE</span>
+                     <span className="font-medium text-text">{formatIndianCurrency(order.payInOnlineAmount)}</span>
                   </div>
+               ) : (
+                  <>
+                     <div className="flex justify-between items-center">
+                        <span className="text-text-muted">Amount not paid yet</span>
+                        <span className="font-medium text-text">{formatIndianCurrency(order.payInOnlineAmount)}</span>
+                     </div>
+                  </>
                )}
             </div>
          </div>

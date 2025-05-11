@@ -16,14 +16,9 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 connectDB();
+
 // clerk middleware
-app.use(clerkMiddleware({
-  publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY,
-  secretKey: process.env.CLERK_SECRET_KEY,
-  authorizedParties: [process.env.CLIENT_URL, 'http://localhost:5173'],
-  debug: true,
-  proxyUrl: process.env.PROXY_URL,
-}));
+app.use(clerkMiddleware());
 
 app.use(express.json());
 
@@ -43,7 +38,7 @@ app.use(cors({
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE","PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 

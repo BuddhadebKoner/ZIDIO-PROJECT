@@ -8,7 +8,6 @@ import { addProduct, getInventorys } from "../api/admin.api";
 import { getAllCollections, getCollectionById, getProductsByCollectionSlug, searchCollections } from "../api/collection.api";
 import { addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
-import { placeOrder } from "../api/payment/order";
 import { getOrderById, getOrders } from "../api/order.api";
 
 export const useIsAuthenticated = () => {
@@ -384,27 +383,6 @@ export const useGetAllInventorys = (pageParam = 1, limit = 10) => {
       refetchOnWindowFocus: false,
    });
 };
-
-// place Order
-export const usePlaceOrder = () => {
-   const queryClient = useQueryClient();
-
-   return useMutation({
-      mutationFn: (orderData) => placeOrder(orderData),
-      onSuccess: () => {
-         queryClient.invalidateQueries([
-            QUERY_KEYS.PRODUCTS.GET_CART_PRODUCTS,
-            QUERY_KEYS.AUTH.IS_AUTHENTICATED,
-         ]);
-      },
-      onError: (error) => {
-         const errorMessage = error?.response?.data?.message || "Error placing order";
-         toast.error(errorMessage, {
-            position: toast.POSITION.TOP_RIGHT,
-         });
-      },
-   });
-}
 
 // get all orders infinite pagination
 export const useGetAllOrders = (pageParam = 1, limit = 10) => {

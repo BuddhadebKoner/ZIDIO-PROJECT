@@ -4,7 +4,7 @@ export const getUpdateAvatar = async (avatar) => {
 
    try {
       // Change from patch to post
-      const response = await axiosInstance.post('/user/update-avatar', { avatar });
+      const response = await axiosInstance.patch('/user/update-avatar', { avatar });
 
       if (!response.data.success) {
          return {
@@ -29,7 +29,7 @@ export const getUpdateAvatar = async (avatar) => {
 
 export const getUpdateUser = async (updateProfile) => {
    try {
-      const response = await axiosInstance.post('/user/update-profile',
+      const response = await axiosInstance.patch('/user/update-profile',
          { ...updateProfile },
          {
             headers: {

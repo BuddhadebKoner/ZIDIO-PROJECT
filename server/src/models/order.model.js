@@ -69,16 +69,31 @@ const orderSchema = new mongoose.Schema({
       required: true,
       default: 'Processing'
    },
+   orderProcessingTime: {
+      type: Date,
+   },
+   orderShippedTime: {
+      type: Date,
+   },
+   orderDeliveredTime: {
+      type: Date,
+   },
+   orderCancelledTime: {
+      type: Date,
+   },
+   orderReturnedTime: {
+      type: Date,
+   },
    orderType: {
       type: String,
-      enum: ['COD', 'Online', 'COD+Online'],
+      enum: ['COD', 'ONLINE', 'COD+ONLINE'],
       required: true
    },
    paymentStatus: {
       type: String,
-      enum: ['Pending', 'Success', 'Failed'],
+      enum: ['paid', 'unpaid'],
       required: true,
-      default: 'Pending'
+      default: 'unpaid'
    },
    payInCashAmount: {
       type: Number,
@@ -94,10 +109,20 @@ const orderSchema = new mongoose.Schema({
       type: Number,
       required: true,
    },
-   paymentId: {
+   sessionId: {
       type: String,
       default: null
    },
+   paymentUrl: {
+      type: String,
+      default: null
+   },
+   paymentData: [
+      {
+         type: mongoose.Schema.Types.ObjectId,
+         ref: "Payment",
+      }
+   ],
 }, { timestamps: true });
 
 export const Order = mongoose.model("Order", orderSchema);

@@ -3,12 +3,12 @@ import { User } from "../models/user.model.js";
 import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
 import mongoose, { startSession } from "mongoose";
+import { Payment } from "../models/payment.model.js";
+import { Inventory } from "../models/inventory.model.js";
 
 
 // Constants
-const VALID_ORDER_TYPES = ['COD', 'Online', 'COD+Online'];
-const ONLINE_PAYMENT_PERCENTAGE = 0.3;
-const CASH_PAYMENT_PERCENTAGE = 0.7;
+const VALID_ORDER_TYPES = ['COD', 'ONLINE', 'COD+ONLINE'];
 
 
 const getStripe = () => {
@@ -132,11 +132,11 @@ const validatePaymentAmounts = (orderData) => {
    }
 
    // Validate payment type and amounts
-   if (orderType === 'Online' && payInOnlineAmount !== payableAmount) {
+   if (orderType === 'ONLINE' && payInOnlineAmount !== payableAmount) {
       return {
          isValid: false,
          statusCode: 400,
-         message: "Online payment amount should equal total payable amount"
+         message: "ONLINE payment amount should equal total payable amount"
       };
    }
 
@@ -148,18 +148,22 @@ const validatePaymentAmounts = (orderData) => {
       };
    }
 
-   if (orderType === 'COD+Online') {
-      // Calculate expected amounts with clear rounding to 2 decimal places
-      const expectedOnlineAmount = parseFloat((payableAmount * ONLINE_PAYMENT_PERCENTAGE).toFixed(2));
-      const expectedCashAmount = parseFloat((payableAmount * CASH_PAYMENT_PERCENTAGE).toFixed(2));
-
-      // Allow for small rounding differences (0.01)
-      if (Math.abs(payInOnlineAmount - expectedOnlineAmount) > 0.01 ||
-         Math.abs(payInCashAmount - expectedCashAmount) > 0.01) {
+   if (orderType === 'COD+ONLINE') {
+      // Check that both payment methods have values greater than 0
+      if (payInOnlineAmount <= 0 || payInCashAmount <= 0) {
          return {
             isValid: false,
             statusCode: 400,
-            message: `For COD+Online orders, online payment must be ₹${expectedOnlineAmount.toFixed(2)} (30%) and cash payment must be ₹${expectedCashAmount.toFixed(2)} (70%) of total amount ₹${payableAmount.toFixed(2)} (including delivery charge of ₹${deliveryCharge.toFixed(2)})`
+            message: "For COD+ONLINE orders, both ONLINE and cash payment amounts must be greater than 0"
+         };
+      }
+
+      // Validate sum equals total (allowing for small rounding differences)
+      if (Math.abs(payInOnlineAmount + payInCashAmount - payableAmount) > 1) {
+         return {
+            isValid: false,
+            statusCode: 400,
+            message: `Total payable amount (₹${payableAmount}) should equal the sum of ONLINE (₹${payInOnlineAmount}) and cash (₹${payInCashAmount}) amounts`
          };
       }
    }
@@ -170,6 +174,8 @@ const validatePaymentAmounts = (orderData) => {
 
 const createOrder = async (orderData, userId, session) => {
    const trackId = uuidv4();
+
+   console.log(orderData);
 
    try {
       const newOrder = await Order.create([{
@@ -283,13 +289,14 @@ const prepareStripeLineItems = (orderData) => {
       purchaseProducts,
       deliveryCharge,
       payInCashAmount,
-      payInOnlineAmount
+      payInOnlineAmount,
+      payableAmount
    } = orderData;
 
    const lineItems = [];
 
-   if (orderType === 'Online') {
-      // For fully online orders, charge the full amount for each product
+   if (orderType === 'ONLINE') {
+      // For fully ONLINE orders, charge the full amount for each product
       purchaseProducts.forEach(item => {
          lineItems.push({
             price_data: {
@@ -310,30 +317,32 @@ const prepareStripeLineItems = (orderData) => {
          });
       });
 
-      // Add full delivery charge
+      // Add delivery charge
       if (deliveryCharge > 0) {
          lineItems.push({
             price_data: {
                currency: 'inr',
                product_data: {
                   name: 'Delivery Charge',
-                  description: 'Shipping and handling',
+                  description: 'Delivery fee',
                },
                unit_amount: Math.round(deliveryCharge * 100),
             },
             quantity: 1,
          });
       }
-   } else if (orderType === 'COD+Online') {
-      // For COD+Online, add a single line item for the 30% advance payment
+   } else if (orderType === 'COD+ONLINE') {
+      // For COD+ONLINE, add a single line item for the partial ONLINE payment
+      const onlinePercentage = Math.round((payInOnlineAmount / payableAmount) * 100);
+
       lineItems.push({
          price_data: {
             currency: 'inr',
             product_data: {
-               name: 'Advance Payment (30%)',
-               description: `30% advance payment for your order. Remaining 70% (₹${payInCashAmount.toFixed(2)}) to be paid on delivery.`,
+               name: 'Partial ONLINE Payment',
+               description: `${onlinePercentage}% ONLINE payment for your order. Remaining ₹${payInCashAmount.toFixed(2)} to be paid on delivery.`,
                metadata: {
-                  orderType: 'COD+Online',
+                  orderType: 'COD+ONLINE',
                   cashAmount: payInCashAmount.toString(),
                   onlineAmount: payInOnlineAmount.toString()
                }
@@ -368,10 +377,9 @@ const createStripeCheckoutSession = async ({
          payment_method_types: ['card'],
          success_url: `${process.env.CLIENT_URL}/verify?success=true&orderId=${orderId}`,
          cancel_url: `${process.env.CLIENT_URL}/verify?success=false&orderId=${orderId}`,
-         // Add receipt email with custom description for COD+Online orders
-         ...(orderType === 'COD+Online' && {
+         ...(orderType === 'COD+ONLINE' && {
             payment_intent_data: {
-               description: `30% advance payment. Remaining ₹${payInCashAmount.toFixed(2)} due on delivery.`
+               description: `Partial ONLINE payment. Remaining ₹${payInCashAmount.toFixed(2)} due on delivery.`
             }
          }),
          metadata: {
@@ -381,9 +389,8 @@ const createStripeCheckoutSession = async ({
             totalAmount: payableAmount.toString(),
             userEmail: user.email || '',
             userName: user.fullName || '',
-            // Add these fields for COD+Online orders
-            ...(orderType === 'COD+Online' && {
-               paymentSplit: '30/70',
+            ...(orderType === 'COD+ONLINE' && {
+               paymentSplit: `${Math.round((payInOnlineAmount / payableAmount) * 100)}/${Math.round((payInCashAmount / payableAmount) * 100)}`,
                onlineAmount: payInOnlineAmount.toString(),
                cashAmount: payInCashAmount.toString()
             })
@@ -394,31 +401,7 @@ const createStripeCheckoutSession = async ({
                setup_future_usage: 'on_session'
             }
          },
-         shipping_address_collection: {
-            allowed_countries: ['IN'],
-         },
-         shipping_options: [
-            {
-               shipping_rate_data: {
-                  type: 'fixed_amount',
-                  fixed_amount: {
-                     amount: Math.round(deliveryCharge * 100),
-                     currency: 'inr',
-                  },
-                  display_name: 'Standard shipping',
-                  delivery_estimate: {
-                     minimum: {
-                        unit: 'business_day',
-                        value: 3,
-                     },
-                     maximum: {
-                        unit: 'business_day',
-                        value: 5,
-                     },
-                  },
-               },
-            },
-         ],
+         billing_address_collection: 'required',
       });
 
       return { session: stripeSession, error: null };
@@ -434,12 +417,11 @@ const createStripeCheckoutSession = async ({
    }
 };
 
-
-const updateOrderWithPayment = async (orderId, paymentId, session) => {
+const updateOrderWithPayment = async (orderId, seasionId, session) => {
    try {
       const updatedOrder = await Order.findByIdAndUpdate(
          orderId,
-         { $set: { paymentId } },
+         { $set: { seasionId } },
          { session, new: true }
       );
 
@@ -563,7 +545,7 @@ export const placeOrder = async (req, res) => {
       }
 
       // Handle different order types
-      if (req.body.orderType === 'Online' || req.body.orderType === 'COD+Online') {
+      if (req.body.orderType === 'ONLINE' || req.body.orderType === 'COD+ONLINE') {
          const stripe = getStripe();
 
          // Ensure user has a Stripe customer ID
@@ -619,6 +601,8 @@ export const placeOrder = async (req, res) => {
                userUpdateError.details
             );
          }
+
+         console.log("Stripe session created:", stripeSession);
 
          // Commit transaction
          await session.commitTransaction();
@@ -694,6 +678,7 @@ export const verifyPayment = async (req, res) => {
 
       // Get order by ID
       const { order, error: orderError } = await getOrderByOrderID(orderId);
+
       if (orderError) {
          return handleErrorResponse(res, orderError.statusCode, orderError.message);
       }
@@ -705,8 +690,8 @@ export const verifyPayment = async (req, res) => {
       }
 
       // Check if order has payment ID
-      if (!order.paymentId) {
-         return handleErrorResponse(res, 400, "This order is not paid online");
+      if (!order.sessionId) {
+         return handleErrorResponse(res, 400, "This order is not paid ONLINE");
       }
 
       // Retrieve payment session from Stripe
@@ -714,9 +699,9 @@ export const verifyPayment = async (req, res) => {
       let session;
 
       try {
-         session = await stripe.checkout.sessions.retrieve(order.paymentId);
+         session = await stripe.checkout.sessions.retrieve(order.sessionId);
          if (!session) {
-            return handleErrorResponse(res, 400, "Payment session not found");
+            return handleErrorResponse(res, 404, "Payment session not found");
          }
       } catch (stripeError) {
          return handleErrorResponse(res, 500, "Failed to retrieve payment information", stripeError);
@@ -726,13 +711,70 @@ export const verifyPayment = async (req, res) => {
       if (session.payment_status === 'paid') {
          // Update order status to success
          await Order.findByIdAndUpdate(orderId, {
-            paymentStatus: 'Success'
+            paymentStatus: 'paid'
+         }, { new: true });
+
+         // fetch payment details from stripe
+         const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+
+         // console.log("Payment Intent:", paymentIntent);
+
+         // Create payment record
+         const paymentData = {
+            orderId: order._id,
+            paymentStatus: paymentIntent.status,
+            paymentMethod: session.payment_method_types[0],
+            transactionId: paymentIntent.id,
+            stripeUserId: paymentIntent.customer,
+            paymentDate: new Date(),
+            paymentTime: new Date().toLocaleTimeString(),
+            stripeSeasionId: session.id,
+            amount: paymentIntent.amount_received / 100,
+         };
+
+         const paymentSave = await Payment.create(paymentData);
+         if (!paymentSave) {
+            return handleErrorResponse(res, 500, "Failed to save payment information");
+         }
+
+         // Prepare the bulk operations for inventory updates
+         const bulkOps = order.purchaseProducts.map(item => ({
+            updateOne: {
+               filter: {
+                  productId: item.productId,
+                  "stocks.size": item.selectedSize
+               },
+               update: {
+                  $inc: {
+                     "stocks.$.quantity": -item.quantity,
+                     totalQuantity: -item.quantity
+                  }
+               }
+            }
+         }));
+
+         // Execute the bulk operation to update inventory
+         if (bulkOps.length > 0) {
+            try {
+               const inventoryResult = await Inventory.bulkWrite(bulkOps);
+
+               if (!inventoryResult || inventoryResult.modifiedCount === 0) {
+                  console.error("Inventory update failed:", inventoryResult);
+               }
+            } catch (inventoryError) {
+               console.error("Error updating inventory:", inventoryError);
+            }
+         }
+
+         // Update order with payment details
+         await Order.findByIdAndUpdate(orderId, {
+            $push: { paymentData: paymentSave._id }
          }, { new: true });
 
          return res.status(200).json({
             success: true,
             message: "Payment verified successfully",
-            paymentStatus: 'Success',
+            paymentStatus: 'paid',
             order: {
                id: order._id,
                trackId: order.trackId,
@@ -744,19 +786,19 @@ export const verifyPayment = async (req, res) => {
          return res.status(200).json({
             success: true,
             message: "Payment is pending",
-            paymentStatus: 'Pending',
+            paymentStatus: 'unpaid',
             session
          });
       } else {
          // Update order status to failed
          await Order.findByIdAndUpdate(orderId, {
-            paymentStatus: 'Failed'
+            paymentStatus: 'unpaid'
          }, { new: true });
 
          return res.status(200).json({
             success: false,
             message: "Payment failed",
-            paymentStatus: 'Failed',
+            paymentStatus: 'unpaid',
             session
          });
       }
@@ -798,13 +840,20 @@ export const getOrders = async (req, res) => {
       const skip = (page - 1) * limit;
 
       // Query orders directly using user's ID
-      const orders = await Order.find({ user: isUserExist._id })
+      // Add condition to exclude unpaid ONLINE orders
+      const orders = await Order.find({
+         user: isUserExist._id,
+         $nor: [{ orderType: 'ONLINE', paymentStatus: 'unpaid' }]
+      })
          .sort({ createdAt: -1 })
          .skip(skip)
          .limit(limit);
 
-      // Get total count for pagination
-      const totalOrders = await Order.countDocuments({ user: isUserExist._id });
+      // Get total count for pagination (excluding unpaid ONLINE orders)
+      const totalOrders = await Order.countDocuments({
+         user: isUserExist._id,
+         $nor: [{ orderType: 'ONLINE', paymentStatus: 'unpaid' }]
+      });
 
       return res.status(200).json({
          success: true,
@@ -844,13 +893,17 @@ export const getOrderById = async (req, res) => {
 
       const { trackId } = req.params;
 
-      // Find the order by trackId
-      const order = await Order.findOne({ trackId, user: isUserExist._id });
+      // Find the order by trackId with security check for unpaid ONLINE orders
+      const order = await Order.findOne({
+         trackId,
+         user: isUserExist._id,
+         $nor: [{ orderType: 'ONLINE', paymentStatus: 'unpaid' }]
+      });
 
       if (!order) {
          return res.status(404).json({
             success: false,
-            message: "Order not found"
+            message: "Order not found or access restricted"
          });
       }
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { formatIndianCurrency } from '../../utils/amountFormater';
 
 const AccountOrderCard = ({ order }) => {
    // Simplified status badge function using theme colors
@@ -31,7 +32,7 @@ const AccountOrderCard = ({ order }) => {
          day: 'numeric'
       });
    };
-   
+
    const totalItems = order.purchaseProducts.reduce((sum, product) => sum + product.quantity, 0);
 
    const thumbnailImage = order.purchaseProducts[0]?.imagesUrl;
@@ -61,7 +62,7 @@ const AccountOrderCard = ({ order }) => {
                <div className="mb-1">
                   {getStatusBadge(order.orderStatus)}
                </div>
-               <p className="font-bold text-text">₹{order.payableAmount}</p>
+               <p className="font-bold text-text">{formatIndianCurrency(order.payableAmount)}</p>
             </div>
          </div>
 

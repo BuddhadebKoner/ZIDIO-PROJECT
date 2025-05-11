@@ -160,21 +160,16 @@ const OrderDetails = () => {
    // Get payment status info
    const getPaymentStatusInfo = (status) => {
       const statusConfig = {
-         'Success': {
+         'paid': {
             color: 'text-success',
             bg: 'bg-green-50',
             border: 'border-green-200'
          },
-         'Pending': {
+         'unpaid': {
             color: 'text-warning',
             bg: 'bg-yellow-50',
             border: 'border-yellow-200'
          },
-         'Failed': {
-            color: 'text-error',
-            bg: 'bg-red-50',
-            border: 'border-red-200'
-         }
       };
 
       return statusConfig[status] || {

@@ -4,24 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import { X, AlertTriangle, MapPin, CreditCard, Wallet, DollarSign, CreditCard as CardIcon, CheckCircle } from 'lucide-react';
 import { formatIndianCurrency } from '../../utils/amountFormater';
 import { toast } from 'react-toastify';
-import { usePlaceOrder } from '../../lib/query/queriesAndMutation';
+import { placeOrderCashAndOnlineMixed, placeOrderCashOnDelivery, placeOrderOnlinePayment } from '../../lib/api/payment/order';
 
 const Checkout = ({ onClose, cartData, summaryData }) => {
    const { currentUser, isLoading } = useAuth();
    const navigate = useNavigate();
    const [paymentProcessing, setPaymentProcessing] = useState(false);
-   const [paymentMethod, setPaymentMethod] = useState('online');
+   const [paymentMethod, setPaymentMethod] = useState('ONLINE');
    const [checkoutStatus, setCheckoutStatus] = useState({ success: false, error: null });
    const [addressErrors, setAddressErrors] = useState([]);
+   const [partialPaymentAmount, setPartialPaymentAmount] = useState(1000);
+   const [partialPaymentError, setPartialPaymentError] = useState('');
 
    const [addressData, setAddressData] = useState(currentUser?.address || {});
-
-   const {
-      mutateAsync: placeOrderAsync,
-      isLoading: isPlacingOrder,
-      isSuccess: isOrderPlaced,
-      isError: isOrderError,
-   } = usePlaceOrder();
 
    useEffect(() => {
       if (currentUser?.address) {
@@ -84,6 +79,24 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
       return true;
    };
 
+   const validatePartialPayment = (amount) => {
+      const numAmount = parseFloat(amount);
+      
+      if (numAmount > summaryData.finalTotal) {
+         setPartialPaymentError('Amount cannot exceed total order value');
+         return false;
+      }
+      
+      setPartialPaymentError('');
+      return true;
+   };
+
+   const handlePartialAmountChange = (e) => {
+      const value = e.target.value;
+      setPartialPaymentAmount(value);
+      validatePartialPayment(value);
+   };
+
    const handleCreateOrder = () => {
       const purchaseProducts = cartData.items.map(item => {
          return {
@@ -116,18 +129,19 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
 
       let payInCashAmount = 0;
       let payInOnlineAmount = 0;
-      let orderType = 'Online';
+      let orderType = 'ONLINE';
 
       if (paymentMethod === 'cod') {
          payInCashAmount = payableAmount;
          orderType = 'COD';
-      } else if (paymentMethod === 'online') {
+      } else if (paymentMethod === 'ONLINE') {
          payInOnlineAmount = payableAmount;
-         orderType = 'Online';
+         orderType = 'ONLINE';
       } else if (paymentMethod === 'partial') {
-         payInOnlineAmount = payableAmount * 0.3;
-         payInCashAmount = payableAmount * 0.7;
-         orderType = 'COD+Online';
+         // Use custom amount for partial payment
+         payInOnlineAmount = parseFloat(partialPaymentAmount);
+         payInCashAmount = payableAmount - payInOnlineAmount;
+         orderType = 'COD+ONLINE';
       }
 
       const orderData = {
@@ -161,6 +175,12 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
          setPaymentProcessing(true);
          setCheckoutStatus({ success: false, error: null });
 
+         // Validate partial payment amount when that method is selected
+         if (paymentMethod === 'partial' && !validatePartialPayment(partialPaymentAmount)) {
+            setPaymentProcessing(false);
+            return;
+         }
+
          const orderData = handleCreateOrder();
 
          try {
@@ -173,8 +193,18 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
          const paymentResponse = await handlePayment(orderData);
 
          if (paymentResponse.success) {
-            // Use mutateAsync to await the response
-            const orderResponse = await placeOrderAsync(orderData);
+            // Select the appropriate API based on payment method
+            let orderResponse;
+
+            if (paymentMethod === 'cod') {
+               orderResponse = await placeOrderCashOnDelivery(orderData);
+            } else if (paymentMethod === 'ONLINE') {
+               orderResponse = await placeOrderOnlinePayment(orderData);
+            } else if (paymentMethod === 'partial') {
+               orderResponse = await placeOrderCashAndOnlineMixed(orderData);
+            }
+
+            console.log("Order response:", orderResponse);
 
             if (orderResponse.success) {
                if (paymentMethod === 'cod') {
@@ -189,14 +219,14 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
                   // Redirect to order success page
                   navigate(`/profile/orders`);
                } else {
-                  // For online/partial payment methods, check for payment URL
-                  if (!orderResponse.sessionData?.url) {
+                  // For ONLINE/partial payment methods, check for payment URL
+                  if (!orderResponse.data?.paymentUrl) {
                      toast.error(orderResponse.message || "Failed to create payment session");
                      throw new Error(orderResponse.message || "Failed to create payment session");
                   }
 
                   // Redirect to payment URL
-                  window.location.href = orderResponse.sessionData.url;
+                  window.location.href = orderResponse.data.paymentUrl;
 
                   setCheckoutStatus({
                      success: true,
@@ -237,10 +267,10 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
       switch (paymentMethod) {
          case 'cod':
             return `Place Order - ${formatIndianCurrency(summaryData.finalTotal)}`;
-         case 'online':
+         case 'ONLINE':
             return `Pay ${formatIndianCurrency(summaryData.finalTotal)}`;
          case 'partial':
-            const onlineAmount = summaryData.finalTotal * 0.3;
+            const onlineAmount = parseFloat(partialPaymentAmount) || 0;
             const codAmount = summaryData.finalTotal - onlineAmount;
             return `Pay ${formatIndianCurrency(onlineAmount)} now & ${formatIndianCurrency(codAmount)} on delivery`;
          default:
@@ -380,22 +410,22 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
                         </label>
 
                         <label
-                           className={`flex flex-col items-center justify-center p-3 rounded-md border cursor-pointer transition-all ${paymentMethod === 'online'
+                           className={`flex flex-col items-center justify-center p-3 rounded-md border cursor-pointer transition-all ${paymentMethod === 'ONLINE'
                               ? 'border-primary-500 bg-primary-950'
                               : 'border-gray-700 bg-gray-800'
                               }`}>
                            <input
                               type="radio"
                               name="paymentMethod"
-                              value="online"
-                              checked={paymentMethod === 'online'}
-                              onChange={() => setPaymentMethod('online')}
+                              value="ONLINE"
+                              checked={paymentMethod === 'ONLINE'}
+                              onChange={() => setPaymentMethod('ONLINE')}
                               className="sr-only"
-                              aria-label="Online Payment"
+                              aria-label="ONLINE Payment"
                            />
-                           <CardIcon size={24} className={paymentMethod === 'online' ? 'text-primary-400' : 'text-text-muted'} />
-                           <span className={`text-xs mt-2 text-center ${paymentMethod === 'online' ? 'text-text' : 'text-text-muted'}`}>
-                              Online Payment
+                           <CardIcon size={24} className={paymentMethod === 'ONLINE' ? 'text-primary-400' : 'text-text-muted'} />
+                           <span className={`text-xs mt-2 text-center ${paymentMethod === 'ONLINE' ? 'text-text' : 'text-text-muted'}`}>
+                              ONLINE Payment
                            </span>
                         </label>
 
@@ -426,7 +456,19 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
 
                      {paymentMethod === 'partial' && (
                         <div className="mt-3 p-2 bg-gray-800 rounded-md text-xs text-text-muted">
-                           <p>Pay 30% online now and the remaining 70% on delivery.</p>
+                           <p>Pay a custom amount ONLINE now and the remaining on delivery.</p>
+                           <div className="mt-2">
+                              <input
+                                 type="number"
+                                 value={partialPaymentAmount}
+                                 onChange={handlePartialAmountChange}
+                                 className="w-full p-2 rounded-md bg-gray-700 text-text"
+                                 placeholder="Enter amount"
+                              />
+                              {partialPaymentError && (
+                                 <p className="text-red-500 text-xs mt-1">{partialPaymentError}</p>
+                              )}
+                           </div>
                         </div>
                      )}
                   </div>
