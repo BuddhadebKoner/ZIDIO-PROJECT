@@ -18,7 +18,9 @@ const port = process.env.PORT || 3000;
 connectDB();
 
 // clerk middleware
-app.use(clerkMiddleware());
+app.use(clerkMiddleware({
+  authorizedParties: ['https://zidio-project-nine.vercel.app']
+}));
 
 app.use(express.json());
 
@@ -38,7 +40,7 @@ app.use(cors({
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE","PATCH", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 

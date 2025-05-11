@@ -14,8 +14,7 @@ if (!PUBLISHABLE_KEY) {
 
 createRoot(document.getElementById('root')).render(
   <ClerkProvider
-    publishableKey={PUBLISHABLE_KEY}
-    allowedRedirectOrigins={['https://zidio-project-nine.vercel.app']}>
+    publishableKey={PUBLISHABLE_KEY}>
     <QueryProvider>
       <AuthProvider>
         <BrowserRouter>
