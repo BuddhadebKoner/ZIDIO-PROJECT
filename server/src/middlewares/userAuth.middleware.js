@@ -1,18 +1,20 @@
-import { getAuth } from "@clerk/express";
+import { clerkClient } from "@clerk/express";
 
 export const userAuth = async (req, res, next) => {
    try {
-      const { userId } = getAuth(req);
+      const userId = req.auth.userId;
 
-      // if (!userId) {
-      //    return res.status(401).json({
-      //       success: false,
-      //       message: "Unauthorized: Authentication required"
-      //    });
-      // }
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "Unauthorized: Authentication required"
+         });
+      }
+
+      const response = await clerkClient.users.getUser(userId);
 
       // Store userId in request for use in controllers  
-      req.userId = userId;
+      req.userId = response.id;
       next();
    } catch (error) {
       console.error("Authentication middleware error:", error);
