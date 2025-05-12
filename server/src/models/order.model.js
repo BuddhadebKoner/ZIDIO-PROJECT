@@ -6,6 +6,10 @@ const orderSchema = new mongoose.Schema({
       ref: "User",
       required: true,
    },
+   orderOwner: {
+      type: String,
+      required: true,
+   },
    trackId: {
       type: String,
       required: true,

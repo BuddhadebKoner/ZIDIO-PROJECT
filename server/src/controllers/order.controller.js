@@ -894,11 +894,15 @@ export const getOrderById = async (req, res) => {
       const { trackId } = req.params;
 
       // Find the order by trackId with security check for unpaid ONLINE orders
+      // populate deliveryAddress
       const order = await Order.findOne({
          trackId,
          user: isUserExist._id,
          $nor: [{ orderType: 'ONLINE', paymentStatus: 'unpaid' }]
-      });
+      })
+         .populate("deliveryAddress")
+
+      console.log("Order:", order);
 
       if (!order) {
          return res.status(404).json({

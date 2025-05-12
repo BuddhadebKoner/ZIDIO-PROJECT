@@ -72,20 +72,30 @@ const OrderPaymentAddressInfo = ({ order, paymentStatusInfo }) => {
          </div>
 
          {/* Delivery Information */}
-         <div className="rounded-lg shadow-sm p-6">
+         <div className="rounded-lg shadow-sm">
             <div className="flex items-center mb-4">
                <MapPin className="h-5 w-5 text-text-muted mr-2" />
                <h2 className="text-lg font-semibold text-text">Delivery Information</h2>
             </div>
 
-            <div className="glass-morphism p-4 rounded-md">
-               <p className="text-sm">
-                  <span className="text-text-muted">Address ID: </span>
-                  <span className="font-medium text-text">{order.deliveryAddress}</span>
-               </p>
-               <p className="text-sm text-text-muted mt-2">
-                  * Full address details would be displayed here in production.
-               </p>
+            <div className="glass-morphism rounded-md">
+               <div className="p-3 rounded-md">
+                  <div className="space-y-1">
+                     <h2
+                        className='font-bold mb-2'
+                     >
+                        Billing Name : {order.orderOwner}
+                     </h2>
+                     <p className="font-medium">{order.deliveryAddress.addressLine1}</p>
+                     {order.deliveryAddress.addressLine2 && (
+                        <p>{order.deliveryAddress.addressLine2}</p>
+                     )}
+                     <p>{order.deliveryAddress.city}</p>
+                     <p>
+                        {order.deliveryAddress.state}, {order.deliveryAddress.country} - {order.deliveryAddress.postalCode}
+                     </p>
+                  </div>
+               </div>
             </div>
          </div>
       </div>

@@ -83,6 +83,7 @@ export const placeOrderOnlinePayment = async (req, res) => {
       // Create order in database first
       const newOrder = new Order({
          user: isUserExist._id,
+         orderOwner: isUserExist.fullName,
          trackId,
          purchaseProducts,
          deliveryAddress: isUserExist.address,
@@ -251,6 +252,7 @@ export const placeOrderCashOnDelivery = async (req, res) => {
       // Create order in database first
       const newOrder = new Order({
          user: isUserExist._id,
+         orderOwner: isUserExist.fullName,
          trackId,
          purchaseProducts,
          deliveryAddress: isUserExist.address,

@@ -5,6 +5,7 @@ import { sanitizedCollection, sanitizedOffer, sanitizedProduct } from "../utils/
 import { HomeContent } from "../models/homecontent.model.js";
 import { deleteFromCloudinary } from "../utils/cloudinary.js";
 import { Inventory } from "../models/inventory.model.js";
+import { Order } from "../models/order.model.js";
 
 export const addProduct = async (req, res) => {
    try {
@@ -1085,3 +1086,139 @@ export const updateInventory = async (req, res) => {
       });
    }
 }
+
+// fetch orders with complex query
+export const getOrders = async (req, res) => {
+   try {
+      const {
+         page = 1,
+         limit = 10,
+         sort = "-createdAt",
+         status,
+         paymentStatus,
+         orderType,
+         startDate,
+         endDate,
+         minAmount,
+         maxAmount,
+         search,
+         trackId,
+         userId
+      } = req.query;
+
+      // console.log("Query parameters:", req.query);
+
+      // Build filter object
+      const filter = {};
+
+      // Filter by order status
+      if (status && ["Processing", "Shipped", "Delivered", "Cancelled", "Returned"].includes(status)) {
+         filter.orderStatus = status;
+      }
+
+      // Filter by payment status
+      if (paymentStatus && ["paid", "unpaid"].includes(paymentStatus)) {
+         filter.paymentStatus = paymentStatus;
+      }
+
+      // Filter by order type
+      if (orderType && ["COD", "ONLINE", "COD+ONLINE"].includes(orderType)) {
+         filter.orderType = orderType;
+      }
+
+      // Filter by date range
+      if (startDate || endDate) {
+         filter.createdAt = {};
+
+         if (startDate) {
+            filter.createdAt.$gte = new Date(startDate);
+         }
+
+         if (endDate) {
+            // Set time to end of day for the end date
+            const endOfDay = new Date(endDate);
+            endOfDay.setHours(23, 59, 59, 999);
+            filter.createdAt.$lte = endOfDay;
+         }
+      }
+
+      // Filter by price range
+      if (minAmount || maxAmount) {
+         filter.payableAmount = {};
+
+         if (minAmount) {
+            filter.payableAmount.$gte = Number(minAmount);
+         }
+
+         if (maxAmount) {
+            filter.payableAmount.$lte = Number(maxAmount);
+         }
+      }
+
+      // Filter by track ID
+      if (trackId) {
+         filter.trackId = { $regex: trackId, $options: "i" };
+      }
+
+      // Filter by user ID
+      if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+         filter.user = new mongoose.Types.ObjectId(userId);
+      }
+
+      // Search functionality (search in product titles, user details via address)
+      if (search) {
+         const searchRegex = { $regex: search, $options: "i" };
+
+         filter.$or = [
+            { "purchaseProducts.title": searchRegex },
+            { trackId: searchRegex }
+         ];
+      }
+
+      // Calculate pagination
+      const pageNum = parseInt(page, 10);
+      const limitNum = parseInt(limit, 10);
+      const skip = (pageNum - 1) * limitNum;
+
+      // Execute query with pagination and populate necessary fields
+      const orders = await Order.find(filter)
+         .populate({
+            path: "user",
+            select: "name email phoneNumber"
+         })
+         .populate({
+            path: "deliveryAddress",
+            select: "name address city state zipCode phoneNumber"
+         })
+         .populate({
+            path: "paymentData",
+            select: "paymentStatus paymentMethod transactionId receiptUrl paymentDate amount"
+         })
+         .sort(sort)
+         .skip(skip)
+         .limit(limitNum)
+         .lean();
+
+      // Get total count for pagination info
+      const totalOrders = await Order.countDocuments(filter);
+      const totalPages = Math.ceil(totalOrders / limitNum);
+
+      // Format response
+      return res.status(200).json({
+         success: true,
+         message: "Orders fetched successfully",
+         currentPage: pageNum,
+         totalPages,
+         totalOrders,
+         limit: limitNum,
+         orders
+      });
+   } catch (error) {
+      console.error("Error fetching orders:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to fetch orders",
+         error: error.message || "Internal server error"
+      });
+   }
+};

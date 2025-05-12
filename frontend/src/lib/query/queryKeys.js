@@ -31,6 +31,7 @@ export const QUERY_KEYS = {
    ORDERS: {
       GET_ALL_ORDERS: 'getAllOrders',
       GET_ORDER_BY_ID: 'getOrderById',
+      GET_ORDERS_WITH_QUERY: 'getOrdersWithQuery',
    },
    EXTREAM_SEARCH: "extreamSearch"
 };

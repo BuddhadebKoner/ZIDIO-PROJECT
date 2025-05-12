@@ -4,7 +4,7 @@ import { QUERY_KEYS } from "./queryKeys";
 import { useUser } from "@clerk/clerk-react";
 import { getAddAddress, getCartProducts, getExtreamSearch, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
-import { addProduct, getInventorys } from "../api/admin.api";
+import { addProduct, getInventorys, getOrdersForAdmin } from "../api/admin.api";
 import { getAllCollections, getCollectionById, getProductsByCollectionSlug, searchCollections } from "../api/collection.api";
 import { addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
@@ -408,3 +408,42 @@ export const useGetOrderById = (trackId) => {
       refetchOnWindowFocus: false,
    });
 }
+
+// get order by query
+export const useGetOrdersWithQuery = (filters) => {
+   // Build query string from filters
+   const buildQueryString = (pageParam) => {
+      const params = new URLSearchParams();
+
+      // Add pagination
+      params.append('page', pageParam);
+      params.append('limit', '10');
+
+      // Add filters (only if they have values)
+      if (filters) {
+         Object.entries(filters).forEach(([key, value]) => {
+            if (value) {
+               params.append(key, value);
+            }
+         });
+      }
+
+      return params.toString();
+   };
+
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.ORDERS.GET_ORDERS_WITH_QUERY, filters],
+      queryFn: ({ pageParam = 1 }) => {
+         const queryString = buildQueryString(pageParam);
+         return getOrdersForAdmin(queryString);
+      },
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      refetchOnWindowFocus: false,
+      enabled: true, // The query will execute immediately
+   });
+};

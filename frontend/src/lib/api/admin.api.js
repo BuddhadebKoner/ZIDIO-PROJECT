@@ -322,3 +322,18 @@ export const updateInventory = async (slug, inventoryData) => {
       };
    }
 }
+
+// get ordders with complex query
+export const getOrdersForAdmin = async (queryString) => {
+   try {
+      const response = await axiosInstance.get(`/admin/get-orders?${queryString}`);
+      return response.data;
+   } catch (error) {
+      console.error('Error fetching orders:', error);
+      return {
+         success: false,
+         message: "Failed to fetch orders with query",
+         error: error.message || 'Unknown error occurred'
+      }
+   }
+}

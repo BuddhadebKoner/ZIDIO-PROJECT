@@ -2,7 +2,6 @@ import { clerkClient } from "@clerk/express";
 import { User } from "../models/user.model.js";
 import { avatars } from "../constant.js";
 
-
 export const isAuthenticated = async (req, res) => {
    try {
       const userId = req.userId;
