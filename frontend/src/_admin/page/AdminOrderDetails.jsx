@@ -15,9 +15,6 @@ const AdminOrderDetails = () => {
       error,
       refetch
    } = useGetOrderById(trackId)
-   console.log("Order Data:", orderData)
-
-   console.log(orderData)
 
    const order = orderData?.order
 
@@ -25,12 +22,8 @@ const AdminOrderDetails = () => {
    const handleStatusUpdate = async (newStatus) => {
       setStatusUpdating(true)
       console.log(`Updating order status from ${order?.orderStatus} to ${newStatus}`)
-      
+
       try {
-         // Here you would make API call to update status
-         // For example:
-         // await updateOrderStatus(order._id, newStatus);
-         
          // Recording the timestamp for the status change
          const timeStampField = {
             'Processing': 'orderProcessingTime',
@@ -39,12 +32,8 @@ const AdminOrderDetails = () => {
             'Cancelled': 'orderCancelledTime',
             'Returned': 'orderReturnedTime'
          }[newStatus];
-         
+
          console.log(`Setting ${timeStampField} to current time`);
-         
-         // Simulate API call with timeout
-         await new Promise(resolve => setTimeout(resolve, 1000));
-         
          console.log("Status updated successfully");
          refetch();
       } catch (error) {
@@ -58,14 +47,8 @@ const AdminOrderDetails = () => {
    const handlePaymentStatusToggle = async () => {
       const newPaymentStatus = order?.paymentStatus === 'paid' ? 'unpaid' : 'paid'
       console.log(`Toggling payment status to: ${newPaymentStatus}`)
-      
+
       try {
-         // API call would go here
-         // await updatePaymentStatus(order._id, newPaymentStatus);
-         
-         // Simulate API call
-         await new Promise(resolve => setTimeout(resolve, 1000));
-         
          console.log("Payment status updated successfully");
          refetch();
       } catch (error) {
@@ -76,7 +59,6 @@ const AdminOrderDetails = () => {
    // Handler for generating invoice
    const handleGenerateInvoice = () => {
       console.log("Generating invoice for order:", order?._id)
-      // Logic to generate invoice would go here
    }
 
    if (isLoading) {
@@ -141,6 +123,38 @@ const AdminOrderDetails = () => {
                         {order.orderType}
                      </span>
                   </div>
+                  {
+                     order.orderType === 'ONLINE' || order.orderType === "COD+ONLINE" ? (
+                        <>
+                           {/* paid amount */}
+                           <div className="flex justify-between items-center mt-2">
+                              <span className="text-text-muted">Paid Amount</span>
+                              <span className="font-medium text-text">
+                                 {order.paymentData && order.paymentData.length > 0
+                                    ? formatIndianCurrency(order.paymentData[0].amount)
+                                    : formatIndianCurrency(0)}
+                              </span>
+                           </div>
+                           {/* not paid yet */}
+                           <div className="flex justify-between items-center mt-2">
+                              <span className="text-text-muted">Not Paid Yet</span>
+                              <span className="font-medium text-text">
+                                 {formatIndianCurrency(order.payableAmount - (order.paymentData && order.paymentData.length > 0
+                                    ? order.paymentData[0].amount
+                                    : 0))}
+                              </span>
+                           </div>
+                        </>
+                     ) : (
+                        <>
+                           {/* paid amount */}
+                           <div className="flex justify-between items-center mt-2">
+                              <span className="text-text-muted">Pay on delivery</span>
+                              <span className="font-medium text-text">{formatIndianCurrency(order.payableAmount)}</span>
+                           </div>
+                        </>
+                     )
+                  }
                </div>
 
                <div className="mt-4 md:mt-0 text-right">
@@ -237,7 +251,7 @@ const AdminOrderDetails = () => {
          </div>
 
          {/* Replace the Order Management Section with the new component */}
-         <OrderManagement 
+         <OrderManagement
             order={order}
             statusUpdating={statusUpdating}
             onStatusUpdate={handleStatusUpdate}

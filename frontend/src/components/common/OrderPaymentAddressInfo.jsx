@@ -50,7 +50,7 @@ const OrderPaymentAddressInfo = ({ order, paymentStatusInfo }) => {
 
                {order.orderType.includes('COD') && (
                   <div className="flex justify-between items-center pt-3 border-t border-primary-800/30">
-                     <span className="text-text-muted">Cash on Delivery</span>
+                     <span className="text-text-muted">Pay on Delivery</span>
                      <span className="font-medium text-text">{formatIndianCurrency(order.payInCashAmount)}</span>
                   </div>
                )}

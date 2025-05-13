@@ -202,12 +202,6 @@ export const placeOrderCashOnDelivery = async (req, res) => {
          });
       }
 
-      if (isUserExist.address.toString() !== req.body.deliveryAddress) {
-         return res.status(400).json({
-            success: false,
-            message: "Delivery address is not same as user address, Unauthorized action",
-         });
-      }
 
       // extracting the order details from the request body
       const {
@@ -222,6 +216,12 @@ export const placeOrderCashOnDelivery = async (req, res) => {
          cartTotal,
       } = req.body;
 
+      if (isUserExist.address.toString() !== deliveryAddress) {
+         return res.status(400).json({
+            success: false,
+            message: "Delivery address is not same as user address, Unauthorized action",
+         });
+      }
       // console.log(req.body);
 
       if (orderType !== "COD") {
@@ -332,8 +332,183 @@ export const placeOrderCashOnDelivery = async (req, res) => {
 };
 
 // place order for cash on delivery + ONLINE payment
+export const placeOrderCashAndOnlineMixed = async (req, res) => {
+   const session = await startSession();
+   try {
+      session.startTransaction();
+      const userId = req.userId;
+      const isUserExist = await validateAuth(userId, session);
+      if (!isUserExist) {
+         await session.abortTransaction();
+         return res.status(401).json({
+            success: false,
+            message: "Unauthorized",
+         });
+      }
 
-export const placeOrderCashAndOnlineMixed = async (req, res) => { }
+      const trackId = uuidv4();
+
+      const {
+         purchaseProducts,
+         deliveryAddress,
+         payableAmount,
+         totalDiscount,
+         orderType,
+         payInCashAmount,
+         payInOnlineAmount,
+         deliveryCharge,
+         cartTotal,
+      } = req.body;
+
+      if (orderType !== "COD+ONLINE") {
+         await session.abortTransaction();
+         return res.status(400).json({
+            success: false,
+            message: "Order type is not COD+ONLINE",
+         });
+      }
+
+      if (isUserExist.address.toString() !== deliveryAddress) {
+         await session.abortTransaction();
+         return res.status(400).json({
+            success: false,
+            message: "Delivery address is not same as user address, Unauthorized action",
+         });
+      }
+
+      // check order calculations
+      const orderValidation = await checkOrderCalculations(
+         purchaseProducts,
+         cartTotal,
+         payInCashAmount,
+         payInOnlineAmount,
+         deliveryCharge,
+         totalDiscount,
+         orderType,
+         session
+      );
+
+      if (!orderValidation.success) {
+         await session.abortTransaction();
+         return res.status(orderValidation.statusCode).json({
+            success: false,
+            message: orderValidation.message,
+            details: orderValidation.details
+         });
+      }
+
+      // create order in database first
+      const newOrder = new Order({
+         user: isUserExist._id,
+         orderOwner: isUserExist.fullName,
+         trackId,
+         purchaseProducts,
+         deliveryAddress: isUserExist.address,
+         payableAmount,
+         totalDiscount,
+         orderStatus: 'Processing',
+         orderProcessingTime: new Date(),
+         orderType: 'COD+ONLINE',
+         paymentStatus: 'unpaid',
+         payInCashAmount,
+         payInOnlineAmount,
+         deliveryCharge,
+      });
+
+      const savedOrder = await newOrder.save({ session });
+
+      if (!savedOrder) {
+         await session.abortTransaction();
+         return res.status(500).json({
+            success: false,
+            message: "Error creating order",
+         });
+      }
+
+      // save orderId in user order
+      const updatedUser = await User.findByIdAndUpdate(
+         { _id: isUserExist._id },
+         { $push: { orders: savedOrder._id } },
+         { new: true, session }
+      );
+
+      if (!updatedUser) {
+         await session.abortTransaction();
+         return res.status(500).json({
+            success: false,
+            message: "Error updating user with orderId",
+         });
+      }
+
+      // Create a checkout session for the online payment portion
+      const stripeSession = await createStripeCheckoutSession({
+         orderType,
+         purchaseProducts,
+         stripeCustomerId: isUserExist.stripeCustomerId,
+         trackId,
+         payInOnlineAmount,
+         userEmail: isUserExist.email,
+         userName: isUserExist.fullName,
+         orderId: savedOrder._id.toString()
+      });
+
+      if (!stripeSession || !stripeSession.url) {
+         await session.abortTransaction();
+         return res.status(500).json({
+            success: false,
+            message: "Error creating checkout session",
+         });
+      }
+
+      // Update order with stripe session information
+      savedOrder.sessionId = stripeSession.id;
+      savedOrder.paymentUrl = stripeSession.url;
+      await savedOrder.save({ session });
+
+      // Update inventory (reduce stock)
+      const bulkOps = purchaseProducts.map(product => ({
+         updateOne: {
+            filter: {
+               productId: product.productId,
+               "stocks.size": product.selectedSize
+            },
+            update: {
+               $inc: {
+                  "stocks.$.quantity": -product.quantity
+               }
+            }
+         }
+      }));
+
+      await Inventory.bulkWrite(bulkOps, { session });
+
+      // IMPORTANT: Commit the transaction
+      await session.commitTransaction();
+
+      // Return success response with payment URL
+      return res.status(200).json({
+         success: true,
+         message: "Mixed payment order created successfully",
+         data: {
+            orderId: savedOrder._id,
+            trackId,
+            paymentUrl: stripeSession.url,
+            sessionId: stripeSession.id
+         }
+      });
+
+   } catch (error) {
+      console.error("Transaction error:", error);
+      await session.abortTransaction();
+      return res.status(500).json({
+         success: false,
+         message: 'Database transaction error, please try again',
+         error: error.message,
+      });
+   } finally {
+      session.endSession();
+   }
+};
 
 // helping functions
 const validateAuth = async (userId, session) => {
@@ -713,8 +888,147 @@ const checkOrderCalculations = async (purchaseProducts, cartTotal, payInCashAmou
       }
    }
    else if (orderType === "COD+ONLINE") {
-      // COD+ONLINE logic implementation would go here
-      return createResponse(false, 501, "Combined payment method not implemented yet");
+      if (payInOnlineAmount <= 0) {
+         return createResponse(false, 400, "Pay in online amount should be greater than 0 for COD+ONLINE orders");
+      }
+      if (payInCashAmount <= 0) {
+         return createResponse(false, 400, "Pay in cash amount should be greater than 0 for COD+ONLINE orders");
+      }
+      if (cartTotal !== payInCashAmount + payInOnlineAmount) {
+         return createResponse(false, 400, "Cart total should be equal to pay in cash amount + pay in online amount for COD+ONLINE orders");
+      }
+      if (cartTotal > LIMIT_AFTER_ADDING_DELIVERY_CHARGE) {
+         if (deliveryCharge > 0) {
+            return createResponse(false, 400, "Delivery charge should be 0 for under ₹1000 orders");
+         }
+      }
+
+      try {
+         const bulkOps = purchaseProducts.map(product => ({
+            productId: product.productId,
+            selectedSize: product.selectedSize,
+            requestedQuantity: product.quantity
+         }));
+         const inventoryResults = await Inventory.find({
+            productId: { $in: bulkOps.map(item => item.productId) }
+         }).session(session);
+         for (const product of bulkOps) {
+            const inventoryItem = inventoryResults.find(item =>
+               item.productId.toString() === product.productId.toString()
+            );
+            if (!inventoryItem) {
+               return createResponse(false, 400, `Product ID ${product.productId} not found in inventory`);
+            }
+            const sizeStock = inventoryItem.stocks.find(stock =>
+               stock.size === product.selectedSize
+            );
+            if (!sizeStock) {
+               return createResponse(false, 400, `Size ${product.selectedSize} not available for product ${product.productId}`);
+            }
+            if (sizeStock.quantity < product.requestedQuantity) {
+               return createResponse(
+                  false, 400,
+                  `Insufficient stock for product ${product.productId} in size ${product.selectedSize}`,
+                  { available: sizeStock.quantity, requested: product.requestedQuantity }
+               );
+            }
+         }
+
+         // STEP 2: Price validation - verify prices match database values
+         const products = await Product.find({
+            _id: { $in: purchaseProducts.map(item => item.productId) }
+         })
+            .populate('offer')
+            .session(session);
+         let calculatedTotal = 0;
+         const priceMismatchItems = [];
+         for (const purchasedItem of purchaseProducts) {
+            const product = products.find(p => p._id.toString() === purchasedItem.productId.toString());
+            if (!product) {
+               return createResponse(false, 400, `Product ID ${purchasedItem.productId} not found in database`);
+            }
+
+            // Detailed offer inspection
+            let priceAfterDiscount = product.price;
+            if (product.offer) {
+               const offer = product.offer;
+
+               const now = new Date();
+               const isDateValid = now >= new Date(offer.startDate) && now <= new Date(offer.endDate);
+
+               // Check if this product is in the offer's product list (if applicable)
+               const isProductInOffer = Array.isArray(offer.products) &&
+                  offer.products.some(p => p.toString() === product._id.toString());
+
+               if (offer.offerStatus && isDateValid && (offer.products.length === 0 || isProductInOffer)) {
+                  priceAfterDiscount = product.price - (product.price * offer.discountValue) / 100;
+               } else {
+                  return createResponse(
+                     false, 400,
+                     `Offer is not valid for product ${product.title}`,
+                     { offerStatus: offer.offerStatus, isDateValid, isProductInOffer }
+                  );
+               }
+            } else {
+               // if not not have offer then check without offer
+               if (product.price !== purchasedItem.payableAmount) {
+                  return createResponse(
+                     false, 400,
+                     `Price mismatch for product ${product.title}`,
+                     { expected: product.price, received: purchasedItem.payableAmount }
+                  );
+               }
+            }
+
+            const expectedItemTotal = priceAfterDiscount * purchasedItem.quantity;
+            calculatedTotal += expectedItemTotal;
+
+            // Check for price mismatch with a tolerance for floating point precision
+            // Only consider it a mismatch if the difference is greater than our threshold
+            const priceDifference = Math.abs(Math.floor(expectedItemTotal) - Math.floor(purchasedItem.payableAmount));
+
+            if (priceDifference > PRICE_DIFFERENCE_THRESHOLD) {
+               priceMismatchItems.push({
+                  productId: purchasedItem.productId,
+                  title: product.title,
+                  expectedPrice: expectedItemTotal,
+                  clientPrice: purchasedItem.payableAmount,
+                  difference: expectedItemTotal - purchasedItem.payableAmount,
+                  basePrice: product.price,
+                  priceAfterDiscount: priceAfterDiscount,
+                  quantity: purchasedItem.quantity,
+                  hasOffer: !!product.offer
+               });
+               return createResponse(
+                  false, 400,
+                  `Price mismatch for product ${product.title}`,
+                  { expected: expectedItemTotal, received: purchasedItem.payableAmount }
+               );
+            }
+         }
+         if (deliveryCharge > 0) {
+            calculatedTotal += deliveryCharge;
+         }
+         // Check total with tolerance for floating point precision
+         if (Math.abs(Math.floor(calculatedTotal) - Math.floor(payInCashAmount + payInOnlineAmount)) > PRICE_DIFFERENCE_THRESHOLD) {
+            return createResponse(
+               false, 400,
+               `Total amount mismatch between calculated value and payment amount`,
+               { expected: calculatedTotal, received: payInCashAmount + payInOnlineAmount }
+            );
+         }
+         if (priceMismatchItems.length > 0) {
+            return createResponse(
+               false, 400,
+               "Price calculation mismatch detected",
+               { mismatchItems: priceMismatchItems }
+            );
+         }
+
+         return createResponse(true, 200, "Order calculations validated successfully");
+      } catch (error) {
+         return createResponse(false, 500, "Error during order validation", { error: error.message });
+      }
    }
    else {
       return createResponse(false, 400, `Invalid order type: ${orderType}`);
@@ -778,6 +1092,47 @@ const createStripeCheckoutSession = async (data) => {
 
       try {
          // create checkout session
+         const stripeSession = await getStripe().checkout.sessions.create({
+            customer: stripeCustomerId,
+            payment_method_types: ["card"],
+            line_items: lineItems,
+            mode: "payment",
+            success_url: `${process.env.CLIENT_URL}/verify?success=true&orderId=${orderId}`,
+            cancel_url: `${process.env.CLIENT_URL}/verify?success=false&orderId=${orderId}`,
+            metadata: {
+               orderId: orderId,
+               trackId: trackId,
+               totalAmount: payInOnlineAmount,
+               userEmail: userEmail,
+               userName: userName,
+            }
+         });
+
+         return stripeSession;
+      } catch (error) {
+         console.error("Stripe session creation error:", error);
+         return null;
+      }
+   } else if (orderType === "COD+ONLINE") {
+      try {
+         // Create a single line item for the online payment portion
+         const lineItems = [{
+            price_data: {
+               currency: "inr",
+               product_data: {
+                  name: "Partial Online Payment",
+                  description: "Online payment portion for your mixed payment order",
+                  metadata: {
+                     orderId: orderId,
+                     trackId: trackId
+                  }
+               },
+               unit_amount: Math.round(payInOnlineAmount * 100)
+            },
+            quantity: 1,
+         }];
+
+         // Create checkout session with the single payment amount
          const stripeSession = await getStripe().checkout.sessions.create({
             customer: stripeCustomerId,
             payment_method_types: ["card"],
@@ -997,13 +1352,6 @@ export const verifyPayment = async (req, res) => {
             await paymentSave[0].save({ session: mongoSession });
          }
       }
-      // Update order with payment details
-      await Order.findByIdAndUpdate(
-         order._id,
-         { $push: { paymentData: paymentSave[0]._id } },
-         { new: true, session: mongoSession }
-      );
-
 
       // Update inventory (reduce stock)
       const bulkOps = order.purchaseProducts.map(item => ({

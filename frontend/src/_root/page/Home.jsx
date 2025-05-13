@@ -24,20 +24,26 @@ const Home = () => {
   }
 
   if (isError) {
-    console.error('Error loading home content:', error);
-    // Consider adding an error state UI here
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+        <h2 className="text-2xl font-bold text-primary-300 mb-4">Unable to load content</h2>
+        <p className="text-gray-400 mb-6">{error?.message || "Please try again later"}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-6 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
-
-  // console.log('Home Content:', homeContent);
 
   return (
     <>
-      {/* Hero is loaded immediately with animation */}
       <div className='pt-8'>
         <Hero bannerImages={homeContent?.heroBannerImages} />
       </div>
 
-      {/* Other sections load when scrolled into view */}
       <AnimatedSection delay={100}>
         <ExclusiveProduct products={homeContent?.exclusiveProducts} />
       </AnimatedSection>

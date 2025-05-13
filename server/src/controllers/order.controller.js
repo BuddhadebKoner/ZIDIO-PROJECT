@@ -845,9 +845,12 @@ export const getOrders = async (req, res) => {
          user: isUserExist._id,
          $nor: [{ orderType: 'ONLINE', paymentStatus: 'unpaid' }]
       })
+         .populate("paymentData")
          .sort({ createdAt: -1 })
          .skip(skip)
          .limit(limit);
+
+      console.log("Orders:", orders);
 
       // Get total count for pagination (excluding unpaid ONLINE orders)
       const totalOrders = await Order.countDocuments({
@@ -900,9 +903,7 @@ export const getOrderById = async (req, res) => {
          user: isUserExist._id,
          $nor: [{ orderType: 'ONLINE', paymentStatus: 'unpaid' }]
       })
-         .populate("deliveryAddress")
-
-      console.log("Order:", order);
+         .populate("deliveryAddress paymentData")
 
       if (!order) {
          return res.status(404).json({

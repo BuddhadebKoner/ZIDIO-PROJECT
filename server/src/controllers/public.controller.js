@@ -73,6 +73,22 @@ export const getHomeContentDetails = async (req, res) => {
          },
          {
             $lookup: {
+               from: "offers",
+               localField: "alltimeBestSellersDetails.offer",
+               foreignField: "_id",
+               as: "alltimeBestSellersOffers"
+            }
+         },
+         {
+            $lookup: {
+               from: "inventories",
+               localField: "alltimeBestSellersDetails.inventory",
+               foreignField: "_id",
+               as: "alltimeBestSellersInventory"
+            }
+         },
+         {
+            $lookup: {
                from: "products",
                localField: "womenFeatured.productId",
                foreignField: "_id",
@@ -277,7 +293,7 @@ export const getHomeContentDetails = async (req, res) => {
                            $arrayElemAt: [
                               {
                                  $filter: {
-                                    input: "$exclusiveProductsOffers",
+                                    input: "$alltimeBestSellersOffers",
                                     as: "o",
                                     cond: {
                                        $let: {
@@ -285,6 +301,25 @@ export const getHomeContentDetails = async (req, res) => {
                                              product: { $arrayElemAt: ["$alltimeBestSellersDetails", 0] }
                                           },
                                           in: { $eq: ["$$o._id", "$$product.offer"] }
+                                       }
+                                    }
+                                 }
+                              },
+                              0
+                           ]
+                        },
+                        productInventory: {
+                           $arrayElemAt: [
+                              {
+                                 $filter: {
+                                    input: "$alltimeBestSellersInventory",
+                                    as: "inv",
+                                    cond: {
+                                       $let: {
+                                          vars: {
+                                             product: { $arrayElemAt: ["$alltimeBestSellersDetails", 0] }
+                                          },
+                                          in: { $eq: ["$$inv._id", "$$product.inventory"] }
                                        }
                                     }
                                  }
@@ -307,6 +342,16 @@ export const getHomeContentDetails = async (req, res) => {
                                     },
                                     then: {
                                        discountValue: "$$productOffer.discountValue"
+                                    },
+                                    else: "$$REMOVE"
+                                 }
+                              },
+                              inventory: {
+                                 $cond: {
+                                    if: { $ne: ["$$productInventory", null] },
+                                    then: {
+                                       stocks: "$$productInventory.stocks",
+                                       total: "$$productInventory.totalQuantity"
                                     },
                                     else: "$$REMOVE"
                                  }

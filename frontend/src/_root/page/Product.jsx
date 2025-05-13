@@ -1,10 +1,13 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 
 import ProductImageGallery from '../../components/product/ProductImageGallery'
 import ProductReviews from '../../components/product/ProductReviews'
-import { Heart, ShoppingCart, Minus, Plus, Truck, X } from 'lucide-react'
+import { Heart, ShoppingCart, Truck, X, AlertCircle } from 'lucide-react'
 import { useGetProductById } from '../../lib/query/queriesAndMutation'
+import { useAuth } from '../../context/AuthContext'
+import { useAddToCart, useAddToWishlist, useRemoveFromWishlist } from '../../lib/query/queriesAndMutation'
+import { toast } from 'react-toastify'
 
 // Lazy load the SplineModel component
 const LazySplineModel = lazy(() => import('../../components/ui/SplineModel'));
@@ -12,11 +15,11 @@ const LazySplineModel = lazy(() => import('../../components/ui/SplineModel'));
 const Product = () => {
   // grab type from url
   const { slug } = useParams()
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('description')
   const [selectedSize, setSelectedSize] = useState('')
-  const [quantity, setQuantity] = useState(1)
-  const [isFavorite, setIsFavorite] = useState(false)
   const [isModelPopupOpen, setIsModelPopupOpen] = useState(false);
+  const { currentUser, isLoading: userLoading } = useAuth();
 
   const {
     data: productData,
@@ -24,24 +27,63 @@ const Product = () => {
     isError: productError,
   } = useGetProductById(slug)
 
+  const {
+    mutate: addToWishlist,
+    isLoading: isAddingToWishlist,
+  } = useAddToWishlist({
+    onSuccess: () => {
+      toast.success("Added to wishlist");
+    },
+    onError: () => {
+      toast.error("Failed to add to wishlist");
+    }
+  });
+
+  const {
+    mutate: removeFromWishlist,
+    isLoading: isRemovingFromWishlist,
+  } = useRemoveFromWishlist({
+    onSuccess: () => {
+      toast.success("Removed from wishlist");
+    },
+    onError: () => {
+      toast.error("Failed to remove from wishlist");
+    }
+  });
+
+  const {
+    mutate: addToCart,
+    isLoading: isAddingToCart,
+    isError: isAddingToCartError,
+    isSuccess: isAddingToCartSuccess,
+  } = useAddToCart();
+
   // Extract product from data
   const product = productData?.product || {}
 
-  // console.log('Product Data:', product)
+  // Check if product is in wishlist
+  const isInWishlist = currentUser?.wishlist?.some(item => item._id === product._id);
 
-  // Handle quantity changes
-  const decreaseQuantity = () => {
-    if (quantity > 1) setQuantity(quantity - 1)
-  }
+  // Check if product is in cart
+  const cartItem = currentUser?.cart?.find(item =>
+    item.productId === product._id && item.size === selectedSize
+  );
 
-  const increaseQuantity = () => {
-    setQuantity(quantity + 1)
-  }
+  const isInCart = !!cartItem;
+
+  // Get inventory data
+  const inventory = product?.inventory?.stocks || [];
+
+  // Create a map of size to stock quantity for easier access
+  const stockMap = inventory.reduce((acc, item) => {
+    acc[item.size] = item.quantity;
+    return acc;
+  }, {});
 
   // Calculate values based on product data and offer
   const hasOffer = product.offer &&
     product.offer.offerStatus === true &&
-    product.offer.products.includes(product._id);
+    product.offer.products?.includes(product._id);
 
   const isOfferActive = hasOffer &&
     new Date() >= new Date(product.offer.startDate) &&
@@ -56,9 +98,65 @@ const Product = () => {
   const formattedDiscountedPrice = `₹${Math.round(discountedPrice).toLocaleString('en-IN')}`;
   const productType = product.categories?.[0]?.main || 't-shirt';
 
-
   // Convert size array from strings to objects with size and stock properties
-  const sizes = product?.size?.map(size => ({ size, stock: 1 })) || [];
+  const sizes = product?.size?.map(size => ({
+    size,
+    stock: stockMap[size] || 0,
+    isAvailable: (stockMap[size] || 0) > 0
+  })) || [];
+
+  // Check if the selected size is in stock
+  const selectedSizeStock = selectedSize ? (stockMap[selectedSize] || 0) : 0;
+  const isSizeInStock = selectedSizeStock > 0;
+
+  // Handle size selection
+  const handleSizeSelect = (size) => {
+    if (stockMap[size] > 0) {
+      setSelectedSize(size);
+    } else {
+      console.log(`Size ${size} is out of stock`);
+    }
+  };
+
+  // Handle add to cart
+  const handleAddToCart = () => {
+    if (!selectedSize) {
+      toast.warning("Please select a size first");
+      return;
+    }
+
+    if (!isSizeInStock) {
+      toast.error(`Size ${selectedSize} is out of stock`);
+      return;
+    }
+
+    // Check if item is already in cart with the selected size
+    if (isInCart) {
+      // Navigate to cart page instead of updating quantity
+      navigate('/cart');
+    } else {
+      console.log(`Adding to cart: ${product.title}, Size: ${selectedSize}, Quantity: 1`);
+      // Call addToCart mutation with product details
+      addToCart({
+        productId: product._id,
+        size: selectedSize,
+        quantity: 1,
+      });
+    }
+  };
+
+  // Handle wishlist toggle
+  const handleWishlistToggle = () => {
+    if (isInWishlist) {
+      console.log(`Removing from wishlist: ${product.title}`);
+      // Here you would call the actual removeFromWishlist mutation
+      removeFromWishlist(product._id);
+    } else {
+      console.log(`Adding to wishlist: ${product.title}`);
+      // Here you would call the actual addToWishlist mutation
+      addToWishlist(product._id);
+    }
+  };
 
   return (
     <div className="min-h-screen px-4 md:px-8 lg:px-30 py-4 mt-20">
@@ -154,6 +252,23 @@ const Product = () => {
               )}
             </div>
 
+            {/* Stock Status Indicator */}
+            {selectedSize ? (
+              <div className="flex items-center">
+                {isSizeInStock ? (
+                  <span className="text-green-500 flex items-center text-sm">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    In Stock ({selectedSizeStock} available)
+                  </span>
+                ) : (
+                  <span className="text-red-500 flex items-center text-sm">
+                    <AlertCircle size={14} className="mr-1" />
+                    Out of Stock
+                  </span>
+                )}
+              </div>
+            ) : null}
+
             {/* Size Selection */}
             <div className="pt-2">
               <h3 className="text-base font-medium text-white mb-3">Select Size</h3>
@@ -165,65 +280,44 @@ const Product = () => {
                       ${selectedSize === sizeOption.size
                         ? 'border-primary-300 bg-primary-500 text-white'
                         : 'border-gray-600 text-gray-300 hover:border-primary-300'} 
-                      ${sizeOption.stock === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                    onClick={() => sizeOption.stock > 0 && setSelectedSize(sizeOption.size)}
-                    disabled={sizeOption.stock === 0}
+                      ${!sizeOption.isAvailable ? 'opacity-50 cursor-not-allowed relative overflow-hidden' : 'cursor-pointer'}`}
+                    onClick={() => handleSizeSelect(sizeOption.size)}
+                    disabled={!sizeOption.isAvailable}
                   >
-                    {sizeOption.size.charAt(0)}
+                    {sizeOption.size}
+                    {!sizeOption.isAvailable && (
+                      <div className="absolute inset-0 border-t border-red-500 transform rotate-45"></div>
+                    )}
                   </button>
                 ))}
-              </div>
-            </div>
-
-            {/* Quantity Selector */}
-            <div className="pt-2">
-              <h3 className="text-base font-medium text-white mb-3">Quantity</h3>
-              <div className="flex items-center border border-gray-600 rounded w-32">
-                <button
-                  onClick={decreaseQuantity}
-                  className="px-3 py-2 text-gray-300 hover:text-primary-300"
-                  aria-label="Decrease quantity"
-                >
-                  <Minus size={16} />
-                </button>
-
-                <span className="flex-1 text-center py-2 text-white text-base font-medium">
-                  {quantity}
-                </span>
-
-                <button
-                  onClick={increaseQuantity}
-                  className="px-3 py-2 text-gray-300 hover:text-primary-300"
-                  aria-label="Increase quantity"
-                >
-                  <Plus size={16} />
-                </button>
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button
-                className={`flex items-center justify-center gap-2 ${selectedSize
-                  ? 'bg-primary-500 hover:bg-primary-600 cursor-pointer'
-                  : 'bg-gray-700 cursor-not-allowed'
+                onClick={handleAddToCart}
+                className={`flex items-center justify-center gap-2 
+                  ${selectedSize && isSizeInStock
+                    ? 'bg-primary-500 hover:bg-primary-600 cursor-pointer'
+                    : 'bg-gray-700 cursor-not-allowed'
                   } text-white py-3 px-6 rounded flex-1 transition duration-300`}
-                disabled={!selectedSize}
+                disabled={!selectedSize || !isSizeInStock}
               >
                 <ShoppingCart size={18} />
-                Add to Cart
+                {isInCart ? 'Go to Cart' : 'Add to Cart'}
               </button>
 
               <button
-                onClick={() => setIsFavorite(!isFavorite)}
+                onClick={handleWishlistToggle}
                 className="flex items-center justify-center gap-2 border border-gray-600 py-3 px-6 rounded hover:border-primary-300 transition duration-300"
-                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
               >
                 <Heart
                   size={18}
-                  className={isFavorite ? "fill-primary-300 text-primary-300" : "text-gray-300"}
+                  className={isInWishlist ? "fill-primary-300 text-primary-300" : "text-gray-300"}
                 />
-                <span className="whitespace-nowrap">{isFavorite ? 'Saved' : 'Save'}</span>
+                <span className="whitespace-nowrap">{isInWishlist ? 'Saved' : 'Save'}</span>
               </button>
             </div>
 
