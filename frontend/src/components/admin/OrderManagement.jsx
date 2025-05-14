@@ -1,5 +1,6 @@
 import React from 'react';
 import { Package, Truck, CheckCircle, XCircle, RotateCw, CreditCard, FileText, Send, DollarSign } from 'lucide-react';
+import { updateOrder } from '../../lib/api/admin.api';
 
 const OrderManagement = ({
    order,
@@ -50,25 +51,61 @@ const OrderManagement = ({
       }
    };
 
-   // Simple status transition handler with console logs
-   const handleStatusTransition = (newStatus) => {
+   // Updated status transition handler with API integration
+   const handleStatusTransition = async (newStatus) => {
       console.log(`Transitioning order ${order._id} from ${order.orderStatus} to ${newStatus}`);
-
-      // Status specific logs
-      if (newStatus === 'Processing') {
-         console.log("Starting to process all products in the order");
-      } else if (newStatus === 'Shipped') {
-         console.log("Order has left the warehouse, updating shipping information");
-      } else if (newStatus === 'Delivered') {
-         console.log("Order has been delivered to customer");
-
-         // For COD orders, prompt for payment collection
-         if (order.orderType === 'COD' && order.paymentStatus !== 'paid') {
-            console.log("This is a COD order - payment collection needed");
-         }
+      
+      // Map the status to the appropriate action parameter
+      const orderAction = {};
+      
+      switch (newStatus) {
+         case 'Processing':
+            console.log("Starting to process all products in the order");
+            orderAction.markAsProcessing = true;
+            break;
+         case 'Shipped':
+            console.log("Order has left the warehouse, updating shipping information");
+            orderAction.markAsShipped = true;
+            break;
+         case 'Delivered':
+            console.log("Order has been delivered to customer");
+            orderAction.markAsDelivered = true;
+            // For COD orders, prompt for payment collection
+            if (order.orderType === 'COD' && order.paymentStatus !== 'paid') {
+               console.log("This is a COD order - payment collection needed");
+            }
+            break;
+         case 'Returned':
+            console.log("Order has been returned");
+            orderAction.markAsReturned = true;
+            break;
+         case 'Cancelled':
+            console.log("Order has been cancelled");
+            orderAction.markAsCancelled = true;
+            break;
+         default:
+            console.log("Unknown status transition");
+            return;
       }
-
-      onStatusUpdate(newStatus);
+      
+      try {
+         // Call the API
+         console.log(order._id)
+         const result = await updateOrder(order._id, orderAction);
+         
+         if (result.success) {
+            // If API call succeeds, notify parent component
+            onStatusUpdate(newStatus);
+         } else {
+            // Handle error
+            console.error("Failed to update order status:", result.message);
+            // You could add error handling UI here if needed
+            alert(`Failed to update order: ${result.message}`);
+         }
+      } catch (error) {
+         console.error("Error updating order status:", error);
+         alert("An unexpected error occurred while updating the order");
+      }
    };
 
    // Simple COD payment collection with console logs

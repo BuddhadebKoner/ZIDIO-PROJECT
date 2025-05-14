@@ -13,7 +13,7 @@ import AdminLayout from "./_admin/AdminLayout";
 import AuthCallback from "./_auth/page/AuthCallback";
 
 // pages
-import { AccountDetails, AccountPaymentDetails, AccountWishlist, Address, Cart, Categories, Collections, Home, Offers, OrderDetails, Orders, Product, Profile, Search, SosCallBack, Verify } from "./_root/page";
+import { AccountDetails, AccountPaymentDetails, AccountWishlist, Address, Cart, Categories, CollectionDetails, Collections, Home, Offers, OrderDetails, Orders, Product, Profile, Search, SosCallBack, Verify } from "./_root/page";
 import { AdminAddCollection, AdminAddOffer, AdminAddProduct, AdminCategory, AdminCollection, AdminCustomers, AdminDashboard, AdminInventory, AdminOffer, AdminOrderDetails, AdminOrders, AdminProduct, AdminReviews, AdminSettings, AdminUpdateCollection, AdminUpdateInventory, AdminUpdateOffer, AdminUpdateProduct } from "./_admin/page";
 
 export const SmoothScrollContext = createContext();
@@ -132,7 +132,7 @@ const App = () => {
           <Route path="/category" element={<Categories />} />
           <Route path="/category/:slug" element={<Categories />} />
           <Route path="/collections" element={<Collections />} />
-          <Route path="/collections/:slug" element={<Collections />} />
+          <Route path="/collections/:slug" element={<CollectionDetails />} />
           <Route path="/offers" element={<Offers />} />
           <Route path="/profile" element={<Profile />} >
             <Route path="/profile/orders" element={<Orders />} />

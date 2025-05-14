@@ -6,6 +6,7 @@ import { HomeContent } from "../models/homecontent.model.js";
 import { deleteFromCloudinary } from "../utils/cloudinary.js";
 import { Inventory } from "../models/inventory.model.js";
 import { Order } from "../models/order.model.js";
+import { User } from "../models/user.model.js";
 
 export const addProduct = async (req, res) => {
    try {
@@ -1218,6 +1219,152 @@ export const getOrders = async (req, res) => {
       return res.status(500).json({
          success: false,
          message: "Failed to fetch orders",
+         error: error.message || "Internal server error"
+      });
+   }
+};
+
+// update order status
+export const updateOrder = async (req, res) => {
+   try {
+      const userId = req.userId;
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "Unauthorized: Authentication required"
+         });
+      }
+
+      // check user is exist or not
+      const isUserExist = await User.findOne({ clerkId: userId });
+      if (!isUserExist) {
+         return res.status(404).json({
+            success: false,
+            message: "User not found"
+         });
+      }
+
+      const { id } = req.params;
+      if (!id) {
+         return res.status(400).json({
+            success: false,
+            message: "Order ID is required"
+         });
+      }
+
+      // check order is exist or not 
+      const order = await Order.findById(id);
+      if (!order) {
+         return res.status(404).json({
+            success: false,
+            message: "Order not found"
+         });
+      }
+
+      const {
+         markAsShipped,
+         markAsDelivered,
+         markAsCancelled,
+         markAsReturned,
+      } = req.body;
+
+      // Ensure only one action is requested
+      const requestedActions = [markAsShipped, markAsDelivered, markAsCancelled, markAsReturned]
+         .filter(action => action === true).length;
+
+      if (requestedActions === 0) {
+         return res.status(400).json({
+            success: false,
+            message: "At least one action is required"
+         });
+      }
+
+      if (requestedActions > 1) {
+         return res.status(400).json({
+            success: false,
+            message: "Only one action can be performed at a time"
+         });
+      }
+
+      // Update based on requested action
+      const updateData = {};
+      let actionMessage = "";
+
+      if (markAsShipped) {
+         // Can only mark as shipped if currently in processing
+         if (order.orderStatus !== "Processing") {
+            return res.status(400).json({
+               success: false,
+               message: `Cannot mark as shipped. Current status is: ${order.orderStatus}`
+            });
+         }
+
+         updateData.orderStatus = "Shipped";
+         updateData.orderShippedTime = new Date();
+         actionMessage = "Order marked as shipped successfully";
+      }
+      else if (markAsDelivered) {
+         // Can only mark as delivered if currently shipped
+         if (order.orderStatus !== "Shipped") {
+            return res.status(400).json({
+               success: false,
+               message: `Cannot mark as delivered. Current status is: ${order.orderStatus}`
+            });
+         }
+
+         updateData.orderStatus = "Delivered";
+         updateData.orderDeliveredTime = new Date();
+         actionMessage = "Order marked as delivered successfully";
+      }
+      else if (markAsCancelled) {
+         // Can't cancel if already delivered or returned
+         if (["Delivered", "Returned"].includes(order.orderStatus)) {
+            return res.status(400).json({
+               success: false,
+               message: `Cannot cancel order. Current status is: ${order.orderStatus}`
+            });
+         }
+
+         updateData.orderStatus = "Cancelled";
+         updateData.orderCancelledTime = new Date();
+         actionMessage = "Order cancelled successfully";
+      }
+      else if (markAsReturned) {
+         if (order.orderStatus !== "Delivered") {
+            return res.status(400).json({
+               success: false,
+               message: `Cannot mark as returned. Current status is: ${order.orderStatus}`
+            });
+         }
+
+         updateData.orderStatus = "Returned";
+         updateData.orderReturnedTime = new Date();
+         actionMessage = "Order marked as returned successfully";
+      }
+
+      const updatedOrder = await Order.findByIdAndUpdate(
+         order._id,
+         { $set: updateData },
+         { new: true }
+      )
+
+      if (!updatedOrder) {
+         return res.status(404).json({
+            success: false,
+            message: "Failed to update order"
+         });
+      }
+
+      return res.status(200).json({
+         success: true,
+         message: actionMessage,
+         order: updatedOrder
+      });
+
+   } catch (error) {
+      return res.status(500).json({
+         success: false,
+         message: "Failed to update order",
          error: error.message || "Internal server error"
       });
    }

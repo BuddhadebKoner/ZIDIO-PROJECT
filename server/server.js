@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from "./src/config/db.js";
-import { clerkMiddleware } from '@clerk/express'
+import { clerkMiddleware } from '@clerk/express';
 import authRouter from './src/routes/auth.route.js';
 import userRouter from './src/routes/user.route.js';
 import adminRouter from './src/routes/admin.route.js';

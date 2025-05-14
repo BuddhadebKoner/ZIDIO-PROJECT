@@ -1,6 +1,6 @@
 import express from 'express'
 import { adminAuth } from '../middlewares/adminAuth.middleware.js'
-import { addCollection, addOffer, addProduct, getInventoryBySlug, getInventorys, getOrders, removeSingleImage, updateCollection, updateHomeContent, updateInventory, updateOffer, updateProduct } from '../controllers/admin.controller.js'
+import { addCollection, addOffer, addProduct, getInventoryBySlug, getInventorys, getOrders, removeSingleImage, updateCollection, updateHomeContent, updateInventory, updateOffer, updateOrder, updateProduct } from '../controllers/admin.controller.js'
 
 const adminRouter = express.Router()
 
@@ -28,5 +28,7 @@ adminRouter.get('/get-inventory/:slug', adminAuth, getInventoryBySlug);
 adminRouter.put('/update-inventory/:slug', adminAuth, updateInventory);
 // fetch orders with complex query
 adminRouter.get('/get-orders', adminAuth, getOrders)
+// update order status
+adminRouter.patch('/update-order/:id', adminAuth, updateOrder)
 
 export default adminRouter

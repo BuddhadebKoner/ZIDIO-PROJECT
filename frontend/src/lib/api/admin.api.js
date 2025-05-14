@@ -337,3 +337,32 @@ export const getOrdersForAdmin = async (queryString) => {
       }
    }
 }
+
+// update order status
+export const updateOrder = async (orderId, orderAction) => {
+   try {
+      const response = await axiosInstance.patch(`/admin/update-order/${orderId}`, orderAction);
+
+      return {
+         success: true,
+         message: response.data.message || "Order updated successfully",
+         product: response.data.order,
+      };
+   } catch (error) {
+      console.error('Error updating order:', error);
+
+      if (error.response?.data?.fieldErrors) {
+         return {
+            success: false,
+            message: error.response.data.message || "Product validation failed",
+            fieldErrors: error.response.data.fieldErrors
+         };
+      }
+
+      return {
+         success: false,
+         message: error.response?.data?.message || "Failed to update order",
+         error: error.response?.data?.error || error.message
+      };
+   }
+}

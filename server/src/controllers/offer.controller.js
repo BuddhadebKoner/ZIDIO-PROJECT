@@ -16,12 +16,82 @@ export const getAllOffers = async (req, res) => {
 
       const skip = (page - 1) * limit;
 
-
-      const offers = await Offer.find()
-         .skip(skip)
-         .limit(limit)
-         .sort({ createdAt: -1 })
-         .lean();
+      // Using aggregation pipeline for more control and efficiency
+      const offers = await Offer.aggregate([
+         { $sort: { createdAt: -1 } },
+         { $skip: skip },
+         { $limit: limit },
+         {
+            $lookup: {
+               from: "products",
+               localField: "products",
+               foreignField: "_id",
+               as: "products",
+               pipeline: [
+                  {
+                     $project: {
+                        _id: 1,
+                        slug: 1,
+                        title: 1,
+                        subTitle: 1,
+                        description: 1,
+                        price: 1,
+                        images: 1,
+                        size: 1,
+                        inventory: 1,
+                        isNewArrival: 1,
+                        isUnderHotDeals: 1,
+                        isBestSeller: 1
+                     }
+                  },
+                  {
+                     $lookup: {
+                        from: "inventories",
+                        localField: "inventory",
+                        foreignField: "_id",
+                        as: "inventoryData"
+                     }
+                  },
+                  {
+                     $lookup: {
+                        from: "collections",
+                        localField: "collections",
+                        foreignField: "_id",
+                        as: "collectionsData"
+                     }
+                  },
+                  {
+                     $addFields: {
+                        inventory: { $arrayElemAt: ["$inventoryData", 0] },
+                        collections: "$collectionsData"
+                     }
+                  },
+                  {
+                     $project: {
+                        inventoryData: 0,
+                        collectionsData: 0
+                     }
+                  }
+               ]
+            }
+         },
+         {
+            $addFields: {
+               activeStatus: {
+                  $cond: {
+                     if: {
+                        $and: [
+                           { $lte: ["$startDate", new Date()] },
+                           { $gte: ["$endDate", new Date()] }
+                        ]
+                     },
+                     then: true,
+                     else: false
+                  }
+               }
+            }
+         }
+      ]);
 
       const totalOffers = await Offer.countDocuments();
 
@@ -34,7 +104,7 @@ export const getAllOffers = async (req, res) => {
          totalPages: Math.ceil(totalOffers / limit),
       });
    } catch (error) {
-      console.error("Error fetching collections", error);
+      console.error("Error fetching offers:", error);
       return res.status(500).json({
          success: false,
          message: "Internal Server Error",
@@ -54,7 +124,6 @@ export const searchOffers = async (req, res) => {
             message: "Invalid pagination parameters.",
          });
       }
-
 
       const searchQuery = searchTerm
          ? {
@@ -110,7 +179,7 @@ export const getOfferDetailsByCode = async (req, res) => {
             message: "Offer not found",
          });
       }
-      
+
       // return offer data 
       return res.status(200).json({
          success: true,

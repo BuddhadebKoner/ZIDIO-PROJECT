@@ -1,145 +1,141 @@
-import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import ProductCard from '../../components/cards/ProductCard';
-import { useGetCollectionById, useGetCollectionProducts } from '../../lib/query/queriesAndMutation';
-import FullPageLoader from '../../components/loaders/FullPageLoader';
+import { useEffect, useRef } from "react";
+import { useGetAllCollections } from "../../lib/query/queriesAndMutation";
+import { Link } from "react-router-dom";
+import { Loader2 } from "lucide-react"; // Import Lucide React loader
+import FullPageLoader from "../../components/loaders/FullPageLoader";
 
 const Collections = () => {
-  const { slug } = useParams();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(12);
-
-  const {
-    data: collections,
-    isLoading: collectionLoading,
-    isError: collectionError,
-  } = useGetCollectionById(slug);
-
   const {
     data,
-    isLoading: productsLoading,
-    isError: productsError,
+    isLoading,
+    isError,
     error,
-    refetch
-  } = useGetCollectionProducts(slug, currentPage, itemsPerPage);
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useGetAllCollections();
 
+  // Reference for the intersection observer target
+  const observerTarget = useRef(null);
+
+  // Setup intersection observer for infinite scrolling
   useEffect(() => {
-    refetch();
-  }, [currentPage, refetch]);
-
-  const formatString = (str) => {
-    if (!str) return '';
-    return str
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
-
-  const products = data?.pages?.[0]?.products || [];
-  const totalPages = data?.pages?.[0]?.totalPages || 0;
-
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-      window.scrollTo(0, 0);
-    }
-  };
-
-  if (collectionLoading || (productsLoading && !data)) {
-    return <FullPageLoader />;
-  }
-
-  if (collectionError || productsError) {
-    return (
-      <div className="flex flex-col items-center justify-center text-center py-20">
-        <div className="bg-red-900/30 p-6 rounded-lg border border-red-500 max-w-md">
-          <h2 className="text-xl font-bold text-red-400 mb-2">Something went wrong</h2>
-          <p className="text-white mb-4">
-            {error?.message || "We couldn't load the collection. Please try again later."}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
     );
-  }
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) observer.observe(currentTarget);
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  // Extract collections from the data
+  const collections = data?.pages?.flatMap(page =>
+    page?.collections || []
+  ) || [];
 
   return (
-    <div className='flex flex-col justify-center items-center'>
-      <div className='w-full h-60 md:h-80 overflow-hidden'>
-        <img
-          src={collections.collection.bannerImageUrl}
-          className='w-full h-full object-cover'
-          alt={collections.collection.name}
-        />
+    <div className="container mx-auto px-4 py-8 min-h-screen mt-20">
+      {/* Header section with stylish title */}
+      <div className="text-center mb-12 relative">
+        <h1 className="text-4xl md:text-5xl font-bold mb-3 text-bg-white">
+          Our <span className="text-primary-500">Collections</span>
+        </h1>
+        <p className="text-text-muted max-w-2xl mx-auto">
+          Discover our carefully curated collections featuring the hottest designs and latest trends
+        </p>
       </div>
 
-      <h1 className='text-3xl font-bold text-white mt-10'>
-        {formatString(slug)}
-      </h1>
-
-      {collections.collection.description && (
-        <p className="text-gray-300 max-w-2xl text-center px-4 mb-4 mt-2">
-          {collections.collection.description}
-        </p>
+      {/* Error state */}
+      {isError && (
+        <div className="text-center py-10">
+          <p className="text-error mb-4">Something went wrong!</p>
+          <p className="text-text-muted">{error?.message || "Failed to load collections"}</p>
+        </div>
       )}
 
-      <div className="container mx-auto px-2 sm:px-4 py-6 mt-2">
-        {products.length > 0 ? (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {products.map((product, index) => (
-                <ProductCard
-                  key={product.id || `product-${index}`}
-                  product={product}
-                />
-              ))}
-            </div>
+      {/* Loading state using Lucide React */}
+      {isLoading && !collections.length ? (
+        <>
+          <FullPageLoader />
+        </>
+      ) : (
+        <>
+          {/* Collections grid with banner-style cards */}
+          <div className="w-full flex flex-col gap-8">
+            {collections.map((collection) => (
+              <Link
+                to={`/collections/${collection.slug}`}
+                key={collection._id}
+                className="block w-full"
+              >
+                <div className="premium-card relative h-0 pb-[30%] md:pb-[25%] rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl hover:transform hover:scale-[1.01] group">
+                  {/* Banner image with proper aspect ratio */}
+                  <img
+                    src={collection.bannerImageUrl}
+                    alt={collection.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
 
-            {totalPages > 1 && (
-              <div className="flex justify-center mt-8 gap-2">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
-                >
-                  Previous
-                </button>
+                  {/* Gradient overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300"></div>
 
-                <div className="flex gap-1">
-                  {[...Array(totalPages)].map((_, i) => (
-                    <button
-                      key={`page-${i + 1}`}
-                      onClick={() => handlePageChange(i + 1)}
-                      className={`w-10 h-10 rounded-full ${currentPage === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-800 text-white hover:bg-gray-700'}`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
+                  {/* Featured badge */}
+                  {collection.isFeatured && (
+                    <div className="absolute top-4 right-4 bg-primary-500 text-white text-xs md:text-sm font-medium py-1 px-3 rounded-full shadow-md z-10">
+                      Featured
+                    </div>
+                  )}
+
+                  {/* Collection info overlaid on image */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3 md:p-5 text-white z-10">
+                    <h3 className="text-lg md:text-xl font-bold mb-1 md:mb-2 group-hover:text-primary-300 transition-colors">
+                      {collection.name}
+                    </h3>
+                    <p className="text-gray-200 text-xs md:text-sm line-clamp-2 mb-2 md:mb-3 opacity-90">
+                      {collection.subtitle}
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-medium bg-white/20 backdrop-blur-sm py-1 px-2 rounded-md">
+                        {collection.products.length} products
+                      </span>
+                      <span className="text-xs md:text-sm inline-flex items-center font-medium group-hover:text-primary-300 transition-colors">
+                        View Collection
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
                 </div>
-
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center py-16">
-            <p className="text-white text-xl">No products found in this collection</p>
+              </Link>
+            ))}
           </div>
-        )}
-      </div>
+
+          {/* Observer target for infinite scroll with Lucide loader */}
+          <div
+            ref={observerTarget}
+            className="w-full h-20 flex items-center justify-center mt-8"
+          >
+            {isFetchingNextPage && (
+              <Loader2 className="text-primary-500 animate-spin mr-2" size={24} />
+            )}
+            {!hasNextPage && collections.length > 0 && (
+              <p className="text-text-muted text-sm">You've seen all collections</p>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
-}
+};
 
-export default Collections
+export default Collections;
