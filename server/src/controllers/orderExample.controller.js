@@ -1049,8 +1049,6 @@ const createStripeCheckoutSession = async (data) => {
       orderId
    } = data;
 
-   console.log(data);
-
    if (orderType === "ONLINE") {
       const lineItems = [];
 

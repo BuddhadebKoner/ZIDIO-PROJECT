@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useGetOrderById } from '../../lib/query/queriesAndMutation';
 import { format } from 'date-fns';
@@ -11,14 +11,15 @@ import {
    ShoppingBag,
    CheckCircle,
    XCircle,
-   RotateCcw
+   RotateCcw,
+   Star
 } from 'lucide-react';
-
 
 import OrderProgressStatus from '../../components/common/OrderPogressStatus';
 import OrderPaymentAddressInfo from '../../components/common/OrderPaymentAddressInfo';
 import OrderDetailsGrid from '../../components/common/OrderDetailsGrid';
 import FullPageLoader from '../../components/loaders/FullPageLoader';
+import RatingPopup from '../../components/ui/RatingPopup';
 
 const OrderDetails = () => {
    // Fetch trackId from url
@@ -32,6 +33,8 @@ const OrderDetails = () => {
    } = useGetOrderById(trackId);
 
    console.log("Order Details Data: ", data);
+
+   // console.log("Order Details Data: ", data);
 
    const handleCancelOrder = () => {
       console.log("Cancelling order...");
@@ -51,6 +54,16 @@ const OrderDetails = () => {
    const handleTrackOrder = () => {
       console.log("Tracking order...");
       // Add actual implementation logic here
+   };
+
+   const [isRatingPopupOpen, setIsRatingPopupOpen] = useState(false);
+
+   const handleOpenRatingPopup = () => {
+      setIsRatingPopupOpen(true);
+   };
+
+   const handleCloseRatingPopup = () => {
+      setIsRatingPopupOpen(false);
    };
 
    const order = data?.order;
@@ -253,13 +266,21 @@ const OrderDetails = () => {
                   </button>
                )}
 
-               {order.orderStatus === 'Delivered' && (
-                  <button
-                     onClick={handleReturnOrder}
-                     className="px-4 py-2 border border-gray-300 text-text hover:bg-gray-200 rounded-md text-sm font-medium flex items-center"
-                  >
-                     <RotateCcw className="mr-2 h-4 w-4" /> Return Order
-                  </button>
+               {(order.isReviewedDone || order.orderStatus === "Delivered") && (
+                  <>
+                     <button
+                        onClick={handleReturnOrder}
+                        className="px-4 py-2 border border-gray-300 text-text hover:bg-gray-200 rounded-md text-sm font-medium flex items-center"
+                     >
+                        <RotateCcw className="mr-2 h-4 w-4" /> Return Order
+                     </button>
+                     <button
+                        onClick={handleOpenRatingPopup}
+                        className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-bg-white rounded-md text-sm font-medium flex items-center"
+                     >
+                        <Star className="mr-2 h-4 w-4" /> Rate Products
+                     </button>
+                  </>
                )}
             </div>
 
@@ -281,6 +302,15 @@ const OrderDetails = () => {
                   paymentStatusInfo={paymentStatusInfo}
                />
             </div>
+
+            {/* Rating Popup */}
+            {isRatingPopupOpen && (
+               <RatingPopup
+                  onClose={handleCloseRatingPopup}
+                  products={order.purchaseProducts}
+                  orderId={order.trackId}
+               />
+            )}
          </div>
       </div>
    );

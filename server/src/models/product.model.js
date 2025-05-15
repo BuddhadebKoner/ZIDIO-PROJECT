@@ -126,7 +126,15 @@ const productSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Inventory',
       default: null,
-   }
+   },
+   // reviews
+   reviews: [
+      {
+         type: mongoose.Schema.Types.ObjectId,
+         ref: 'Review',
+         default: null,
+      }
+   ]
 }, { timestamps: true });
 
 export const Product = mongoose.model('Product', productSchema);

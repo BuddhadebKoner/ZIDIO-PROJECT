@@ -850,8 +850,6 @@ export const getOrders = async (req, res) => {
          .skip(skip)
          .limit(limit);
 
-      console.log("Orders:", orders);
-
       // Get total count for pagination (excluding unpaid ONLINE orders)
       const totalOrders = await Order.countDocuments({
          user: isUserExist._id,

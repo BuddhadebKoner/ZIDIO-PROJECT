@@ -121,6 +121,10 @@ const orderSchema = new mongoose.Schema({
       type: String,
       default: null
    },
+   isReviewedDone: {
+      type: Boolean,
+      default: false
+   },
    paymentData: [
       {
          type: mongoose.Schema.Types.ObjectId,
