@@ -1,11 +1,14 @@
 import axiosInstance from "../../config/config";
+import { useAuth } from '@clerk/clerk-react';
 
 export const isAuthenticated = async () => {
+   const { getToken } = useAuth()
+   const token = await getToken();
+
    try {
       const response = await axiosInstance.post('/auth/is-authenticated', {
          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
          },
       });
       if (response.status === 200) {
