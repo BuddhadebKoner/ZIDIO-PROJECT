@@ -2,7 +2,12 @@ import axiosInstance from "../../config/config";
 
 export const isAuthenticated = async () => {
    try {
-      const response = await axiosInstance.post('/auth/is-authenticated');
+      const response = await axiosInstance.post('/auth/is-authenticated', {
+         headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+         },
+      });
       if (response.status === 200) {
          return {
             success: true,
