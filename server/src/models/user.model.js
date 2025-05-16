@@ -40,7 +40,6 @@ const userSchema = new mongoose.Schema({
    },
    stripeCustomerId: {
       type: String,
-      unique: true,
    },
    orders: [
       {

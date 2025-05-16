@@ -1,5 +1,5 @@
 import express from 'express';
-import { addToCart, addTowishlist, filterProducts, getProductById, getProducts, removeFromCart, removeFromWishlist, searchProducts, updateCart } from '../controllers/product.controller.js';
+import { addReview, addToCart, addTowishlist, filterProducts, getProductById, getProducts, getReviewsById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from '../controllers/product.controller.js';
 import { userAuth } from '../middlewares/userAuth.middleware.js';
 
 const productRouter = express.Router();
@@ -22,5 +22,9 @@ productRouter.post('/add-to-cart', userAuth, addToCart);
 productRouter.post('/remove-from-cart', userAuth, removeFromCart);
 // update cart quantity and size
 productRouter.put('/update-cart', userAuth, updateCart);
+// add review
+productRouter.post('/add-review', userAuth, addReview);
+// get all reviews by product id
+productRouter.get('/get-reviews/:slug', getReviewsById);
 
 export default productRouter;

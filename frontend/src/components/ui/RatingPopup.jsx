@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Star, X } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useAddReview } from '../../lib/query/queriesAndMutation';
 
 const RatingPopup = ({ onClose, products, orderId }) => {
    const [ratings, setRatings] = useState(
@@ -11,6 +12,9 @@ const RatingPopup = ({ onClose, products, orderId }) => {
          comment: '',
       }))
    );
+   
+   // Use the mutation hook
+   const { mutate: submitReview, isLoading } = useAddReview();
 
    const handleRatingChange = (index, newRating) => {
       const updatedRatings = [...ratings];
@@ -30,18 +34,18 @@ const RatingPopup = ({ onClose, products, orderId }) => {
          toast.error('Please rate at least one product');
          return false;
       }
-      
+
       // Check if all rated products have comments
       const ratedWithoutComments = ratings.filter(
          item => item.rating > 0 && !item.comment.trim()
       );
-      
+
       if (ratedWithoutComments.length > 0) {
          const productNames = ratedWithoutComments.map(item => item.productName);
          toast.error(`Please add comments for all rated products: ${productNames.join(', ')}`);
          return false;
       }
-      
+
       return true;
    };
 
@@ -56,23 +60,22 @@ const RatingPopup = ({ onClose, products, orderId }) => {
       // Filter out products that haven't been rated
       const validRatings = ratings.filter(item => item.rating > 0);
 
-      // Submit rating data
-      try {
-         // Log the data that would be submitted
-         console.log('Rating submission data:', {
-            orderId,
-            ratings: validRatings
-         });
-         
-         // Show success message
-         toast.success('Thank you for your feedback!');
-         
-         // Close the popup
-         onClose();
-      } catch (error) {
-         toast.error('Failed to submit ratings. Please try again.');
-         console.error('Error submitting ratings:', error);
-      }
+      // Submit data using the mutation
+      const reviewData = {
+         orderId,
+         ratings: validRatings,
+      };
+      
+      // Log the data that would be submitted
+      console.log('Rating submission data:', reviewData);
+      
+      // Use the mutation function from the hook
+      submitReview(reviewData, {
+         onSuccess: () => {
+            // Close the popup on success
+            onClose();
+         }
+      });
    };
 
    return (
@@ -99,9 +102,9 @@ const RatingPopup = ({ onClose, products, orderId }) => {
                      <div key={index} className="border border-gray-800 rounded-lg p-6 hover:border-primary-700/50 transition-all duration-300">
                         <div className="flex items-start gap-4 mb-4">
                            {product.imagesUrl && (
-                              <img 
-                                 src={product.imagesUrl} 
-                                 alt={product.title} 
+                              <img
+                                 src={product.imagesUrl}
+                                 alt={product.title}
                                  className="w-20 h-20 object-cover rounded-md"
                               />
                            )}
@@ -131,14 +134,13 @@ const RatingPopup = ({ onClose, products, orderId }) => {
                                     key={star}
                                     type="button"
                                     onClick={() => handleRatingChange(index, star)}
-                                    className={`p-1 transform hover:scale-110 transition-transform duration-200 ${
-                                       ratings[index].rating >= star ? 'text-yellow-400' : 'text-gray-600'
-                                    }`}
+                                    className={`p-1 transform hover:scale-110 transition-transform duration-200 ${ratings[index].rating >= star ? 'text-yellow-400' : 'text-gray-600'
+                                       }`}
                                     aria-label={`Rate ${star} stars`}
                                  >
-                                    <Star 
-                                       size={28} 
-                                       fill={ratings[index].rating >= star ? 'currentColor' : 'none'} 
+                                    <Star
+                                       size={28}
+                                       fill={ratings[index].rating >= star ? 'currentColor' : 'none'}
                                        strokeWidth={ratings[index].rating >= star ? 0 : 1.5}
                                     />
                                  </button>
@@ -164,14 +166,13 @@ const RatingPopup = ({ onClose, products, orderId }) => {
                               id={`comment-${index}`}
                               value={ratings[index].comment}
                               onChange={(e) => handleCommentChange(index, e.target.value)}
-                              placeholder={ratings[index].rating > 0 
-                                 ? "Please share your thoughts about this product (required)" 
+                              placeholder={ratings[index].rating > 0
+                                 ? "Please share your thoughts about this product (required)"
                                  : "Write your thoughts about this product..."}
-                              className={`w-full bg-gray-900/50 border ${
-                                 ratings[index].rating > 0 && !ratings[index].comment.trim() 
-                                    ? "border-red-500" 
-                                    : "border-gray-700"
-                              } rounded-md p-3 h-24 resize-none focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 text-text placeholder-gray-500 transition-all duration-200`}
+                              className={`w-full bg-gray-900/50 border ${ratings[index].rating > 0 && !ratings[index].comment.trim()
+                                 ? "border-red-500"
+                                 : "border-gray-700"
+                                 } rounded-md p-3 h-24 resize-none focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 text-text placeholder-gray-500 transition-all duration-200`}
                            />
                            {ratings[index].rating > 0 && !ratings[index].comment.trim() && (
                               <p className="text-red-500 text-xs mt-1">Comment is required when rating a product</p>
@@ -192,8 +193,9 @@ const RatingPopup = ({ onClose, products, orderId }) => {
                   <button
                      type="submit"
                      className="px-5 py-2.5 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors duration-200"
+                     disabled={isLoading}
                   >
-                     Submit Ratings
+                     {isLoading ? 'Submitting...' : 'Submit Ratings'}
                   </button>
                </div>
             </form>

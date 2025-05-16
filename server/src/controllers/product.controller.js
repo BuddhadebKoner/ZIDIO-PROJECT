@@ -1,4 +1,6 @@
+import { Order } from "../models/order.model.js";
 import { Product } from "../models/product.model.js";
+import { Review } from "../models/review.model.js";
 import { User } from "../models/user.model.js";
 
 export const getProducts = async (req, res) => {
@@ -21,8 +23,8 @@ export const getProducts = async (req, res) => {
          .limit(limit)
          .sort({ createdAt: -1 })
          .lean();
-      
-      if (!products || products.length === 0) { 
+
+      if (!products || products.length === 0) {
          return res.status(404).json({
             success: false,
             message: "No products found.",
@@ -828,3 +830,274 @@ export const updateCart = async (req, res) => {
       });
    }
 };
+
+// add review
+export const addReview = async (req, res) => {
+   try {
+      const userId = req.userId;
+      const { orderId, ratings } = req.body;
+
+      // Validate request
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "User not authenticated"
+         });
+      }
+
+      const user = await User.findOne({ clerkId: userId });
+      if (!user) {
+         return res.status(404).json({
+            success: false,
+            message: "User not found"
+         });
+      }
+
+      // Validate order ID
+      if (!orderId) {
+         return res.status(400).json({
+            success: false,
+            message: "Order ID is required"
+         });
+      }
+
+      // Find the order
+      const order = await Order.findOne({ trackId: orderId, user: user._id });
+      if (!order) {
+         return res.status(404).json({
+            success: false,
+            message: "Order not found or does not belong to this user"
+         });
+      }
+
+      // Check if reviews already done
+      if (order.isReviewedDone) {
+         return res.status(400).json({
+            success: false,
+            message: "Reviews have already been submitted for this order"
+         });
+      }
+
+      // Validate ratings data
+      if (!Array.isArray(ratings) || ratings.length === 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Invalid ratings data. Expected non-empty array of ratings."
+         });
+      }
+
+      const createdReviews = [];
+      const errors = [];
+      const productUpdates = new Map(); 
+
+      // Process each review in the array
+      for (const reviewItem of ratings) {
+         try {
+            const { productId, productName, rating, comment } = reviewItem;
+
+            // Validate review data
+            if (!productId) {
+               errors.push({ productId, error: "Product ID is required" });
+               continue;
+            }
+
+            if (!rating || rating < 1 || rating > 5) {
+               errors.push({ productId, error: "Rating must be between 1 and 5" });
+               continue;
+            }
+
+            if (!comment || comment.trim() === '') {
+               errors.push({ productId, error: "Comment is required" });
+               continue;
+            }
+
+            // Find the product
+            const product = await Product.findById(productId);
+            if (!product) {
+               errors.push({ productId, error: "Product not found" });
+               continue;
+            }
+
+            // Check if user has already reviewed this product
+            const existingReview = await Review.findOne({
+               userId: user._id,
+               productId
+            });
+
+            let newReview;
+
+            if (existingReview) {
+               // Get old rating for calculation
+               const oldRating = existingReview.rating;
+               
+               // Update existing review
+               existingReview.rating = rating;
+               existingReview.comment = comment;
+               newReview = await existingReview.save();
+               
+               // Store update info for this product
+               if (!productUpdates.has(productId)) {
+                  productUpdates.set(productId, {
+                     product,
+                     oldRatingSum: oldRating,
+                     newRatingSum: rating,
+                     reviewCountDiff: 0
+                  });
+               } else {
+                  const update = productUpdates.get(productId);
+                  update.oldRatingSum += oldRating;
+                  update.newRatingSum += rating;
+               }
+            } else {
+               // Create new review
+               newReview = await Review.create({
+                  userId: user._id,
+                  productId,
+                  rating,
+                  comment
+               });
+
+               // Add review reference to product if not already added
+               if (!product.reviews.includes(newReview._id)) {
+                  product.reviews.push(newReview._id);
+               }
+               
+               // Store update info for this product
+               if (!productUpdates.has(productId)) {
+                  productUpdates.set(productId, {
+                     product,
+                     oldRatingSum: 0,
+                     newRatingSum: rating,
+                     reviewCountDiff: 1
+                  });
+               } else {
+                  const update = productUpdates.get(productId);
+                  update.newRatingSum += rating;
+                  update.reviewCountDiff += 1;
+               }
+            }
+            
+            createdReviews.push(newReview);
+            
+         } catch (error) {
+            errors.push({
+               productId: reviewItem.productId,
+               error: `Error processing review: ${error.message}`
+            });
+         }
+      }
+
+      // Apply all product updates with accurate rating calculations
+      for (const [productId, update] of productUpdates.entries()) {
+         const { product, oldRatingSum, newRatingSum, reviewCountDiff } = update;
+         
+         // Calculate new average rating
+         const newReviewCount = product.reviewCount + reviewCountDiff;
+         const currentTotalPoints = product.averageRating * product.reviewCount;
+         const adjustedTotalPoints = currentTotalPoints - oldRatingSum + newRatingSum;
+         
+         product.reviewCount = newReviewCount;
+         product.averageRating = newReviewCount > 0 
+            ? Math.round((adjustedTotalPoints / newReviewCount) * 10) / 10 
+            : 0;
+            
+         await product.save();
+      }
+
+      // Update order review status if at least one review was created
+      if (createdReviews.length > 0) {
+         order.isReviewedDone = true;
+         await order.save();
+      }
+
+      // Return appropriate response based on results
+      if (createdReviews.length === 0) {
+         return res.status(400).json({
+            success: false,
+            message: "Failed to create any reviews",
+            errors
+         });
+      }
+
+      return res.status(201).json({
+         success: true,
+         message: "Reviews added successfully and order updated",
+         reviews: createdReviews,
+         orderUpdated: true,
+         errors: errors.length > 0 ? errors : undefined
+      });
+   } catch (error) {
+      console.error("Error adding reviews:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Internal Server Error",
+         error: error.message
+      });
+   }
+};
+
+// get all reviews by product id with pagination 
+export const getReviewsById = async (req, res) => {
+   try {
+      const { slug } = req.params;
+      let { page, limit } = req.query;
+
+      // Set pagination defaults
+      page = parseInt(page) || 1;
+      limit = parseInt(limit) || 5;
+
+      if (page < 1 || limit < 1) {
+         return res.status(400).json({
+            success: false,
+            message: "Invalid pagination parameters.",
+         });
+      }
+
+      const skip = (page - 1) * limit;
+
+      // Find the product by slug
+      const product = await Product.findOne({ slug });
+      if (!product) {
+         return res.status(404).json({
+            success: false,
+            message: "Product not found.",
+         });
+      }
+
+      // Fetch reviews for the product with pagination
+      const reviews = await Review.find({ productId: product._id })
+         .skip(skip)
+         .limit(limit)
+         .sort({ createdAt: -1 })
+         .populate("userId", "fullName avatar")
+         .lean();
+
+      // Format reviews to include only necessary user data
+      const formattedReviews = reviews.map(review => ({
+         _id: review._id,
+         rating: review.rating,
+         comment: review.comment,
+         createdAt: review.createdAt,
+         userName: review.userId.fullName,
+         userAvatar: review.userId.avatar,
+      }));
+
+      const totalReviews = await Review.countDocuments({ productId: product._id });
+
+      return res.status(200).json({
+         success: true,
+         message: "Reviews fetched successfully",
+         reviews: formattedReviews,
+         totalReviews,
+         averageRating: product.averageRating,
+         currentPage: page,
+         totalPages: Math.ceil(totalReviews / limit),
+      });
+   } catch (error) {
+      console.error("Error fetching reviews:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Internal Server Error",
+      });
+   }
+}

@@ -1,65 +1,71 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { useGetReviewsById } from '../../lib/query/queriesAndMutation'
+import { avatars } from '../../utils/constant'
 
 const ProductReviews = ({ slug }) => {
   // State for reviews and loading status
-  const [reviews, setReviews] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
   const [averageRating, setAverageRating] = useState(0)
+  const [totalReviews, setTotalReviews] = useState(0)
 
-  // Fetch reviews data
+  // Reference for intersection observer
+  const loadMoreRef = useRef(null)
+
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useGetReviewsById(slug)
+
+  // Handle intersection for infinite scrolling
   useEffect(() => {
-    // In a real app, you would fetch reviews from an API
-    const fetchReviews = async () => {
-      setIsLoading(true)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 }
+    )
 
-      try {
-        // Simulate API call with dummy data
-        await new Promise(resolve => setTimeout(resolve, 800))
-
-        // Dummy reviews data
-        const dummyReviews = [
-          {
-            userId: 'user1',
-            name: 'John Smith',
-            rating: 5,
-            comment: 'Excellent t-shirt quality. The fabric is soft and comfortable, and the design has held up well after multiple washes. Sizing is accurate as described.',
-            createdAt: '2025-03-25T14:32:22Z'
-          },
-          {
-            userId: 'user2',
-            name: 'Sarah Johnson',
-            rating: 4,
-            comment: 'Great design and color, fits as expected. Took away one star because the fabric is a bit thinner than I expected, but still good quality overall.',
-            createdAt: '2025-03-20T09:15:43Z'
-          },
-          {
-            userId: 'user3',
-            name: 'Miguel Rodriguez',
-            rating: 5,
-            comment: 'This t-shirt exceeded my expectations! The print quality is exceptional and the material is breathable and perfect for summer.',
-            createdAt: '2025-04-01T16:22:10Z'
-          }
-        ]
-
-        setReviews(dummyReviews)
-
-        // Calculate average rating
-        const totalRating = dummyReviews.reduce((acc, review) => acc + review.rating, 0)
-        setAverageRating(dummyReviews.length > 0 ? totalRating / dummyReviews.length : 0)
-      } catch (error) {
-        console.error('Error fetching reviews:', error)
-      } finally {
-        setIsLoading(false)
-      }
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current)
     }
 
-    fetchReviews()
-  }, [slug])
+    return () => {
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current)
+      }
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
+  // Calculate average rating and flatten reviews from all pages
+  const reviews = data?.pages.flatMap(page => page.reviews || []) || []
+
+  useEffect(() => {
+    if (data?.pages?.length > 0) {
+      const firstPage = data.pages[0]
+      setTotalReviews(firstPage.totalReviews || 0)
+      
+      // Use the server-provided averageRating instead of calculating it manually
+      setAverageRating(firstPage.averageRating || 0)
+    }
+  }, [data])
 
   // Format date helper
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' }
     return new Date(dateString).toLocaleDateString(undefined, options)
+  }
+
+  // Find avatar URL by avatar name
+  const getAvatarUrl = (avatarName) => {
+    const avatar = avatars.find(a => a.name === avatarName)
+    return avatar ? avatar.url : null
   }
 
   // Render star rating
@@ -85,9 +91,13 @@ const ProductReviews = ({ slug }) => {
     <div className="mt-8">
       <h2 className="text-xl md:text-2xl font-bold mb-4">Customer Reviews</h2>
 
-      {isLoading ? (
+      {isLoading && reviews.length === 0 ? (
         <div className="flex justify-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-highlight-primary"></div>
+        </div>
+      ) : isError ? (
+        <div className="text-center py-8 text-red-500">
+          <p>Error loading reviews: {error?.message || 'Something went wrong'}</p>
         </div>
       ) : reviews.length > 0 ? (
         <div>
@@ -96,37 +106,49 @@ const ProductReviews = ({ slug }) => {
             <div className="flex items-center mb-2">
               <div className="text-2xl font-bold mr-2">{averageRating.toFixed(1)}</div>
               <div className="mr-2">{renderStars(Math.round(averageRating))}</div>
-              <div className="text-sm text-secondary">({reviews.length} reviews)</div>
+              <div className="text-sm text-secondary">({totalReviews} reviews)</div>
             </div>
           </div>
 
           {/* Review list */}
           <div className="space-y-4">
-            {reviews.map((review, index) => (
-              <div key={index} className="border-b border-theme pb-4 last:border-b-0">
-                <div className="flex justify-between items-start mb-1">
-                  <div className="font-medium text-primary">{review.name}</div>
-                  <div className="text-xs text-secondary">{formatDate(review.createdAt)}</div>
+            {reviews.map((review) => (
+              <div key={review._id} className="border-b border-theme pb-4 last:border-b-0">
+                <div className="flex items-start mb-1">
+                  {review.userAvatar && (
+                    <img
+                      src={getAvatarUrl(review.userAvatar)}
+                      alt={review.userName}
+                      className="w-10 h-10 rounded-full mr-3"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div className="font-medium text-primary">{review.userName}</div>
+                      <div className="text-xs text-secondary">{formatDate(review.createdAt)}</div>
+                    </div>
+                    <div className="mb-2">{renderStars(review.rating)}</div>
+                    <p className="text-secondary text-sm sm:text-base">{review.comment}</p>
+                  </div>
                 </div>
-                <div className="mb-2">{renderStars(review.rating)}</div>
-                <p className="text-secondary text-sm sm:text-base">{review.comment}</p>
               </div>
             ))}
           </div>
 
-          {/* Write review button */}
-          <div className="mt-6">
-            <button className="bg-highlight-primary text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-all">
-              Write a Review
-            </button>
-          </div>
+          {/* Loading indicator for next page */}
+          {hasNextPage && (
+            <div ref={loadMoreRef} className="flex justify-center py-4">
+              {isFetchingNextPage ? (
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-highlight-primary"></div>
+              ) : (
+                <div className="h-6 w-6"></div> // Placeholder to maintain same height
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <div className="text-center py-8">
           <p className="text-secondary mb-4">No reviews yet. Be the first to review this product!</p>
-          <button className="bg-highlight-primary text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-all">
-            Write a Review
-          </button>
         </div>
       )}
     </div>

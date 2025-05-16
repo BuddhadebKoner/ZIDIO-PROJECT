@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 
 import ProductImageGallery from '../../components/product/ProductImageGallery'
 import ProductReviews from '../../components/product/ProductReviews'
-import { Heart, ShoppingCart, Truck, X, AlertCircle } from 'lucide-react'
+import { Heart, ShoppingCart, Truck, X, AlertCircle, Star } from 'lucide-react'
 import { useGetProductById } from '../../lib/query/queriesAndMutation'
 import { useAuth } from '../../context/AuthContext'
 import { useAddToCart, useAddToWishlist, useRemoveFromWishlist } from '../../lib/query/queriesAndMutation'
@@ -26,6 +26,8 @@ const Product = () => {
     isLoading: productLoading,
     isError: productError,
   } = useGetProductById(slug)
+
+  console.log(productData, "productData")
 
   const {
     mutate: addToWishlist,
@@ -228,10 +230,31 @@ const Product = () => {
               )}
             </div>
 
-            {/* Product Title */}
+            {/* Product Title and Rating Section */}
             <div className="flex flex-col">
               <h1 className="text-2xl font-bold text-white mb-2">{product.title}</h1>
               <p className="text-gray-400">{product.subTitle}</p>
+
+              {/* Add Star Rating Display - only shown if there are reviews */}
+              {product.reviewCount > 0 && (
+                <div className="flex items-center mt-3">
+                  <div className="flex mr-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        size={16}
+                        className={`${star <= (product.averageRating || 0)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-500"
+                          } mr-0.5`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-300">
+                    {product.averageRating ? product.averageRating.toFixed(1) : "0"}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Price display */}

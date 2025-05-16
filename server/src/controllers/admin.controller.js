@@ -7,6 +7,7 @@ import { deleteFromCloudinary } from "../utils/cloudinary.js";
 import { Inventory } from "../models/inventory.model.js";
 import { Order } from "../models/order.model.js";
 import { User } from "../models/user.model.js";
+import { Review } from "../models/review.model.js";
 
 export const addProduct = async (req, res) => {
    try {
@@ -1369,3 +1370,134 @@ export const updateOrder = async (req, res) => {
       });
    }
 };
+
+// get all reviews by pagination
+export const getReviews = async (req, res) => {
+   try {
+      let { page, limit } = req.query;
+      page = parseInt(page) || 1;
+      limit = parseInt(limit) || 5;
+
+      if (page < 1 || limit < 1) {
+         return res.status(400).json({
+            success: false,
+            message: "Invalid pagination parameters.",
+         });
+      }
+
+      const skip = (page - 1) * limit;
+
+      const reviews = await Review.find()
+         .populate({ path: "userId", select: "fullName" })
+         .populate({ path: "productId", select: "title slug" })
+         .skip(skip)
+         .limit(limit)
+         .sort({ createdAt: -1 })
+
+      if (!reviews || reviews.length === 0) {
+         return res.status(404).json({
+            success: false,
+            message: "No reviews found",
+         });
+      }
+
+      const totalReviews = await Review.countDocuments();
+      if (!totalReviews) {
+         return res.status(404).json({
+            success: false,
+            message: "No reviews found",
+         });
+      }
+
+      return res.status(200).json({
+         success: true,
+         message: "Reviews fetched successfully",
+         reviews,
+         totalPages: Math.ceil(totalReviews / limit),
+         currentPage: page,
+         totalItems: totalReviews
+      });
+
+   } catch (error) {
+      console.error("Error fetching reviews:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to fetch reviews",
+         error: error.message || "Server error"
+      });
+   }
+}
+
+/// get all customers
+export const getCustomers = async (req, res) => {
+   try {
+      const {
+         page = 1,
+         limit = 10,
+         search,
+         sort = "-createdAt"
+      } = req.query;
+
+      const pageNum = parseInt(page);
+      const limitNum = parseInt(limit);
+
+      if (pageNum < 1 || limitNum < 1) {
+         return res.status(400).json({
+            success: false,
+            message: "Invalid pagination parameters.",
+         });
+      }
+
+      const skip = (pageNum - 1) * limitNum;
+
+      // Build filter object
+      const filter = { role: "user" }; 
+
+      // Add search functionality
+      if (search) {
+         const searchRegex = { $regex: search, $options: "i" };
+         filter.$or = [
+            { fullName: searchRegex },
+            { email: searchRegex },
+            { phone: searchRegex }
+         ];
+      }
+
+      // Execute query with optimizations
+      const customers = await User.find(filter)
+         .select("clerkId fullName email phone avatar createdAt")
+         .skip(skip)
+         .limit(limitNum)
+         .sort(sort)
+         .lean();
+
+      if (!customers || customers.length === 0) {
+         return res.status(200).json({ 
+            success: true,
+            message: "No customers found",
+            customers: [],
+            totalPages: 0,
+            currentPage: pageNum,
+            totalItems: 0
+         });
+      }
+
+      const totalCustomers = await User.countDocuments(filter);
+
+      return res.status(200).json({
+         success: true,
+         message: "Customers fetched successfully",
+         customers,
+         totalPages: Math.ceil(totalCustomers / limitNum),
+         currentPage: pageNum,
+         totalItems: totalCustomers
+      });
+   } catch (error) {
+      console.error("Error fetching customers:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to fetch customers",
+         error: error.message || "Server error"
+      });
+   }
+}

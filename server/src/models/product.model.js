@@ -134,7 +134,18 @@ const productSchema = new mongoose.Schema({
          ref: 'Review',
          default: null,
       }
-   ]
+   ],
+   // Rating statistics
+   averageRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5
+   },
+   reviewCount: {
+      type: Number,
+      default: 0
+   }
 }, { timestamps: true });
 
 export const Product = mongoose.model('Product', productSchema);

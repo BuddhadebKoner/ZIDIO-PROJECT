@@ -32,27 +32,10 @@ const OrderDetails = () => {
       error
    } = useGetOrderById(trackId);
 
-   console.log("Order Details Data: ", data);
-
    // console.log("Order Details Data: ", data);
-
-   const handleCancelOrder = () => {
-      console.log("Cancelling order...");
-      // Add actual implementation logic here
-   };
-
-   const handleReturnOrder = () => {
-      console.log("Returning order...");
-      // Add actual implementation logic here
-   };
 
    const handleDownloadInvoice = () => {
       console.log("Downloading invoice...");
-      // Add actual implementation logic here
-   };
-
-   const handleTrackOrder = () => {
-      console.log("Tracking order...");
       // Add actual implementation logic here
    };
 
@@ -221,14 +204,6 @@ const OrderDetails = () => {
                   >
                      <FileText className="mr-2 h-4 w-4" /> Download Invoice
                   </button>
-                  {(order.orderStatus === 'Processing' || order.orderStatus === 'Shipped') && (
-                     <button
-                        onClick={handleTrackOrder}
-                        className="px-3 py-2 bg-primary-600 hover:bg-primary-700 rounded-md text-sm font-medium text-bg-white flex items-center shadow-sm transition-colors"
-                     >
-                        <Truck className="mr-2 h-4 w-4" /> Track Order
-                     </button>
-                  )}
                </div>
             </div>
 
@@ -255,31 +230,22 @@ const OrderDetails = () => {
                </div>
             )}
 
-            {/* Action Buttons - Moved outside the header flex container */}
+            {/* Action Buttons - Rating Products with improved UX */}
             <div className="flex flex-wrap gap-3 mb-8">
-               {order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Delivered' && order.orderStatus !== 'Returned' && (
-                  <button
-                     onClick={handleCancelOrder}
-                     className="px-4 py-2 border border-primary-300 text-error hover:bg-primary-50 rounded-md text-sm font-medium flex items-center"
-                  >
-                     <XCircle className="mr-2 h-4 w-4" /> Cancel Order
-                  </button>
-               )}
-
-               {(order.isReviewedDone || order.orderStatus === "Delivered") && (
+               {order.orderStatus === "Delivered" && (
                   <>
-                     <button
-                        onClick={handleReturnOrder}
-                        className="px-4 py-2 border border-gray-300 text-text hover:bg-gray-200 rounded-md text-sm font-medium flex items-center"
-                     >
-                        <RotateCcw className="mr-2 h-4 w-4" /> Return Order
-                     </button>
-                     <button
-                        onClick={handleOpenRatingPopup}
-                        className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-bg-white rounded-md text-sm font-medium flex items-center"
-                     >
-                        <Star className="mr-2 h-4 w-4" /> Rate Products
-                     </button>
+                     {order.isReviewedDone ? (
+                        <div className="px-4 py-2 bg-surface border border-gray-200 text-success rounded-md text-sm font-medium flex items-center">
+                           <CheckCircle className="mr-2 h-4 w-4" /> Products Rated
+                        </div>
+                     ) : (
+                        <button
+                           onClick={handleOpenRatingPopup}
+                           className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-bg-white rounded-md text-sm font-medium flex items-center"
+                        >
+                           <Star className="mr-2 h-4 w-4" /> Rate Products
+                        </button>
+                     )}
                   </>
                )}
             </div>

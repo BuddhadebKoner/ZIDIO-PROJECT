@@ -139,7 +139,7 @@ export const removeFromCart = async (productId) => {
 }
 
 // update cart quantity and size
-export const updateCart = async (data) => { 
+export const updateCart = async (data) => {
    try {
       const response = await axiosInstance.put(`/products/update-cart`, data);
       if (response.data && response.data.success) {
@@ -152,5 +152,35 @@ export const updateCart = async (data) => {
          message: error.message || "Failed to update cart",
          response: error.response
       };
+   }
+}
+
+// add review
+export const addReview = async (data) => {
+   try {
+      const response = await axiosInstance.post(`/products/add-review`, data);
+
+
+      console.log("addReview response", response);
+   } catch (error) {
+      return {
+         message: error.message || "Failed to add review",
+         response: error.response
+      };
+   }
+};
+
+// get all reviews by product id pagination
+export const getReviewsById = async (slug, page = 1, limit = 5) => {
+   try {
+      const response = await axiosInstance.get(`/products/get-reviews/${slug}?page=${page}&limit=${limit}`);
+      if (response.data && response.data.success) {
+         return response.data;
+      } else {
+         throw new Error(response.data?.message || "Failed to fetch reviews");
+      }
+   } catch (error) {
+      console.error("Error fetching reviews:", error);
+      throw error;
    }
 }

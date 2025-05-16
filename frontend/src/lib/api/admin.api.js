@@ -366,3 +366,25 @@ export const updateOrder = async (orderId, orderAction) => {
       };
    }
 }
+
+// get all reviews
+export const getReviews = async (page = 1, limit = 10) => {
+   try {
+      const response = await axiosInstance.get(`/admin/get-reviews?page=${page}&limit=${limit}`);
+      return response.data;
+   } catch (error) {
+      console.error('Error fetching reviews:', error);
+      throw error;
+   }
+}
+
+// get all customers
+export const getCustomers = async (page = 1, limit = 10) => {
+   try {
+      const response = await axiosInstance.get(`/admin/get-customers?page=${page}&limit=${limit}`);
+      return response.data;
+   } catch (error) {
+      console.error('Error fetching customers:', error);
+      throw error;
+   }
+}

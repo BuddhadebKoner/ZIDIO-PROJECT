@@ -4,9 +4,9 @@ import { QUERY_KEYS } from "./queryKeys";
 import { useUser } from "@clerk/clerk-react";
 import { getAddAddress, getCartProducts, getExtreamSearch, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
-import { addProduct, getInventorys, getOrdersForAdmin } from "../api/admin.api";
+import { addProduct, getCustomers, getInventorys, getOrdersForAdmin, getReviews } from "../api/admin.api";
 import { getAllCollections, getCollectionById, getProductsByCollectionSlug, searchCollections } from "../api/collection.api";
-import { addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
+import { addReview, addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, getReviewsById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
 import { getOrderById, getOrders } from "../api/order.api";
 
@@ -447,3 +447,72 @@ export const useGetOrdersWithQuery = (filters) => {
       enabled: true, // The query will execute immediately
    });
 };
+
+// add review 
+export const useAddReview = () => {
+   try {
+      const queryClient = useQueryClient();
+
+      return useMutation({
+         mutationFn: (reviewData) => addReview(reviewData),
+         onSuccess: () => {
+            queryClient.invalidateQueries([QUERY_KEYS.ORDERS.GET_ORDER_BY_ID]);
+            toast.success("Review added successfully!");
+         },
+         onError: (error) => {
+            const errorMessage = error?.response?.data?.message || "Error adding review";
+            toast.error(errorMessage, {
+               position: toast.POSITION.TOP_RIGHT,
+            });
+         },
+      });
+   } catch (error) {
+      console.error("Error adding review:", error);
+      throw error;
+   }
+};
+
+// get all reviews by product id infinite pagination
+export const useGetReviewsById = (slug, page = 1, limit = 5) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.PRODUCTS.GET_REVIEWS_BY_ID, slug, page, limit],
+      queryFn: ({ pageParam = 1 }) => getReviewsById(slug, pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      refetchOnWindowFocus: false,
+   });
+}
+
+// get all reviews
+export const useGetAllReviews = (page = 1, limit = 5) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.REVIEWS.GET_ALL_REVIEWS, page, limit],
+      queryFn: ({ pageParam = 1 }) => getReviews(pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      refetchOnWindowFocus: false,
+   });
+}
+
+// get all customers
+export const useGetAllCustomers = (page = 1, limit = 5) => {
+   return useInfiniteQuery({
+      queryKey: [QUERY_KEYS.CUSTOMERS.GET_ALL_CUSTOMERS, page, limit],
+      queryFn: ({ pageParam = 1 }) => getCustomers(pageParam, limit),
+      getNextPageParam: (lastPage) => {
+         if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
+            return lastPage.currentPage + 1;
+         }
+         return undefined;
+      },
+      refetchOnWindowFocus: false,
+   });
+}
