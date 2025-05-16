@@ -8,6 +8,7 @@ import { Inventory } from "../models/inventory.model.js";
 import { Order } from "../models/order.model.js";
 import { User } from "../models/user.model.js";
 import { Review } from "../models/review.model.js";
+import { Payment } from "../models/payment.model.js";
 
 export const addProduct = async (req, res) => {
    try {
@@ -1451,7 +1452,7 @@ export const getCustomers = async (req, res) => {
       const skip = (pageNum - 1) * limitNum;
 
       // Build filter object
-      const filter = { role: "user" }; 
+      const filter = { role: "user" };
 
       // Add search functionality
       if (search) {
@@ -1472,7 +1473,7 @@ export const getCustomers = async (req, res) => {
          .lean();
 
       if (!customers || customers.length === 0) {
-         return res.status(200).json({ 
+         return res.status(200).json({
             success: true,
             message: "No customers found",
             customers: [],
@@ -1497,6 +1498,101 @@ export const getCustomers = async (req, res) => {
       return res.status(500).json({
          success: false,
          message: "Failed to fetch customers",
+         error: error.message || "Server error"
+      });
+   }
+}
+
+// dashbord stats
+export const getDashboardStats = async (req, res) => {
+   try {
+      const userId = req.userId;
+      if (!userId) {
+         return res.status(401).json({
+            success: false,
+            message: "Unauthorized: Authentication required"
+         });
+      }
+
+      // Calculate date for 30 days ago
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      // 1. Total revenue in last 30 days - calculated from Payment collection
+      const revenueData = await Payment.aggregate([
+         {
+            $match: {
+               paymentDate: { $gte: thirtyDaysAgo },
+               paymentStatus: 'succeeded'
+            }
+         },
+         {
+            $group: {
+               _id: null,
+               totalRevenue: { $sum: "$amount" }
+            }
+         }
+      ]);
+
+      const totalRevenue = revenueData[0]?.totalRevenue || 0;
+
+      // 2. Total products delivered in last 30 days
+      const deliveredProductsData = await Order.aggregate([
+         {
+            $match: {
+               orderStatus: 'Delivered',
+               orderDeliveredTime: { $gte: thirtyDaysAgo }
+            }
+         },
+         {
+            $unwind: "$purchaseProducts"
+         },
+         {
+            $group: {
+               _id: null,
+               totalProductsDelivered: { $sum: "$purchaseProducts.quantity" }
+            }
+         }
+      ]);
+
+      const totalProductsDelivered = deliveredProductsData[0]?.totalProductsDelivered || 0;
+
+      // 3. Total customers
+      const totalCustomers = await User.countDocuments({ role: 'user' });
+
+      // 4. Total inventory stocks - get total products in stock
+      const inventoryData = await Inventory.aggregate([
+         {
+            $match: {
+               "stocks.quantity": { $gt: 0 }  // Only count items with stock > 0
+            }
+         },
+         {
+            $group: {
+               _id: null,
+               totalStock: { $sum: "$totalQuantity" },
+               totalProducts: { $sum: 1 }
+            }
+         }
+      ]);
+
+      const totalInventoryStock = inventoryData[0]?.totalStock || 0;
+
+      return res.status(200).json({
+         success: true,
+         message: "Dashboard stats fetched successfully",
+         stats: {
+            revenueInLast30Days: totalRevenue,
+            productsDeliveredInLast30Days: totalProductsDelivered,
+            totalCustomers: totalCustomers,
+            totalInventoryStock: totalInventoryStock,
+         }
+      });
+   } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      return res.status(500).json({
+         success: false,
+         message: "Failed to fetch dashboard stats",
          error: error.message || "Server error"
       });
    }

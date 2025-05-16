@@ -1,6 +1,6 @@
 import express from 'express'
 import { adminAuth } from '../middlewares/adminAuth.middleware.js'
-import { addCollection, addOffer, addProduct, getCustomers, getInventoryBySlug, getInventorys, getOrders, getReviews, removeSingleImage, updateCollection, updateHomeContent, updateInventory, updateOffer, updateOrder, updateProduct } from '../controllers/admin.controller.js'
+import { addCollection, addOffer, addProduct, getCustomers, getDashboardStats, getInventoryBySlug, getInventorys, getOrders, getReviews, removeSingleImage, updateCollection, updateHomeContent, updateInventory, updateOffer, updateOrder, updateProduct } from '../controllers/admin.controller.js'
 
 const adminRouter = express.Router()
 
@@ -34,5 +34,7 @@ adminRouter.patch('/update-order/:id', adminAuth, updateOrder)
 adminRouter.get('/get-reviews', adminAuth, getReviews)
 // get all customers
 adminRouter.get('/get-customers', adminAuth, getCustomers)
+// dashboard stats
+adminRouter.get('/get-dashboard-stats', adminAuth, getDashboardStats)
 
 export default adminRouter

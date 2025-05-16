@@ -388,3 +388,14 @@ export const getCustomers = async (page = 1, limit = 10) => {
       throw error;
    }
 }
+
+// get dashboard stats
+export const getDashboardStats = async () => {
+   try {
+      const response = await axiosInstance.get(`/admin/get-dashboard-stats`);
+      return response.data;
+   } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      throw error;
+   }
+}

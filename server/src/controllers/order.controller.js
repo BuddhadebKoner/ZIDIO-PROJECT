@@ -901,7 +901,7 @@ export const getOrderById = async (req, res) => {
          $nor: [{ orderType: 'ONLINE', paymentStatus: 'unpaid' }]
       }).populate("deliveryAddress paymentData")
 
-      console.log("Order:", order);
+      // console.log("Order:", order);
 
       if (!order) {
          return res.status(404).json({

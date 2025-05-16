@@ -39,5 +39,8 @@ export const QUERY_KEYS = {
    CUSTOMERS: {
       GET_ALL_CUSTOMERS: 'getAllCustomers',
    },
+   DASHVOARD: {
+      GET_DASHBOARD_DATA: 'getDashboardData',
+   },
    EXTREAM_SEARCH: "extreamSearch"
 };

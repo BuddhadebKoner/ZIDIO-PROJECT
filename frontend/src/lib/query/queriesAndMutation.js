@@ -4,7 +4,7 @@ import { QUERY_KEYS } from "./queryKeys";
 import { useUser } from "@clerk/clerk-react";
 import { getAddAddress, getCartProducts, getExtreamSearch, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
-import { addProduct, getCustomers, getInventorys, getOrdersForAdmin, getReviews } from "../api/admin.api";
+import { addProduct, getCustomers, getDashboardStats, getInventorys, getOrdersForAdmin, getReviews } from "../api/admin.api";
 import { getAllCollections, getCollectionById, getProductsByCollectionSlug, searchCollections } from "../api/collection.api";
 import { addReview, addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, getReviewsById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
@@ -513,6 +513,15 @@ export const useGetAllCustomers = (page = 1, limit = 5) => {
          }
          return undefined;
       },
+      refetchOnWindowFocus: false,
+   });
+}
+
+// get dashboard stats
+export const useGetDashboardStats = () => {
+   return useQuery({
+      queryKey: [QUERY_KEYS.DASHVOARD.GET_DASHBOARD_DATA],
+      queryFn: () => getDashboardStats(),
       refetchOnWindowFocus: false,
    });
 }
