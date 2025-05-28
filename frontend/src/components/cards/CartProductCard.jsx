@@ -2,8 +2,12 @@ import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useRemoveFromCart, useUpdateCart } from '../../lib/query/queriesAndMutation'
 import { toast } from 'react-toastify'
 import { formatIndianCurrency } from '../../utils/amountFormater'
+import { useAuth } from '../../context/AuthContext'
 
 const CartProductCard = ({ item, setProductAbliability }) => {
+
+  const { refreshUserData } = useAuth()
+
   if (!item || typeof item !== 'object') {
     return <div className="text-error p-4">Invalid product data</div>
   }
@@ -87,6 +91,7 @@ const CartProductCard = ({ item, setProductAbliability }) => {
     if (typeof onRemoveItem === 'function') {
       onRemoveItem(productId, {
         onSuccess: () => {
+          refreshUserData();
           console.log('Item removed from cart successfully')
           setShowConfirmation(false)
           if (!isInStock && typeof setProductAbliability === 'function') {
@@ -198,7 +203,7 @@ const CartProductCard = ({ item, setProductAbliability }) => {
       const newQuantity = Math.min(quantity, availableQty);
 
       if (newQuantity < quantity) {
-        console.warn(`Quantity adjusted to ${newQuantity} for size ${newSize}`);  
+        console.warn(`Quantity adjusted to ${newQuantity} for size ${newSize}`);
       }
 
       updateQuantity({

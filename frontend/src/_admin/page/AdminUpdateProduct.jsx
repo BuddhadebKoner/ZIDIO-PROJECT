@@ -1,7 +1,7 @@
 import { ChevronLeft, Loader2, AlertCircle, Lock, X } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import SingleImageUploader from '../../components/shared/SingleImageUploader';
+import MultipleImageUploader from '../../components/shared/MultipleImageUploader';
 import { toast } from 'react-toastify';
 import FindCollections from '../../components/dataFinding/FindCollections';
 import { getProductById } from '../../lib/api/product.api';
@@ -10,8 +10,7 @@ import {
   validateProductForm,
   processProductData,
   identifyChangedFields,
-  formatSubmitData,
-  updateImageArray
+  formatSubmitData
 } from '../../utils/product.utils';
 
 const AdminUpdateProduct = () => {
@@ -46,6 +45,11 @@ const AdminUpdateProduct = () => {
 
   const sizeOptions = ['S', 'M', 'L', 'XL', 'XXL'];
 
+  // Debug effect to track image changes
+  useEffect(() => {
+    console.log('FormData images changed:', formData.images);
+  }, [formData.images]);
+
   useEffect(() => {
     const fetchProductData = async () => {
       if (!slug) {
@@ -59,7 +63,7 @@ const AdminUpdateProduct = () => {
         setFetchError('');
 
         const response = await getProductById(slug);
-        console.log("Product data response:", response.product);
+        // console.log("Product data response:", response.product);
 
         if (!response || !response.product) {
           throw new Error("Product not found or invalid response format");
@@ -162,8 +166,6 @@ const AdminUpdateProduct = () => {
         throw new Error('Please upload at least one product image');
       }
 
-      console.log("Submitting changes:", submitData);
-
       const response = await updateProduct(slug, submitData);
 
       if (response.success) {
@@ -183,31 +185,10 @@ const AdminUpdateProduct = () => {
     }
   };
 
-  const addProductImage = (imageUrl, imageId, index) => {
-    const updatedImages = updateImageArray(formData.images, {
-      action: 'add',
-      imageUrl,
-      imageId,
-      index
-    });
-
-    setFormData(prev => ({ ...prev, images: updatedImages }));
+  const handleImagesChange = (newImages) => {
+    console.log('Images changed:', newImages);
+    setFormData(prev => ({ ...prev, images: newImages }));
     setDirtyFields(prev => ({ ...prev, images: true }));
-  };
-
-  const removeProductImage = (index) => {
-    const updatedImages = updateImageArray(formData.images, {
-      action: 'remove',
-      index
-    });
-
-    setFormData(prev => ({ ...prev, images: updatedImages }));
-    setDirtyFields(prev => ({ ...prev, images: true }));
-  };
-
-  const addImageField = () => {
-    const updatedImages = updateImageArray(formData.images, { action: 'addField' });
-    setFormData(prev => ({ ...prev, images: updatedImages }));
   };
 
   const hasChanges = Object.keys(dirtyFields).length > 0 &&
@@ -356,61 +337,20 @@ const AdminUpdateProduct = () => {
           </div>
 
           <div className="md:col-span-2">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-primary-300">Product Images</h2>
-              <button
-                type="button"
-                onClick={addImageField}
-                className="btn-secondary text-sm px-3 py-1"
-                disabled={loading}
-              >
-                Add Image
-              </button>
-            </div>
-
             {validationErrors.images && (
               <div className="mb-3 p-3 bg-red-900/30 text-red-400 rounded-md">
                 {validationErrors.images}
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-              {formData.images.map((image, index) => (
-                <div key={index} className="p-4 border border-gray-700 rounded-md relative">
-                  <button
-                    type="button"
-                    className="absolute top-2 right-2 bg-red-500/80 text-white p-1 rounded-full hover:bg-red-600"
-                    onClick={() => removeProductImage(index)}
-                    disabled={loading}
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  <SingleImageUploader
-                    setImageUrl={(url) => addProductImage(url, image.imageId || '', index)}
-                    setImageId={(id) => addProductImage(image.imageUrl || '', id, index)}
-                    label={`Product Image #${index + 1}`}
-                    currentImageUrl={image.imageUrl}
-                    disabled={loading}
-                    path="products"
-                    aspectRatio="square"
-                  />
-                </div>
-              ))}
-            </div>
-
-            {formData.images.length === 0 && (
-              <div className="text-center p-8 border border-dashed border-gray-600 rounded-md">
-                <p className="text-gray-400 mb-3">No product images added</p>
-                <button
-                  type="button"
-                  onClick={addImageField}
-                  className="btn-secondary text-sm px-4 py-2"
-                  disabled={loading}
-                >
-                  Add Image
-                </button>
-              </div>
-            )}
+            <MultipleImageUploader
+              images={formData.images}
+              onImagesChange={handleImagesChange}
+              label="Product Images"
+              disabled={loading}
+              path="products"
+              maxImages={10}
+            />
           </div>
 
           <div className="md:col-span-2">

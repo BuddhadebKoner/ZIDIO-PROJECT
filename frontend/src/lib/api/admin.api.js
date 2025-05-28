@@ -256,6 +256,7 @@ export const getHomeContent = async () => {
 
 // delete image from cloudinary by public_id
 export const deleteImage = async (public_id) => {
+
    try {
       const response = await axiosInstance.delete('/admin/delete-image', {
          data: { public_id }
@@ -268,7 +269,11 @@ export const deleteImage = async (public_id) => {
       };
    } catch (error) {
       console.error('Error deleting image:', error);
-      throw error;
+      return {
+         success: false,
+         message: error.response?.data?.message || "Failed to delete image",
+         error: error.response?.data?.error || error.message
+      };
    }
 }
 

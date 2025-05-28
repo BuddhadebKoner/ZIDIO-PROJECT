@@ -9,13 +9,19 @@ cloudinary.config({
 export const deleteFromCloudinary = async (publicId) => {
    try {
       if (!publicId) {
+         console.log("No publicId provided to deleteFromCloudinary");
          return null;
       }
 
+      console.log("Attempting to delete from Cloudinary with publicId:", publicId);
+      
       const response = await cloudinary.uploader.destroy(publicId);
-
+      
+      console.log("Cloudinary destroy response:", response);
+      
       return response;
    } catch (error) {
-      throw new Error("Image delete failed");
+      console.error("Cloudinary delete error:", error);
+      throw new Error(`Image delete failed: ${error.message}`);
    }
 };

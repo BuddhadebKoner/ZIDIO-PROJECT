@@ -1,7 +1,5 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
-import { isAuthenticated } from "../api/auth.api";
 import { QUERY_KEYS } from "./queryKeys";
-import { useUser } from "@clerk/clerk-react";
 import { getAddAddress, getCartProducts, getExtreamSearch, getHomeContentDetails, getUpdateAddress, getUpdateAvatar, getUpdateUser } from "../api/user.api";
 import { toast } from "react-toastify";
 import { addProduct, getCustomers, getDashboardStats, getInventorys, getOrdersForAdmin, getReviews } from "../api/admin.api";
@@ -9,17 +7,6 @@ import { getAllCollections, getCollectionById, getProductsByCollectionSlug, sear
 import { addReview, addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, getReviewsById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
 import { getOrderById, getOrders } from "../api/order.api";
-
-export const useIsAuthenticated = () => {
-   const { user } = useUser();
-   const clerkId = user?.id;
-
-   return useQuery({
-      queryKey: [QUERY_KEYS.AUTH.IS_AUTHENTICATED],
-      queryFn: () => isAuthenticated(),
-      enabled: !!clerkId,
-   });
-};
 
 // Updated to use mutation for avatar update
 export const useUpdateAvatar = () => {

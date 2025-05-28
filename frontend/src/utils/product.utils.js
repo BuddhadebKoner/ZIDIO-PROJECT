@@ -16,7 +16,10 @@ export const formatSubmitData = (changedFields, formData) => {
             submitData[field] = Number(changedFields[field]);
             break;
          case 'images':
-            submitData[field] = changedFields[field].filter(img => img.imageUrl && img.imageId);
+            console.log('formatSubmitData - processing images:', changedFields[field]);
+            const filteredImages = changedFields[field].filter(img => img.imageUrl && img.imageId);
+            console.log('formatSubmitData - filtered images:', filteredImages);
+            submitData[field] = filteredImages;
             break;
          default:
             submitData[field] = changedFields[field];
@@ -39,11 +42,28 @@ export const identifyChangedFields = (dirtyFields, formData, originalData) => {
 
    Object.keys(dirtyFields).forEach(field => {
       if (field === 'images') {
-         if (JSON.stringify(formData.images) !== JSON.stringify(originalData.images)) {
+         // Process originalData.images to match formData.images structure for comparison
+         const originalProcessedImages = Array.isArray(originalData.images) && originalData.images.length > 0
+            ? originalData.images.map(img => ({
+                 imageUrl: img.imageUrl || '',
+                 imageId: img.imageId || ''
+              }))
+            : [{ imageUrl: '', imageId: '' }];
+         
+         console.log('identifyChangedFields - comparing images:');
+         console.log('formData.images:', formData.images);
+         console.log('originalProcessedImages:', originalProcessedImages);
+         
+         if (JSON.stringify(formData.images) !== JSON.stringify(originalProcessedImages)) {
+            console.log('identifyChangedFields - images have changed');
             changedFields.images = formData.images;
+         } else {
+            console.log('identifyChangedFields - images are the same');
          }
       } else if (field === 'sizes') {
-         if (JSON.stringify(formData.sizes) !== JSON.stringify(originalData.sizes)) {
+         // Handle both 'sizes' and 'size' fields from originalData
+         const originalSizes = originalData.sizes || originalData.size || [];
+         if (JSON.stringify(formData.sizes) !== JSON.stringify(originalSizes)) {
             changedFields.size = formData.sizes;
          }
       } else if (field === 'collections') {

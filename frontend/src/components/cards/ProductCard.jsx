@@ -14,7 +14,7 @@ const ProductCard = ({ product }) => {
    const [isHeartActive, setIsHeartActive] = useState(false);
    const [isInCart, setIsInCart] = useState(false);
 
-   const { currentUser } = useAuth();
+   const { currentUser, refreshUserData } = useAuth();
 
    // console.log(currentUser.cart, currentUser.wishlist, product);
 
@@ -148,6 +148,7 @@ const ProductCard = ({ product }) => {
          }
 
          addToCart({ productId: product._id, quantity: 1, size: sizeToSend });
+         refreshUserData();
       }
    };
 

@@ -1,8 +1,10 @@
 import axiosInstance from "../../config/config";
 
+// Create a function that takes the token as a parameter
 export const isAuthenticated = async () => {
    try {
       const response = await axiosInstance.post('/auth/is-authenticated');
+
       if (response.status === 200) {
          return {
             success: true,
@@ -26,7 +28,7 @@ export const isAuthenticated = async () => {
 };
 
 // Upload image to Cloudinary
-export const uploadImage = async (file, path) => {
+export const uploadImage = async (file, path, progressCallback = null) => {
    try {
       const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
       const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
@@ -41,7 +43,45 @@ export const uploadImage = async (file, path) => {
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
       formData.append('folder', `e-commerce/${path}`);
 
-      // Direct upload to Cloudinary using fetch API
+      // Use XMLHttpRequest for progress tracking if callback provided
+      if (progressCallback) {
+         return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            
+            xhr.upload.addEventListener('progress', (e) => {
+               if (e.lengthComputable) {
+                  const progress = Math.round((e.loaded / e.total) * 100);
+                  progressCallback(progress);
+               }
+            });
+
+            xhr.addEventListener('load', () => {
+               if (xhr.status === 200) {
+                  try {
+                     const data = JSON.parse(xhr.responseText);
+                     resolve({
+                        success: true,
+                        imageUrl: data.secure_url,
+                        imageId: data.public_id
+                     });
+                  } catch (parseError) {
+                     reject(new Error('Failed to parse response'));
+                  }
+               } else {
+                  reject(new Error('Image upload to Cloudinary failed'));
+               }
+            });
+
+            xhr.addEventListener('error', () => {
+               reject(new Error('Network error during upload'));
+            });
+
+            xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`);
+            xhr.send(formData);
+         });
+      }
+
+      // Direct upload to Cloudinary using fetch API (no progress tracking)
       const response = await fetch(
          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
          {

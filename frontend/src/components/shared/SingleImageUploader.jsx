@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { uploadImage } from '../../lib/api/auth.api';
+import { deleteImage } from '../../lib/api/admin.api';
 import { toast } from "react-toastify";
 import { Image, X, Upload, Loader2 } from 'lucide-react';
 
@@ -9,25 +10,43 @@ const SingleImageUploader = ({
   label = "Upload Image",
   className = "",
   currentImageUrl = null,
+  currentImageId = null,
   disabled = false,
   path = "unknown",
 }) => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [preview, setPreview] = useState(currentImageUrl);
+  const [currentId, setCurrentId] = useState(currentImageId);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Update preview when currentImageUrl changes
+  // Update preview and current ID when props change
   React.useEffect(() => {
     setPreview(currentImageUrl);
-  }, [currentImageUrl]);
+    setCurrentId(currentImageId);
+  }, [currentImageUrl, currentImageId]);
 
   const uploadToCloudinary = async (file) => {
     setUploadingImage(true);
     setUploadProgress(0);
 
     try {
+      // If there's an existing image, delete it from Cloudinary first
+      if (currentId) {
+        try {
+          const deleteResult = await deleteImage(currentId);
+          if (deleteResult.success) {
+            console.log('Old image deleted from Cloudinary:', currentId);
+          } else {
+            console.warn('Failed to delete old image from Cloudinary:', deleteResult.message);
+          }
+        } catch (deleteError) {
+          console.error('Error deleting old image from Cloudinary:', deleteError);
+          // Continue with upload even if deletion fails
+        }
+      }
+
       // Generate local preview immediately
       const localPreview = URL.createObjectURL(file);
       setPreview(localPreview);
@@ -40,8 +59,16 @@ const SingleImageUploader = ({
         throw new Error(result.message || 'Failed to upload image');
       }
 
-      setImageUrl(result.imageUrl);
-      setImageId(result.imageId);
+      // Call setImageUrl first, then setImageId to ensure proper sequencing
+      if (result.imageUrl) {
+        setImageUrl(result.imageUrl);
+      }
+      
+      if (result.imageId) {
+        setImageId(result.imageId);
+        setCurrentId(result.imageId); // Update local state
+      }
+      
       toast.success('Image uploaded successfully');
 
       // Clean up local preview
@@ -84,8 +111,23 @@ const SingleImageUploader = ({
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleRemoveImage = () => {
+  const handleRemoveImage = async () => {
+    // Delete from Cloudinary if there's an image ID
+    if (currentId) {
+      try {
+        const result = await deleteImage(currentId);
+        if (result.success) {
+          console.log('Image deleted from Cloudinary:', currentId);
+        } else {
+          console.warn('Failed to delete image from Cloudinary:', result.message);
+        }
+      } catch (error) {
+        console.error('Error deleting image from Cloudinary:', error);
+      }
+    }
+
     setPreview(null);
+    setCurrentId(null);
     setImageUrl('');
     setImageId('');
     if (fileInputRef.current) fileInputRef.current.value = '';

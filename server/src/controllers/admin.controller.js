@@ -897,8 +897,35 @@ export const updateHomeContent = async (req, res) => {
 // remove image from cloudinary by public_id
 export const removeSingleImage = async (req, res) => {
    try {
-      const { imageId } = req.params;
-      await deleteFromCloudinary(res.imageId);
+      const { public_id } = req.body;
+
+      console.log("Received public_id:", public_id);
+      
+      if (!public_id) {
+         return res.status(400).json({
+            success: false,
+            message: "Image ID is required"
+         });
+      }
+
+      const result = await deleteFromCloudinary(public_id);
+      
+      // console.log("Cloudinary delete result:", result);
+      
+      // Check if deletion was successful
+      if (result && (result.result === 'ok' || result.result === 'not found')) {
+         return res.status(200).json({
+            success: true,
+            message: result.result === 'ok' ? "Image deleted successfully" : "Image was already deleted or not found",
+            result
+         });
+      } else {
+         return res.status(400).json({
+            success: false,
+            message: "Failed to delete image from Cloudinary",
+            result
+         });
+      }
 
    } catch (error) {
       console.error("Error removing image:", error);
