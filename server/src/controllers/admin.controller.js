@@ -1605,6 +1605,123 @@ export const getDashboardStats = async (req, res) => {
 
       const totalInventoryStock = inventoryData[0]?.totalStock || 0;
 
+      // 5. Daily revenue for last 7 days (for line chart)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const dailyRevenueData = await Payment.aggregate([
+         {
+            $match: {
+               paymentDate: { $gte: sevenDaysAgo },
+               paymentStatus: 'succeeded'
+            }
+         },
+         {
+            $group: {
+               _id: {
+                  $dateToString: { format: "%Y-%m-%d", date: "$paymentDate" }
+               },
+               revenue: { $sum: "$amount" },
+               orders: { $sum: 1 }
+            }
+         },
+         {
+            $sort: { "_id": 1 }
+         }
+      ]);
+
+      // 6. Order status distribution (for pie chart)
+      const orderStatusData = await Order.aggregate([
+         {
+            $group: {
+               _id: "$orderStatus",
+               count: { $sum: 1 }
+            }
+         }
+      ]);
+
+      // 7. Monthly revenue for last 6 months (for bar chart)
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      const monthlyRevenueData = await Payment.aggregate([
+         {
+            $match: {
+               paymentDate: { $gte: sixMonthsAgo },
+               paymentStatus: 'succeeded'
+            }
+         },
+         {
+            $group: {
+               _id: {
+                  year: { $year: "$paymentDate" },
+                  month: { $month: "$paymentDate" }
+               },
+               revenue: { $sum: "$amount" },
+               orders: { $sum: 1 }
+            }
+         },
+         {
+            $sort: { "_id.year": 1, "_id.month": 1 }
+         }
+      ]);
+
+      // 8. Top selling products (for product analytics)
+      const topSellingProducts = await Order.aggregate([
+         {
+            $match: {
+               orderStatus: { $in: ['Delivered', 'Shipped', 'Processing'] }
+            }
+         },
+         {
+            $unwind: "$purchaseProducts"
+         },
+         {
+            $lookup: {
+               from: "products",
+               localField: "purchaseProducts.productId",
+               foreignField: "_id",
+               as: "productDetails"
+            }
+         },
+         {
+            $unwind: "$productDetails"
+         },
+         {
+            $group: {
+               _id: "$purchaseProducts.productId",
+               title: { $first: "$productDetails.title" },
+               totalSold: { $sum: "$purchaseProducts.quantity" },
+               revenue: { $sum: { $multiply: ["$purchaseProducts.quantity", "$purchaseProducts.price"] } }
+            }
+         },
+         {
+            $sort: { totalSold: -1 }
+         },
+         {
+            $limit: 5
+         }
+      ]);
+
+      // Format data for charts
+      const chartData = {
+         dailyRevenue: dailyRevenueData.map(item => ({
+            date: item._id,
+            revenue: item.revenue,
+            orders: item.orders
+         })),
+         orderStatus: orderStatusData.map(item => ({
+            name: item._id,
+            value: item.count
+         })),
+         monthlyRevenue: monthlyRevenueData.map(item => ({
+            month: `${item._id.year}-${String(item._id.month).padStart(2, '0')}`,
+            revenue: item.revenue,
+            orders: item.orders
+         })),
+         topProducts: topSellingProducts
+      };
+
       return res.status(200).json({
          success: true,
          message: "Dashboard stats fetched successfully",
@@ -1613,7 +1730,8 @@ export const getDashboardStats = async (req, res) => {
             productsDeliveredInLast30Days: totalProductsDelivered,
             totalCustomers: totalCustomers,
             totalInventoryStock: totalInventoryStock,
-         }
+         },
+         chartData
       });
    } catch (error) {
       console.error("Error fetching dashboard stats:", error);

@@ -11,6 +11,7 @@ import { useAuth } from "./context/AuthContext";
 import FullPageLoader from "./components/loaders/FullPageLoader";
 import AdminLayout from "./_admin/AdminLayout";
 import AuthCallback from "./_auth/page/AuthCallback";
+import AuthDebugger from "./components/debug/AuthDebugger";
 
 // pages
 import { AccountDetails, AccountPaymentDetails, AccountWishlist, Address, Cart, Categories, CollectionDetails, Collections, Home, Offers, OrderDetails, Orders, Product, Profile, Search, SosCallBack, Verify } from "./_root/page";
@@ -182,6 +183,9 @@ const App = () => {
 
         {/* secure */}
         <Route path="/verify" element={<Verify />} />
+        
+        {/* Debug route - remove in production */}
+        <Route path="/debug-auth" element={<AuthDebugger />} />
       </Routes>
       {/* Toast notifications */}
       <ToastContainer

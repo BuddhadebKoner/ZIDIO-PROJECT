@@ -10,6 +10,7 @@ import collectionRouter from './src/routes/collection.route.js';
 import productRouter from './src/routes/product.route.js';
 import offerRouter from './src/routes/offer.route.js';
 import orderRouter from './src/routes/order.route.js';
+import { clerkWebhook } from './src/controllers/webhooks.js';
 
 dotenv.config();
 
@@ -20,18 +21,25 @@ connectDB();
 // clerk middleware
 app.use(clerkMiddleware({
   authorizedParties: ['https://zidio-project-nine.vercel.app', 'http://localhost:5173'],
-  apiKey: process.env.CLERK_API_KEY,
+  secretKey: process.env.CLERK_SECRET_KEY,
+  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
 }));
+
+console.log('Clerk middleware configured with secret key:', process.env.CLERK_SECRET_KEY ? 'Present' : 'Missing');
 
 app.use(express.json());
 
 const allowedOrigins = [
   process.env.CLIENT_URL?.replace(/\/$/, ''),
   'http://localhost:5173',
+  'https://zidio-project-nine.vercel.app',
 ].filter(Boolean);
+
+console.log('Allowed CORS origins:', allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
+    console.log('CORS check for origin:', origin);
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
@@ -42,7 +50,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
 
 // testing
@@ -64,6 +72,8 @@ app.use('/api/products', productRouter);
 app.use('/api/offers', offerRouter);
 // order
 app.use('/api/orders', orderRouter);
+// clerk
+app.post('/clerk', express.json(), clerkWebhook)
 
 app.listen(port, () => {
   console.log(`Server is running on PORT http://localhost:${port}/`);

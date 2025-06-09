@@ -5,6 +5,12 @@ import { formatIndianCurrency } from '../../utils/amountFormater'
 import FullPageLoader from '../../components/loaders/FullPageLoader'
 import OrderCard from '../../components/cards/OrderCard'
 import { Link } from 'react-router-dom'
+import { 
+  RevenueChart, 
+  OrderStatusChart, 
+  MonthlyRevenueChart, 
+  TopProductsChart 
+} from '../../components/charts'
 
 const AdminDashboard = () => {
   const {
@@ -13,6 +19,8 @@ const AdminDashboard = () => {
     isError,
     error,
   } = useGetDashboardStats()
+
+  console.log("Dashboard Stats:", dashboardStats)
 
   const {
     data: processingOrdersData,
@@ -46,12 +54,14 @@ const AdminDashboard = () => {
   }
 
   const stats = dashboardStats?.stats || {};
+  const chartData = dashboardStats?.chartData || {};
 
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-8 text-text">Dashboard Overview</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Revenue Card */}
         <div className="bg-surface p-6 rounded-lg comic-border glass-morphism">
           <div className="flex items-center mb-4">
@@ -107,6 +117,42 @@ const AdminDashboard = () => {
             <p className="text-sm text-text-muted">Items in stock</p>
           </div>
         </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="space-y-8 mb-8">
+        {/* Revenue and Order Status Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {chartData.dailyRevenue && chartData.dailyRevenue.length > 0 && (
+            <RevenueChart data={chartData.dailyRevenue} />
+          )}
+          {chartData.orderStatus && chartData.orderStatus.length > 0 && (
+            <OrderStatusChart data={chartData.orderStatus} />
+          )}
+        </div>
+
+        {/* Monthly Revenue and Top Products Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {chartData.monthlyRevenue && chartData.monthlyRevenue.length > 0 && (
+            <MonthlyRevenueChart data={chartData.monthlyRevenue} />
+          )}
+          {chartData.topProducts && chartData.topProducts.length > 0 && (
+            <TopProductsChart data={chartData.topProducts} />
+          )}
+        </div>
+
+        {/* Fallback message when no chart data is available */}
+        {(!chartData.dailyRevenue?.length && 
+          !chartData.orderStatus?.length && 
+          !chartData.monthlyRevenue?.length && 
+          !chartData.topProducts?.length) && (
+          <div className="bg-surface p-8 rounded-lg comic-border glass-morphism text-center">
+            <h3 className="text-xl font-semibold text-text mb-2">No Chart Data Available</h3>
+            <p className="text-text-muted">
+              Chart data will appear here once you have orders and payment transactions.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Processing Orders Section */}

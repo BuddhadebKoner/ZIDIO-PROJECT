@@ -1,9 +1,22 @@
 import axiosInstance from "../../config/config";
 
 // Create a function that takes the token as a parameter
-export const isAuthenticated = async () => {
+export const isAuthenticated = async (token = null) => {
    try {
-      const response = await axiosInstance.post('/auth/is-authenticated');
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+      
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      console.log('Auth API - Making request with token:', token ? 'Present' : 'Not present');
+
+      const response = await axiosInstance.post('/auth/is-authenticated', {}, {
+         headers
+      });
 
       if (response.status === 200) {
          return {
@@ -19,9 +32,11 @@ export const isAuthenticated = async () => {
       };
    } catch (error) {
       console.error('Error checking authentication:', error);
+      console.error('Response data:', error.response?.data);
+      console.error('Response status:', error.response?.status);
       return {
          success: false,
-         message: 'Error checking authentication',
+         message: error.response?.data?.message || 'Error checking authentication',
          user: null
       };
    }

@@ -7,6 +7,34 @@ import { getAllCollections, getCollectionById, getProductsByCollectionSlug, sear
 import { addReview, addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, getReviewsById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
 import { getOrderById, getOrders } from "../api/order.api";
+import { isAuthenticated } from "../api/auth.api";
+
+// isAuthenticated query
+export const useIsAuthenticated = (enabled = true, getToken = null) => {
+   return useQuery({
+      queryKey: [QUERY_KEYS.AUTH.IS_AUTHENTICATED],
+      queryFn: async () => {
+         console.log('Auth Query - Enabled:', enabled);
+         console.log('Auth Query - GetToken function:', getToken ? 'Present' : 'Not present');
+         
+         let token = null;
+         if (getToken) {
+            try {
+               token = await getToken();
+               console.log('Auth Query - Token retrieved:', token ? 'Present' : 'Not present');
+            } catch (error) {
+               console.error('Auth Query - Error getting token:', error);
+            }
+         }
+         return isAuthenticated(token);
+      },
+      enabled: !!enabled,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
+      retry: false,
+      throwOnError: false,
+   });
+};
 
 // Updated to use mutation for avatar update
 export const useUpdateAvatar = () => {
