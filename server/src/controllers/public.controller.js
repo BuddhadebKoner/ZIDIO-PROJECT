@@ -1,5 +1,4 @@
 import { HomeContent } from "../models/homecontent.model.js";
-import mongoose from "mongoose";
 
 export const getHomeContentDetails = async (req, res) => {
    try {

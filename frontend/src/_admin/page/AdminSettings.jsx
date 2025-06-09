@@ -10,8 +10,11 @@ import BestSellersSection from './sections/BestSellersSection.jsx';
 import WomenFeaturedSection from './sections/WomenFeaturedSection.jsx';
 import { getHomeContent } from '../../lib/api/admin.api.js';
 import { LoaderCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 const AdminSettings = () => {
+  const { getToken } = useAuth();
+
   const [initialLoading, setInitialLoading] = useState(true);
   const [initialData, setInitialData] = useState(null);
 
@@ -36,7 +39,12 @@ const AdminSettings = () => {
   useEffect(() => {
     const fetchHomeContent = async () => {
       try {
-        const res = await getHomeContent();
+        const token = await getToken();
+        if (!token) {
+          toast.error("You need to be logged in to access this page");
+          return;
+        }
+        const res = await getHomeContent(token);
 
         if (res?.data?.success) {
           setInitialData(res.data.homeContent);

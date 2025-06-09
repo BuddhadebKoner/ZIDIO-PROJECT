@@ -292,14 +292,25 @@ export const updateHomeContent = async (homeData, token = null) => {
    }
 }
 
-export const getHomeContent = async () => {
+export const getHomeContent = async (token = null) => {
    try {
-      const response = await axiosInstance.get('/user/home-content');
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get('/admin/get-home', {
+         headers
+      });
 
       return {
          success: true,
-         message: 'Home content fetched successfully',
-         data: response.data,
+         message: response.data.message || "Home content fetched successfully",
+         homeContent: response.data.home,
       };
    } catch (error) {
       console.error('Error Fetching Home Content', error);

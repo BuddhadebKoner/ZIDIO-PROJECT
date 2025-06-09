@@ -20,7 +20,7 @@ const AdminDashboard = () => {
     error,
   } = useGetDashboardStats()
 
-  console.log("Dashboard Stats:", dashboardStats)
+  // console.log("Dashboard Stats:", dashboardStats)
 
   const {
     data: processingOrdersData,

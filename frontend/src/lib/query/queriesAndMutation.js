@@ -580,7 +580,7 @@ export const useVerifyPayment = () => {
             QUERY_KEYS.ORDERS.GET_ALL_ORDERS,
             QUERY_KEYS.AUTH.IS_AUTHENTICATED,
          ]);
-         toast.success("Payment verified successfully!");
+         // toast.success("Payment verified successfully!");
       },
       onError: (error) => {
          const errorMessage = error?.response?.data?.message || "Error verifying payment";
