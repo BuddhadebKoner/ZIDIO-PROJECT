@@ -303,14 +303,14 @@ export const getHomeContent = async (token = null) => {
          headers.Authorization = `Bearer ${token}`;
       }
 
-      const response = await axiosInstance.get('/admin/get-home', {
+      const response = await axiosInstance.get('/user/home-content', {
          headers
       });
 
       return {
          success: true,
-         message: response.data.message || "Home content fetched successfully",
-         homeContent: response.data.home,
+         message: 'Home content fetched successfully',
+         data: response.data,
       };
    } catch (error) {
       console.error('Error Fetching Home Content', error);
