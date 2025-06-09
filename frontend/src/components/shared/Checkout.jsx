@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { X, AlertTriangle, MapPin, CreditCard, Wallet, DollarSign, CreditCard as CardIcon, CheckCircle } from 'lucide-react';
 import { formatIndianCurrency } from '../../utils/amountFormater';
 import { toast } from 'react-toastify';
-import { placeOrderCashAndOnlineMixed, placeOrderCashOnDelivery, placeOrderOnlinePayment } from '../../lib/api/payment/order';
+import { usePlaceOrderOnlinePayment, usePlaceOrderCashOnDelivery, usePlaceOrderCashAndOnlineMixed } from '../../lib/query/queriesAndMutation';
 
 const Checkout = ({ onClose, cartData, summaryData }) => {
    const { currentUser, isLoading } = useAuth();
@@ -17,6 +17,11 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
    const [partialPaymentError, setPartialPaymentError] = useState('');
 
    const [addressData, setAddressData] = useState(currentUser?.address || {});
+
+   // Initialize payment mutation hooks
+   const placeOnlineOrderMutation = usePlaceOrderOnlinePayment();
+   const placeCODOrderMutation = usePlaceOrderCashOnDelivery();
+   const placeMixedOrderMutation = usePlaceOrderCashAndOnlineMixed();
 
    useEffect(() => {
       if (currentUser?.address) {
@@ -193,15 +198,15 @@ const Checkout = ({ onClose, cartData, summaryData }) => {
          const paymentResponse = await handlePayment(orderData);
 
          if (paymentResponse.success) {
-            // Select the appropriate API based on payment method
+            // Select the appropriate mutation based on payment method
             let orderResponse;
 
             if (paymentMethod === 'cod') {
-               orderResponse = await placeOrderCashOnDelivery(orderData);
+               orderResponse = await placeCODOrderMutation.mutateAsync(orderData);
             } else if (paymentMethod === 'ONLINE') {
-               orderResponse = await placeOrderOnlinePayment(orderData);
+               orderResponse = await placeOnlineOrderMutation.mutateAsync(orderData);
             } else if (paymentMethod === 'partial') {
-               orderResponse = await placeOrderCashAndOnlineMixed(orderData);
+               orderResponse = await placeMixedOrderMutation.mutateAsync(orderData);
             }
 
             console.log("Order response:", orderResponse);

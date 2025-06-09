@@ -7,6 +7,7 @@ import { getAllCollections, getCollectionById, getProductsByCollectionSlug, sear
 import { addReview, addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, getReviewsById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
 import { getOrderById, getOrders } from "../api/order.api";
+import { placeOrderOnlinePayment, placeOrderCashOnDelivery, placeOrderCashAndOnlineMixed } from "../api/payment/order";
 import { isAuthenticated } from "../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
 
@@ -40,9 +41,13 @@ export const useIsAuthenticated = (enabled = true, getToken = null) => {
 // Updated to use mutation for avatar update
 export const useUpdateAvatar = () => {
    const queryClient = useQueryClient();
+   const { getToken } = useAuth();
 
    return useMutation({
-      mutationFn: (avatarName) => getUpdateAvatar(avatarName),
+      mutationFn: async (avatarName) => {
+         const token = await getToken();
+         return getUpdateAvatar(avatarName, token);
+      },
       onSuccess: () => {
          queryClient.invalidateQueries([QUERY_KEYS.AUTH.IS_AUTHENTICATED]);
       },
@@ -52,9 +57,13 @@ export const useUpdateAvatar = () => {
 // update user deatils
 export const useUpdateUserDetails = () => {
    const queryClient = useQueryClient();
+   const { getToken } = useAuth();
 
    return useMutation({
-      mutationFn: (updateProfile) => getUpdateUser(updateProfile),
+      mutationFn: async (updateProfile) => {
+         const token = await getToken();
+         return getUpdateUser(updateProfile, token);
+      },
       onSuccess: () => {
          queryClient.invalidateQueries([QUERY_KEYS.AUTH.IS_AUTHENTICATED]);
          toast.success("Profile updated successfully!");
@@ -71,9 +80,13 @@ export const useUpdateUserDetails = () => {
 // add address
 export const useAddAddress = () => {
    const queryClient = useQueryClient();
+   const { getToken } = useAuth();
 
    return useMutation({
-      mutationFn: (address) => getAddAddress(address),
+      mutationFn: async (address) => {
+         const token = await getToken();
+         return getAddAddress(address, token);
+      },
       onSuccess: () => {
          queryClient.invalidateQueries([QUERY_KEYS.AUTH.IS_AUTHENTICATED]);
          toast.success("Address added successfully!");
@@ -90,9 +103,13 @@ export const useAddAddress = () => {
 // update address
 export const useUpdateAddress = () => {
    const queryClient = useQueryClient();
+   const { getToken } = useAuth();
 
    return useMutation({
-      mutationFn: (address) => getUpdateAddress(address),
+      mutationFn: async (address) => {
+         const token = await getToken();
+         return getUpdateAddress(address, token);
+      },
       onSuccess: () => {
          queryClient.invalidateQueries([QUERY_KEYS.AUTH.IS_AUTHENTICATED]);
          toast.success("Address updated successfully!");
@@ -109,9 +126,13 @@ export const useUpdateAddress = () => {
 // add prodct
 export const useAddProduct = () => {
    const queryClient = useQueryClient();
+   const { getToken } = useAuth();
 
    return useMutation({
-      mutationFn: (product) => addProduct(product),
+      mutationFn: async (product) => {
+         const token = await getToken();
+         return addProduct(product, token);
+      },
       onSuccess: () => {
          queryClient.invalidateQueries([QUERY_KEYS.PRODUCTS.GET_PRODUCTS]);
       },
@@ -233,9 +254,14 @@ export const useSearchOffers = (searchTerm = '', limit = 5) => {
 
 // get home content
 export const useGetHomeContent = () => {
+   const { getToken } = useAuth();
+
    return useQuery({
       queryKey: [QUERY_KEYS.HOME.GET_HOME_CONTENT],
-      queryFn: () => getHomeContentDetails(),
+      queryFn: async () => {
+         const token = await getToken();
+         return getHomeContentDetails(token);
+      },
       refetchOnWindowFocus: false,
       // meoised for 10 minutes
       staleTime: 10 * 60 * 1000,
@@ -288,9 +314,13 @@ export const useGetCollectionProducts = (slug, page = 1, limit = 5) => {
 // add to wishlist
 export const useAddToWishlist = () => {
    const queryClient = useQueryClient();
+   const { getToken } = useAuth();
 
    return useMutation({
-      mutationFn: (productId) => addToWishlist(productId),
+      mutationFn: async (productId) => {
+         const token = await getToken();
+         return addToWishlist(productId, token);
+      },
       onSuccess: () => {
          queryClient.invalidateQueries([
             QUERY_KEYS.AUTH.IS_AUTHENTICATED,
@@ -305,9 +335,13 @@ export const useAddToWishlist = () => {
 // remove from wishlist
 export const useRemoveFromWishlist = () => {
    const queryClient = useQueryClient();
+   const { getToken } = useAuth();
 
    return useMutation({
-      mutationFn: (productId) => removeFromWishlist(productId),
+      mutationFn: async (productId) => {
+         const token = await getToken();
+         return removeFromWishlist(productId, token);
+      },
       onSuccess: () => {
          queryClient.invalidateQueries([
             QUERY_KEYS.AUTH.IS_AUTHENTICATED,
@@ -320,11 +354,16 @@ export const useRemoveFromWishlist = () => {
 }
 
 // add to cart
+// add to cart
 export const useAddToCart = () => {
    const queryClient = useQueryClient();
+   const { getToken } = useAuth();
 
    return useMutation({
-      mutationFn: (productId, quantity, size) => addToCart(productId, quantity, size),
+      mutationFn: async (data) => {
+         const token = await getToken();
+         return addToCart(data, token);
+      },
       onSuccess: () => {
          queryClient.invalidateQueries([
             QUERY_KEYS.AUTH.IS_AUTHENTICATED,
@@ -335,13 +374,16 @@ export const useAddToCart = () => {
       },
    });
 }
-
 // remove from cart
 export const useRemoveFromCart = () => {
    const queryClient = useQueryClient();
+   const { getToken } = useAuth();
 
    return useMutation({
-      mutationFn: (productId) => removeFromCart(productId),
+      mutationFn: async (productId) => {
+         const token = await getToken();
+         return removeFromCart(productId, token);
+      },
       onSuccess: () => {
          queryClient.invalidateQueries([
             QUERY_KEYS.AUTH.IS_AUTHENTICATED,
@@ -355,21 +397,15 @@ export const useRemoveFromCart = () => {
 
 
 // get cart products
-export const useGetCartProducts = async () => {
+export const useGetCartProducts = () => {
    const { getToken } = useAuth();
-
-   let token = null;
-   if (getToken) {
-      try {
-         token = await getToken();
-      } catch (error) {
-         console.error('Error getting token:', error);
-      }
-   }
 
    return useQuery({
       queryKey: [QUERY_KEYS.PRODUCTS.GET_CART_PRODUCTS],
-      queryFn: () => getCartProducts(token),
+      queryFn: async () => {
+         const token = await getToken();
+         return getCartProducts(token);
+      },
       refetchOnWindowFocus: false,
    });
 }
@@ -377,9 +413,13 @@ export const useGetCartProducts = async () => {
 // update cart quantity and size
 export const useUpdateCart = () => {
    const queryClient = useQueryClient();
+   const { getToken } = useAuth();
 
    return useMutation({
-      mutationFn: (data) => updateCart(data),
+      mutationFn: async (data) => {
+         const token = await getToken();
+         return updateCart(data, token);
+      },
       onSuccess: () => {
          queryClient.invalidateQueries([
             QUERY_KEYS.PRODUCTS.GET_CART_PRODUCTS,
@@ -394,9 +434,14 @@ export const useUpdateCart = () => {
 
 // get all inventorys
 export const useGetAllInventorys = (pageParam = 1, limit = 10) => {
+   const { getToken } = useAuth();
+
    return useInfiniteQuery({
       queryKey: [QUERY_KEYS.INVENTORY.GET_ALL_INVENTORY, limit],
-      queryFn: ({ pageParam }) => getInventorys(pageParam, limit),
+      queryFn: async ({ pageParam }) => {
+         const token = await getToken();
+         return getInventorys(pageParam, limit, token);
+      },
       getNextPageParam: (lastPage) => {
          if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
             return lastPage.currentPage + 1;
@@ -409,9 +454,14 @@ export const useGetAllInventorys = (pageParam = 1, limit = 10) => {
 
 // get all orders infinite pagination
 export const useGetAllOrders = (pageParam = 1, limit = 10) => {
+   const { getToken } = useAuth();
+
    return useInfiniteQuery({
       queryKey: [QUERY_KEYS.ORDERS.GET_ALL_ORDERS, limit],
-      queryFn: ({ pageParam }) => getOrders(pageParam, limit),
+      queryFn: async ({ pageParam }) => {
+         const token = await getToken();
+         return getOrders(pageParam, limit, token);
+      },
       getNextPageParam: (lastPage) => {
          if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
             return lastPage.currentPage + 1;
@@ -425,15 +475,103 @@ export const useGetAllOrders = (pageParam = 1, limit = 10) => {
 
 // get order by id
 export const useGetOrderById = (trackId) => {
+   const { getToken } = useAuth();
+
    return useQuery({
       queryKey: [QUERY_KEYS.ORDERS.GET_ORDER_BY_ID, trackId],
-      queryFn: () => getOrderById(trackId),
+      queryFn: async () => {
+         const token = await getToken();
+         return getOrderById(trackId, token);
+      },
       refetchOnWindowFocus: false,
    });
 }
 
+// place order online payment
+export const usePlaceOrderOnlinePayment = () => {
+   const queryClient = useQueryClient();
+   const { getToken } = useAuth();
+
+   return useMutation({
+      mutationFn: async (orderData) => {
+         const token = await getToken();
+         return placeOrderOnlinePayment(orderData, token);
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries([
+            QUERY_KEYS.PRODUCTS.GET_CART_PRODUCTS,
+            QUERY_KEYS.AUTH.IS_AUTHENTICATED,
+            QUERY_KEYS.ORDERS.GET_ALL_ORDERS,
+         ]);
+         toast.success("Order placed successfully!");
+      },
+      onError: (error) => {
+         const errorMessage = error?.response?.data?.message || "Error placing order";
+         toast.error(errorMessage, {
+            position: toast.POSITION.TOP_RIGHT,
+         });
+      },
+   });
+};
+
+// place order cash on delivery
+export const usePlaceOrderCashOnDelivery = () => {
+   const queryClient = useQueryClient();
+   const { getToken } = useAuth();
+
+   return useMutation({
+      mutationFn: async (orderData) => {
+         const token = await getToken();
+         return placeOrderCashOnDelivery(orderData, token);
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries([
+            QUERY_KEYS.PRODUCTS.GET_CART_PRODUCTS,
+            QUERY_KEYS.AUTH.IS_AUTHENTICATED,
+            QUERY_KEYS.ORDERS.GET_ALL_ORDERS,
+         ]);
+         toast.success("Order placed successfully!");
+      },
+      onError: (error) => {
+         const errorMessage = error?.response?.data?.message || "Error placing order";
+         toast.error(errorMessage, {
+            position: toast.POSITION.TOP_RIGHT,
+         });
+      },
+   });
+};
+
+// place order cash and online mixed
+export const usePlaceOrderCashAndOnlineMixed = () => {
+   const queryClient = useQueryClient();
+   const { getToken } = useAuth();
+
+   return useMutation({
+      mutationFn: async (orderData) => {
+         const token = await getToken();
+         return placeOrderCashAndOnlineMixed(orderData, token);
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries([
+            QUERY_KEYS.PRODUCTS.GET_CART_PRODUCTS,
+            QUERY_KEYS.AUTH.IS_AUTHENTICATED,
+            QUERY_KEYS.ORDERS.GET_ALL_ORDERS,
+         ]);
+         toast.success("Order placed successfully!");
+      },
+      onError: (error) => {
+         const errorMessage = error?.response?.data?.message || "Error placing order";
+         toast.error(errorMessage, {
+            position: toast.POSITION.TOP_RIGHT,
+         });
+      },
+   });
+};
+
 // get order by query
 export const useGetOrdersWithQuery = (filters) => {
+   const { getToken } = useAuth();
+
    // Build query string from filters
    const buildQueryString = (pageParam) => {
       const params = new URLSearchParams();
@@ -456,9 +594,10 @@ export const useGetOrdersWithQuery = (filters) => {
 
    return useInfiniteQuery({
       queryKey: [QUERY_KEYS.ORDERS.GET_ORDERS_WITH_QUERY, filters],
-      queryFn: ({ pageParam = 1 }) => {
+      queryFn: async ({ pageParam = 1 }) => {
          const queryString = buildQueryString(pageParam);
-         return getOrdersForAdmin(queryString);
+         const token = await getToken();
+         return getOrdersForAdmin(queryString, token);
       },
       getNextPageParam: (lastPage) => {
          if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
@@ -475,9 +614,13 @@ export const useGetOrdersWithQuery = (filters) => {
 export const useAddReview = () => {
    try {
       const queryClient = useQueryClient();
+      const { getToken } = useAuth();
 
       return useMutation({
-         mutationFn: (reviewData) => addReview(reviewData),
+         mutationFn: async (reviewData) => {
+            const token = await getToken();
+            return addReview(reviewData, token);
+         },
          onSuccess: () => {
             queryClient.invalidateQueries([QUERY_KEYS.ORDERS.GET_ORDER_BY_ID]);
             toast.success("Review added successfully!");
@@ -512,9 +655,14 @@ export const useGetReviewsById = (slug, page = 1, limit = 5) => {
 
 // get all reviews
 export const useGetAllReviews = (page = 1, limit = 5) => {
+   const { getToken } = useAuth();
+
    return useInfiniteQuery({
       queryKey: [QUERY_KEYS.REVIEWS.GET_ALL_REVIEWS, page, limit],
-      queryFn: ({ pageParam = 1 }) => getReviews(pageParam, limit),
+      queryFn: async ({ pageParam = 1 }) => {
+         const token = await getToken();
+         return getReviews(pageParam, limit, token);
+      },
       getNextPageParam: (lastPage) => {
          if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
             return lastPage.currentPage + 1;
@@ -527,9 +675,14 @@ export const useGetAllReviews = (page = 1, limit = 5) => {
 
 // get all customers
 export const useGetAllCustomers = (page = 1, limit = 5) => {
+   const { getToken } = useAuth();
+
    return useInfiniteQuery({
       queryKey: [QUERY_KEYS.CUSTOMERS.GET_ALL_CUSTOMERS, page, limit],
-      queryFn: ({ pageParam = 1 }) => getCustomers(pageParam, limit),
+      queryFn: async ({ pageParam = 1 }) => {
+         const token = await getToken();
+         return getCustomers(pageParam, limit, token);
+      },
       getNextPageParam: (lastPage) => {
          if (lastPage?.success && lastPage.currentPage < lastPage.totalPages) {
             return lastPage.currentPage + 1;
@@ -542,9 +695,14 @@ export const useGetAllCustomers = (page = 1, limit = 5) => {
 
 // get dashboard stats
 export const useGetDashboardStats = () => {
+   const { getToken } = useAuth();
+
    return useQuery({
       queryKey: [QUERY_KEYS.DASHVOARD.GET_DASHBOARD_DATA],
-      queryFn: () => getDashboardStats(),
+      queryFn: async () => {
+         const token = await getToken();
+         return getDashboardStats(token);
+      },
       refetchOnWindowFocus: false,
    });
 }

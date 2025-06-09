@@ -1,10 +1,21 @@
 import axiosInstance from "../../config/config";
 
-export const getUpdateAvatar = async (avatar) => {
+export const getUpdateAvatar = async (avatar, token = null) => {
 
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       // Change from patch to post
-      const response = await axiosInstance.patch('/user/update-avatar', { avatar });
+      const response = await axiosInstance.patch('/user/update-avatar', { avatar }, {
+         headers
+      });
 
       if (!response.data.success) {
          return {
@@ -27,14 +38,21 @@ export const getUpdateAvatar = async (avatar) => {
    }
 };
 
-export const getUpdateUser = async (updateProfile) => {
+export const getUpdateUser = async (updateProfile, token = null) => {
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await axiosInstance.patch('/user/update-profile',
          { ...updateProfile },
          {
-            headers: {
-               'Content-Type': 'application/json',
-            },
+            headers
          }
       );
 
@@ -61,14 +79,21 @@ export const getUpdateUser = async (updateProfile) => {
 };
 
 // add address
-export const getAddAddress = async (address) => {
+export const getAddAddress = async (address, token = null) => {
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await axiosInstance.post('/user/add-address',
          { ...address },
          {
-            headers: {
-               'Content-Type': 'application/json',
-            },
+            headers
          }
       );
 
@@ -85,14 +110,21 @@ export const getAddAddress = async (address) => {
 };
 
 // update address
-export const getUpdateAddress = async (address) => {
+export const getUpdateAddress = async (address, token = null) => {
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await axiosInstance.patch('/user/update-address',
          { ...address },
          {
-            headers: {
-               'Content-Type': 'application/json',
-            },
+            headers
          }
       );
 
@@ -108,9 +140,20 @@ export const getUpdateAddress = async (address) => {
    }
 };
 
-export const getHomeContentDetails = async () => {
+export const getHomeContentDetails = async (token = null) => {
    try {
-      const response = await axiosInstance.get('/user/home-content-details');
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get('/user/home-content-details', {
+         headers
+      });
 
       return response.data.homeContent;
    } catch (error) {
@@ -144,7 +187,7 @@ export const getCartProducts = async (token = null) => {
          headers.Authorization = `Bearer ${token}`;
       }
 
-      const response = await axiosInstance.get('/user/cart-products', {}, {
+      const response = await axiosInstance.get('/user/cart-products', {
          headers
       });
 

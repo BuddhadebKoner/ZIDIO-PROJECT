@@ -1,8 +1,19 @@
 import axiosInstance from "../../config/config"
 
-export const getOrders = async (page = 1, limit = 5) => {
+export const getOrders = async (page = 1, limit = 5, token = null) => {
    try {
-      const response = await axiosInstance.get(`/orders/get-orders?page=${page}&limit=${limit}`);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get(`/orders/get-orders?page=${page}&limit=${limit}`, {
+         headers
+      });
       if (!response.data.success) {
          return {
             success: false,
@@ -21,9 +32,20 @@ export const getOrders = async (page = 1, limit = 5) => {
 }
 
 // Get order by ID
-export const getOrderById = async (trackId) => {
+export const getOrderById = async (trackId, token = null) => {
    try {
-      const response = await axiosInstance.get(`/orders/get-order/${trackId}`);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get(`/orders/get-order/${trackId}`, {
+         headers
+      });
       if (!response.data.success) {
          return {
             success: false,
@@ -42,9 +64,20 @@ export const getOrderById = async (trackId) => {
 }
 
 // verify payment
-export const verifyPayment = async (verifyOrder) => {
+export const verifyPayment = async (verifyOrder, token = null) => {
    try {
-      const response = await axiosInstance.post(`/orders/verify-payment`, verifyOrder);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post(`/orders/verify-payment`, verifyOrder, {
+         headers
+      });
       return response.data;
    } catch (error) {
       return {

@@ -1,8 +1,19 @@
 import axiosInstance from "../../config/config";
 
-export const addProduct = async (productData) => {
+export const addProduct = async (productData, token = null) => {
    try {
-      const response = await axiosInstance.post('/admin/add-product', productData);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post('/admin/add-product', productData, {
+         headers
+      });
 
       // Handle successful response
       return {
@@ -31,12 +42,19 @@ export const addProduct = async (productData) => {
    }
 };
 
-export const addCollection = async (collectionData) => {
+export const addCollection = async (collectionData, token = null) => {
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await axiosInstance.post('/admin/add-collection', collectionData, {
-         headers: {
-            'Content-Type': 'application/json',
-         },
+         headers
       });
 
       // Handle successful response
@@ -66,12 +84,19 @@ export const addCollection = async (collectionData) => {
    }
 };
 
-export const addOffer = async (offerData) => {
+export const addOffer = async (offerData, token = null) => {
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await axiosInstance.post('/admin/add-offer', offerData, {
-         headers: {
-            'Content-Type': 'application/json',
-         },
+         headers
       });
 
       return {
@@ -98,7 +123,7 @@ export const addOffer = async (offerData) => {
    }
 }
 
-export const updateProduct = async (slug, productData) => {
+export const updateProduct = async (slug, productData, token = null) => {
    if (!productData || Object.keys(productData).length === 0) {
       return {
          success: false,
@@ -106,10 +131,17 @@ export const updateProduct = async (slug, productData) => {
       }
    }
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await axiosInstance.put(`/admin/update-product/${slug}`, productData, {
-         headers: {
-            'Content-Type': 'application/json',
-         },
+         headers
       });
 
       return {
@@ -136,7 +168,7 @@ export const updateProduct = async (slug, productData) => {
    }
 }
 
-export const updateCollection = async (slug, collectionData) => {
+export const updateCollection = async (slug, collectionData, token = null) => {
    if (!collectionData || Object.keys(collectionData).length === 0) {
       return {
          success: false,
@@ -144,10 +176,17 @@ export const updateCollection = async (slug, collectionData) => {
       }
    }
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await axiosInstance.put(`/admin/update-collection/${slug}`, collectionData, {
-         headers: {
-            'Content-Type': 'application/json',
-         },
+         headers
       });
 
       return {
@@ -174,13 +213,20 @@ export const updateCollection = async (slug, collectionData) => {
    }
 }
 
-export const updateOffer = async (slug, offerData) => {
+export const updateOffer = async (slug, offerData, token = null) => {
    console.log("updateOffer", slug);
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await axiosInstance.put(`/admin/update-offer/${slug}`, offerData, {
-         headers: {
-            'Content-Type': 'application/json',
-         },
+         headers
       });
 
       return {
@@ -207,12 +253,19 @@ export const updateOffer = async (slug, offerData) => {
    }
 }
 
-export const updateHomeContent = async (homeData) => {
+export const updateHomeContent = async (homeData, token = null) => {
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await axiosInstance.put('/admin/update-home', homeData, {
-         headers: {
-            'Content-Type': 'application/json',
-         },
+         headers
       });
 
       return {
@@ -255,11 +308,21 @@ export const getHomeContent = async () => {
 };
 
 // delete image from cloudinary by public_id
-export const deleteImage = async (public_id) => {
+export const deleteImage = async (public_id, token = null) => {
 
    try {
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await axiosInstance.delete('/admin/delete-image', {
-         data: { public_id }
+         data: { public_id },
+         headers
       });
 
       return {
@@ -278,9 +341,20 @@ export const deleteImage = async (public_id) => {
 }
 
 // get all inventorys
-export const getInventorys = async (page = 1, limit = 10) => {
+export const getInventorys = async (page = 1, limit = 10, token = null) => {
    try {
-      const response = await axiosInstance.get(`/admin/get-inventory?page=${page}&limit=${limit}`);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get(`/admin/get-inventory?page=${page}&limit=${limit}`, {
+         headers
+      });
       return response.data;
    } catch (error) {
       console.error('Error fetching inventory:', error);
@@ -289,9 +363,20 @@ export const getInventorys = async (page = 1, limit = 10) => {
 }
 
 // get inventory by slug
-export const getInventoryBySlug = async (slug) => {
+export const getInventoryBySlug = async (slug, token = null) => {
    try {
-      const response = await axiosInstance.get(`/admin/get-inventory/${slug}`);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get(`/admin/get-inventory/${slug}`, {
+         headers
+      });
       return response.data;
    } catch (error) {
       console.error('Error fetching inventory:', error);
@@ -300,9 +385,20 @@ export const getInventoryBySlug = async (slug) => {
 }
 
 // update inventory by slug
-export const updateInventory = async (slug, inventoryData) => {
+export const updateInventory = async (slug, inventoryData, token = null) => {
    try {
-      const response = await axiosInstance.put(`/admin/update-inventory/${slug}`, inventoryData);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.put(`/admin/update-inventory/${slug}`, inventoryData, {
+         headers
+      });
 
       return {
          success: true,
@@ -329,9 +425,20 @@ export const updateInventory = async (slug, inventoryData) => {
 }
 
 // get ordders with complex query
-export const getOrdersForAdmin = async (queryString) => {
+export const getOrdersForAdmin = async (queryString, token = null) => {
    try {
-      const response = await axiosInstance.get(`/admin/get-orders?${queryString}`);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get(`/admin/get-orders?${queryString}`, {
+         headers
+      });
       return response.data;
    } catch (error) {
       console.error('Error fetching orders:', error);
@@ -344,9 +451,20 @@ export const getOrdersForAdmin = async (queryString) => {
 }
 
 // update order status
-export const updateOrder = async (orderId, orderAction) => {
+export const updateOrder = async (orderId, orderAction, token = null) => {
    try {
-      const response = await axiosInstance.patch(`/admin/update-order/${orderId}`, orderAction);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.patch(`/admin/update-order/${orderId}`, orderAction, {
+         headers
+      });
 
       return {
          success: true,
@@ -373,9 +491,20 @@ export const updateOrder = async (orderId, orderAction) => {
 }
 
 // get all reviews
-export const getReviews = async (page = 1, limit = 10) => {
+export const getReviews = async (page = 1, limit = 10, token = null) => {
    try {
-      const response = await axiosInstance.get(`/admin/get-reviews?page=${page}&limit=${limit}`);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get(`/admin/get-reviews?page=${page}&limit=${limit}`, {
+         headers
+      });
       return response.data;
    } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -384,9 +513,20 @@ export const getReviews = async (page = 1, limit = 10) => {
 }
 
 // get all customers
-export const getCustomers = async (page = 1, limit = 10) => {
+export const getCustomers = async (page = 1, limit = 10, token = null) => {
    try {
-      const response = await axiosInstance.get(`/admin/get-customers?page=${page}&limit=${limit}`);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get(`/admin/get-customers?page=${page}&limit=${limit}`, {
+         headers
+      });
       return response.data;
    } catch (error) {
       console.error('Error fetching customers:', error);
@@ -395,9 +535,20 @@ export const getCustomers = async (page = 1, limit = 10) => {
 }
 
 // get dashboard stats
-export const getDashboardStats = async () => {
+export const getDashboardStats = async (token = null) => {
    try {
-      const response = await axiosInstance.get(`/admin/get-dashboard-stats`);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get(`/admin/get-dashboard-stats`, {
+         headers
+      });
       return response.data;
    } catch (error) {
       console.error('Error fetching dashboard stats:', error);

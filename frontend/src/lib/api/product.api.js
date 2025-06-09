@@ -71,9 +71,20 @@ export const getProductById = async (slug) => {
 }
 
 // add to wishlist
-export const addToWishlist = async (productId) => {
+export const addToWishlist = async (productId, token = null) => {
    try {
-      const response = await axiosInstance.post(`/products/add-to-wishlist`, { productId });
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post(`/products/add-to-wishlist`, { productId }, {
+         headers
+      });
       if (response.data && response.data.success) {
          return response.data;
       } else {
@@ -88,9 +99,20 @@ export const addToWishlist = async (productId) => {
 }
 
 // remove from wishlist
-export const removeFromWishlist = async (productId) => {
+export const removeFromWishlist = async (productId, token = null) => {
    try {
-      const response = await axiosInstance.post(`/products/remove-from-wishlist`, { productId });
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post(`/products/remove-from-wishlist`, { productId }, {
+         headers
+      });
       if (response.data && response.data.success) {
          return response.data;
       } else {
@@ -105,9 +127,20 @@ export const removeFromWishlist = async (productId) => {
 }
 
 // add to cart
-export const addToCart = async (data) => {
+export const addToCart = async (data, token = null) => {
    try {
-      const response = await axiosInstance.post(`/products/add-to-cart`, data);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post(`/products/add-to-cart`, data, {
+         headers
+      });
       if (response.data && response.data.success) {
          return response.data;
       } else {
@@ -122,9 +155,20 @@ export const addToCart = async (data) => {
 }
 
 // remove from cart
-export const removeFromCart = async (productId) => {
+export const removeFromCart = async (productId, token = null) => {
    try {
-      const response = await axiosInstance.post(`/products/remove-from-cart`, { productId });
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post(`/products/remove-from-cart`, { productId }, {
+         headers
+      });
       if (response.data && response.data.success) {
          return response.data;
       } else {
@@ -139,9 +183,20 @@ export const removeFromCart = async (productId) => {
 }
 
 // update cart quantity and size
-export const updateCart = async (data) => {
+export const updateCart = async (data, token = null) => {
    try {
-      const response = await axiosInstance.put(`/products/update-cart`, data);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.put(`/products/update-cart`, data, {
+         headers
+      });
       if (response.data && response.data.success) {
          return response.data;
       } else {
@@ -156,12 +211,23 @@ export const updateCart = async (data) => {
 }
 
 // add review
-export const addReview = async (data) => {
+export const addReview = async (data, token = null) => {
    try {
-      const response = await axiosInstance.post(`/products/add-review`, data);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
 
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post(`/products/add-review`, data, {
+         headers
+      });
 
       console.log("addReview response", response);
+      return response.data;
    } catch (error) {
       return {
          message: error.message || "Failed to add review",

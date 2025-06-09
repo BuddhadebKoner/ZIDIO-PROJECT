@@ -1,6 +1,6 @@
 import axiosInstance from "../../../config/config";
 
-export const placeOrderOnlinePayment = async (orderData) => {
+export const placeOrderOnlinePayment = async (orderData, token = null) => {
 
    if (orderData?.orderType !== "ONLINE") { 
       return {
@@ -11,7 +11,18 @@ export const placeOrderOnlinePayment = async (orderData) => {
    }
 
    try {
-      const response = await axiosInstance.post('/orders/place-order-online', orderData);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post('/orders/place-order-online', orderData, {
+         headers
+      });
       if (!response.data.success) {
          console.error("Error placing order:", response.message);
       }
@@ -27,7 +38,7 @@ export const placeOrderOnlinePayment = async (orderData) => {
 }
 
 // Place order with cash on delivery
-export const placeOrderCashOnDelivery = async (orderData) => {
+export const placeOrderCashOnDelivery = async (orderData, token = null) => {
    if (orderData?.orderType !== "COD") {
       return {
          success: false,
@@ -36,7 +47,18 @@ export const placeOrderCashOnDelivery = async (orderData) => {
       };
    }
    try {
-      const response = await axiosInstance.post('/orders/place-order-cod', orderData);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post('/orders/place-order-cod', orderData, {
+         headers
+      });
       if (!response.data.success) {
          console.error("Error placing order:", response.message);
       }
@@ -51,7 +73,7 @@ export const placeOrderCashOnDelivery = async (orderData) => {
    }
 }
 // Place order with online and cash
-export const placeOrderCashAndOnlineMixed = async (orderData) => {
+export const placeOrderCashAndOnlineMixed = async (orderData, token = null) => {
    if (orderData?.orderType !== "COD+ONLINE") {
       return {
          success: false,
@@ -60,7 +82,18 @@ export const placeOrderCashAndOnlineMixed = async (orderData) => {
       };
    }
    try {
-      const response = await axiosInstance.post('/orders/place-order-online-cash', orderData);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post('/orders/place-order-online-cash', orderData, {
+         headers
+      });
       if (!response.data.success) {
          console.error("Error placing order:", response.message);
       }
