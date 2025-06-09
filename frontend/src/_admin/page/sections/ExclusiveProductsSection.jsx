@@ -3,8 +3,10 @@ import { toast } from 'react-toastify';
 import { ChevronDown, ChevronUp, ShoppingBag, Loader2 } from 'lucide-react';
 import FindProducts from '../../../components/dataFinding/FindProducts';
 import { updateHomeContent } from '../../../lib/api/admin.api';
+import { useAuth } from '../../../context/AuthContext';
 
 const ExclusiveProductsSection = ({ initialProducts }) => {
+   const { getToken } = useAuth();
    const [products, setProducts] = useState(initialProducts || []);
    const [errors, setErrors] = useState(null);
    const [loading, setLoading] = useState(false);
@@ -14,7 +16,7 @@ const ExclusiveProductsSection = ({ initialProducts }) => {
    // Helper function to extract product IDs for comparison
    const extractProductIds = (products) => {
       if (!products) return [];
-      return products.map(product => 
+      return products.map(product =>
          typeof product === 'object' ? product.productId : product
       );
    };
@@ -32,16 +34,16 @@ const ExclusiveProductsSection = ({ initialProducts }) => {
       const newProducts = productIds.map(id => ({ productId: id }));
       setProducts(newProducts);
       setErrors(null);
-      
+
       // Compare selected products with initial products to detect changes
       const initialIds = extractProductIds(initialProducts);
-      
+
       // Check if arrays have the same elements (regardless of order)
-      const hasChanged = 
-         initialIds.length !== productIds.length || 
+      const hasChanged =
+         initialIds.length !== productIds.length ||
          !initialIds.every(id => productIds.includes(id)) ||
          !productIds.every(id => initialIds.includes(id));
-      
+
       setHasChanges(hasChanged);
    };
 
@@ -70,7 +72,12 @@ const ExclusiveProductsSection = ({ initialProducts }) => {
             )),
          }
 
-         const response = await updateHomeContent(formtedProdcts);
+         const token = await getToken();
+         if (!token) {
+            toast.error("You need to be logged in to access this page");
+            return;
+         }
+         const response = await updateHomeContent(formtedProdcts, token);
 
          if (response && response.success) {
             toast.success('Exclusive products updated successfully');

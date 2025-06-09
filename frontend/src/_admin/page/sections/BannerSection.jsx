@@ -3,8 +3,10 @@ import { toast } from 'react-toastify';
 import { ChevronDown, ChevronUp, Image, Loader2, Trash2 } from 'lucide-react';
 import SingleImageUploader from '../../../components/shared/SingleImageUploader';
 import { updateHomeContent } from '../../../lib/api/admin.api';
+import { useAuth } from '../../../context/AuthContext';
 
 const BannerSection = ({ initialBanners = [] }) => {
+   const { getToken } = useAuth();
    const [originalBanners, setOriginalBanners] = useState([]);
    const [banners, setBanners] = useState(initialBanners.length > 0 ? initialBanners : [
       { imageUrl: '', imageId: '', path: '' }
@@ -152,9 +154,16 @@ const BannerSection = ({ initialBanners = [] }) => {
             }))
          };
 
+         const token = await getToken();
+         if (!token) {
+            toast.error("You need to be logged in to access this page");
+            setLoading(false);
+            return;
+         }
+
          console.log('Formatted Data:', formattedData);
 
-         const res = await updateHomeContent(formattedData);
+         const res = await updateHomeContent(formattedData, token);
          console.log('Response:', res);
 
          setTimeout(() => {

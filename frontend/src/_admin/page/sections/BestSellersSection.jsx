@@ -3,8 +3,10 @@ import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import FindProducts from '../../../components/dataFinding/FindProducts'
 import { updateHomeContent } from '../../../lib/api/admin.api'
+import { useAuth } from '../../../context/AuthContext'
 
 const BestSellersSection = ({ initialBestSeller }) => {
+  const { getToken } = useAuth()
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState(null)
@@ -60,7 +62,12 @@ const BestSellersSection = ({ initialBestSeller }) => {
         alltimeBestSellers: selectedProduct
       }
 
-      const response = await updateHomeContent(formattedProducts)
+      const token = await getToken()
+      if (!token) {
+        toast.error("You need to be logged in to access this page")
+        return
+      }
+      const response = await updateHomeContent(formattedProducts, token)
 
       if (response && response.success) {
         toast.success('Best seller product updated successfully')

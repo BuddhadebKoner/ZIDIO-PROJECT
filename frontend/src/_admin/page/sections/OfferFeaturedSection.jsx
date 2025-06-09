@@ -3,9 +3,11 @@ import { toast } from 'react-toastify';
 import { ChevronDown, ChevronUp, Image, Loader2, Trash2 } from 'lucide-react';
 import SingleImageUploader from '../../../components/shared/SingleImageUploader';
 import { updateHomeContent } from '../../../lib/api/admin.api';
+import { useAuth } from '../../../context/AuthContext';
 
 const OfferFeaturedSection = ({ initialOffers = [] }) => {
 
+  const { getToken } = useAuth();
   const [originalOffers, setOriginalOffers] = useState([]);
   const [offers, setOffers] = useState(initialOffers.length > 0 ? initialOffers : [
     { imageUrl: '', imageId: '', path: '' }
@@ -142,6 +144,12 @@ const OfferFeaturedSection = ({ initialOffers = [] }) => {
       return;
     }
 
+    const token = await getToken();
+    if (!token) {
+      toast.error("You need to be logged in to access this page");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -155,7 +163,7 @@ const OfferFeaturedSection = ({ initialOffers = [] }) => {
 
       console.log('Formatted Data:', formattedData);
 
-      const res = await updateHomeContent(formattedData);
+      const res = await updateHomeContent(formattedData, token);
       console.log('Response:', res);
 
       setTimeout(() => {

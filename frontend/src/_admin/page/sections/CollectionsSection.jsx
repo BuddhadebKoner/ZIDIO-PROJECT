@@ -3,8 +3,10 @@ import { toast } from 'react-toastify';
 import { ChevronDown, ChevronUp, Package, Loader2, Trash2 } from 'lucide-react';
 import SingleImageUploader from '../../../components/shared/SingleImageUploader';
 import { updateHomeContent } from '../../../lib/api/admin.api';
+import { useAuth } from '../../../context/AuthContext';
 
 const CollectionsSection = ({ initialCollections = [] }) => {
+   const { getToken } = useAuth();
    const [originalCollections, setOriginalCollections] = useState([]);
    const [collections, setCollections] = useState(initialCollections.length > 0 ? initialCollections : [
       { imageUrl: '', imageId: '', path: '/' }
@@ -160,9 +162,16 @@ const CollectionsSection = ({ initialCollections = [] }) => {
             }))
          };
 
+         const token = await getToken();
+         if (!token) {
+            toast.error("You need to be logged in to access this page");
+            setLoading(false);
+            return;
+         }
+
          console.log('Formatted Data:', formattedData);
 
-         const res = await updateHomeContent(formattedData);
+         const res = await updateHomeContent(formattedData, token);
          console.log('Response:', res);
 
          setTimeout(() => {

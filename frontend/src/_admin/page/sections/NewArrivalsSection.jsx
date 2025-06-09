@@ -3,8 +3,10 @@ import { toast } from 'react-toastify';
 import { ChevronDown, ChevronUp, Tags, Loader2 } from 'lucide-react';
 import FindProducts from '../../../components/dataFinding/FindProducts';
 import { updateHomeContent } from '../../../lib/api/admin.api';
+import { useAuth } from '../../../context/AuthContext';
 
 const NewArrivalsSection = ({ initialProducts }) => {
+   const { getToken } = useAuth();
    const [products, setProducts] = useState(initialProducts || []);
    const [errors, setErrors] = useState(null);
    const [loading, setLoading] = useState(false);
@@ -70,7 +72,12 @@ const NewArrivalsSection = ({ initialProducts }) => {
             )),
          }
 
-         const response = await updateHomeContent(formattedProducts);
+         const token = await getToken();
+         if (!token) {
+            toast.error("You need to be logged in to access this page");
+            return;
+         }
+         const response = await updateHomeContent(formattedProducts, token);
 
          if (response && response.success) {
             toast.success('New arrivals updated successfully');
