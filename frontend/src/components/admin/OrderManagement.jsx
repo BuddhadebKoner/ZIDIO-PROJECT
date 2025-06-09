@@ -1,6 +1,7 @@
 import React from 'react';
 import { Package, Truck, CheckCircle, XCircle, RotateCw, CreditCard, FileText, Send, DollarSign } from 'lucide-react';
 import { updateOrder } from '../../lib/api/admin.api';
+import { useAuth } from '../../context/AuthContext';
 
 const OrderManagement = ({
    order,
@@ -9,6 +10,9 @@ const OrderManagement = ({
    onPaymentStatusToggle,
    onGenerateInvoice
 }) => {
+
+   const { getToken } = useAuth();
+
    // Helper function to determine if a status transition is valid
    const canTransitionTo = (targetStatus) => {
       if (statusUpdating) return false;
@@ -54,10 +58,10 @@ const OrderManagement = ({
    // Updated status transition handler with API integration
    const handleStatusTransition = async (newStatus) => {
       console.log(`Transitioning order ${order._id} from ${order.orderStatus} to ${newStatus}`);
-      
+
       // Map the status to the appropriate action parameter
       const orderAction = {};
-      
+
       switch (newStatus) {
          case 'Processing':
             console.log("Starting to process all products in the order");
@@ -87,12 +91,11 @@ const OrderManagement = ({
             console.log("Unknown status transition");
             return;
       }
-      
+
       try {
-         // Call the API
-         console.log(order._id)
-         const result = await updateOrder(order._id, orderAction);
-         
+         const token = await getToken();
+         const result = await updateOrder(order._id, orderAction, token);
+
          if (result.success) {
             // If API call succeeds, notify parent component
             onStatusUpdate(newStatus);
