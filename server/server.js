@@ -20,7 +20,11 @@ connectDB();
 
 // clerk middleware
 app.use(clerkMiddleware({
-  authorizedParties: ['https://zidio-project-nine.vercel.app', 'http://localhost:5173'],
+  authorizedParties: [
+    'https://zidio-project-three.vercel.app', 
+    'https://zidio-project-nine.vercel.app', 
+    'http://localhost:5173'
+  ],
   secretKey: process.env.CLERK_SECRET_KEY,
   publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
 }));
@@ -32,14 +36,15 @@ app.use(express.json());
 const allowedOrigins = [
   process.env.CLIENT_URL?.replace(/\/$/, ''),
   'http://localhost:5173',
+  'https://zidio-project-three.vercel.app',
   'https://zidio-project-nine.vercel.app',
 ].filter(Boolean);
 
-console.log('Allowed CORS origins:', allowedOrigins);
+// console.log('Allowed CORS origins:', allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
-    console.log('CORS check for origin:', origin);
+    // console.log('CORS check for origin:', origin);
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
