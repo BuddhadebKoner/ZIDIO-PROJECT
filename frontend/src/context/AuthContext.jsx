@@ -9,28 +9,21 @@ export const AuthProvider = ({ children }) => {
    const { isLoaded, user } = useUser();
    const { getToken } = useClerkAuth();
 
-   console.log('AuthContext - Clerk user loaded:', isLoaded);
-   console.log('AuthContext - Clerk user:', user ? 'Present' : 'Not present');
-
    const {
       data: authData,
       isLoading: queryLoading,
       isError: queryError,
       error: queryErrorData,
       refetch: refetchAuth,
-   } = useIsAuthenticated(user && isLoaded, getToken); 
-
-   console.log('AuthContext - Auth data:', authData);
-   console.log('AuthContext - Query loading:', queryLoading);
-   console.log('AuthContext - Query error:', queryError);
+   } = useIsAuthenticated(user && isLoaded, getToken);
 
    // Derived state from query results
    const isLoading = !isLoaded || queryLoading;
    const isAuth = authData?.success && !!authData?.user;
    const currentUser = authData?.user || null;
-   const error = queryError 
-      ? (queryErrorData?.response?.data?.message || 
-         queryErrorData?.message || 
+   const error = queryError
+      ? (queryErrorData?.response?.data?.message ||
+         queryErrorData?.message ||
          "Authentication failed")
       : (!isAuth && authData?.message ? authData.message : null);
 
@@ -60,6 +53,7 @@ export const AuthProvider = ({ children }) => {
       refreshUserData,
       isAdmin,
       user,
+      getToken,
    };
 
    return <AuthContext.Provider value={authValues}>{children}</AuthContext.Provider>;

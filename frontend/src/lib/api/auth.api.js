@@ -12,8 +12,6 @@ export const isAuthenticated = async (token = null) => {
          headers.Authorization = `Bearer ${token}`;
       }
 
-      console.log('Auth API - Making request with token:', token ? 'Present' : 'Not present');
-
       const response = await axiosInstance.post('/auth/is-authenticated', {}, {
          headers
       });

@@ -8,6 +8,7 @@ import { addReview, addToCart, addToWishlist, filterProducts, getAllProducts, ge
 import { getAllOffers, searchOffers } from "../api/offer.api";
 import { getOrderById, getOrders } from "../api/order.api";
 import { isAuthenticated } from "../api/auth.api";
+import { useAuth } from "../../context/AuthContext";
 
 // isAuthenticated query
 export const useIsAuthenticated = (enabled = true, getToken = null) => {
@@ -16,7 +17,7 @@ export const useIsAuthenticated = (enabled = true, getToken = null) => {
       queryFn: async () => {
          console.log('Auth Query - Enabled:', enabled);
          console.log('Auth Query - GetToken function:', getToken ? 'Present' : 'Not present');
-         
+
          let token = null;
          if (getToken) {
             try {
@@ -352,16 +353,23 @@ export const useRemoveFromCart = () => {
    });
 }
 
-// update cart quantity
-export const useUpdateCartQuantity = () => {
-
-}
 
 // get cart products
-export const useGetCartProducts = () => {
+export const useGetCartProducts = async () => {
+   const { getToken } = useAuth();
+
+   let token = null;
+   if (getToken) {
+      try {
+         token = await getToken();
+      } catch (error) {
+         console.error('Error getting token:', error);
+      }
+   }
+
    return useQuery({
       queryKey: [QUERY_KEYS.PRODUCTS.GET_CART_PRODUCTS],
-      queryFn: () => getCartProducts(),
+      queryFn: () => getCartProducts(token),
       refetchOnWindowFocus: false,
    });
 }

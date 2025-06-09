@@ -133,9 +133,20 @@ export const getExtreamSearch = async (search) => {
 };
 
 // get cart products
-export const getCartProducts = async () => {
+export const getCartProducts = async (token = null) => {
    try {
-      const response = await axiosInstance.get('/user/cart-products');
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get('/user/cart-products', {}, {
+         headers
+      });
 
       if (response.data.success) {
          return response.data.cartData;
