@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import FullPageLoader from '../components/loaders/FullPageLoader';
-import { verifyPayment } from '../lib/api/order.api';
+import { useVerifyPayment } from '../lib/query/queriesAndMutation';
 import { CheckCircle, AlertTriangle, Home, ShoppingBag } from 'lucide-react';
 
 const Verify = () => {
@@ -22,6 +22,9 @@ const Verify = () => {
     currentUser,
     isLoading,
   } = useAuth();
+
+  // Initialize the verify payment mutation
+  const verifyPaymentMutation = useVerifyPayment();
 
   // Clear any redirect timers when component unmounts
   useEffect(() => {
@@ -66,7 +69,7 @@ const Verify = () => {
         paymentSuccess: success === 'true', // Convert string to boolean
       };
 
-      const response = await verifyPayment(verifyOrder);
+      const response = await verifyPaymentMutation.mutateAsync(verifyOrder);
 
       if (response.success) {
         setVerificationStatus('success');

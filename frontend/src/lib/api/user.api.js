@@ -140,20 +140,9 @@ export const getUpdateAddress = async (address, token = null) => {
    }
 };
 
-export const getHomeContentDetails = async (token = null) => {
+export const getHomeContentDetails = async () => {
    try {
-      const headers = {
-         'Content-Type': 'application/json',
-      };
-
-      // If token is provided, add it to headers
-      if (token) {
-         headers.Authorization = `Bearer ${token}`;
-      }
-
-      const response = await axiosInstance.get('/user/home-content-details', {
-         headers
-      });
+      const response = await axiosInstance.get('/user/home-content-details');
 
       return response.data.homeContent;
    } catch (error) {

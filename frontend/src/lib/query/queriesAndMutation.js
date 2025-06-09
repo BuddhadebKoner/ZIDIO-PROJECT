@@ -6,7 +6,7 @@ import { addProduct, getCustomers, getDashboardStats, getInventorys, getOrdersFo
 import { getAllCollections, getCollectionById, getProductsByCollectionSlug, searchCollections } from "../api/collection.api";
 import { addReview, addToCart, addToWishlist, filterProducts, getAllProducts, getProductById, getReviewsById, removeFromCart, removeFromWishlist, searchProducts, updateCart } from "../api/product.api";
 import { getAllOffers, searchOffers } from "../api/offer.api";
-import { getOrderById, getOrders } from "../api/order.api";
+import { getOrderById, getOrders, verifyPayment } from "../api/order.api";
 import { placeOrderOnlinePayment, placeOrderCashOnDelivery, placeOrderCashAndOnlineMixed } from "../api/payment/order";
 import { isAuthenticated } from "../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
@@ -254,16 +254,13 @@ export const useSearchOffers = (searchTerm = '', limit = 5) => {
 
 // get home content
 export const useGetHomeContent = () => {
-   const { getToken } = useAuth();
 
    return useQuery({
       queryKey: [QUERY_KEYS.HOME.GET_HOME_CONTENT],
       queryFn: async () => {
-         const token = await getToken();
-         return getHomeContentDetails(token);
+         return getHomeContentDetails();
       },
       refetchOnWindowFocus: false,
-      // meoised for 10 minutes
       staleTime: 10 * 60 * 1000,
    });
 }
@@ -561,6 +558,32 @@ export const usePlaceOrderCashAndOnlineMixed = () => {
       },
       onError: (error) => {
          const errorMessage = error?.response?.data?.message || "Error placing order";
+         toast.error(errorMessage, {
+            position: toast.POSITION.TOP_RIGHT,
+         });
+      },
+   });
+};
+
+// verify payment
+export const useVerifyPayment = () => {
+   const queryClient = useQueryClient();
+   const { getToken } = useAuth();
+
+   return useMutation({
+      mutationFn: async (verifyOrder) => {
+         const token = await getToken();
+         return verifyPayment(verifyOrder, token);
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries([
+            QUERY_KEYS.ORDERS.GET_ALL_ORDERS,
+            QUERY_KEYS.AUTH.IS_AUTHENTICATED,
+         ]);
+         toast.success("Payment verified successfully!");
+      },
+      onError: (error) => {
+         const errorMessage = error?.response?.data?.message || "Error verifying payment";
          toast.error(errorMessage, {
             position: toast.POSITION.TOP_RIGHT,
          });
