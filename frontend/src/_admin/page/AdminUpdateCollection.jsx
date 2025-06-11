@@ -40,7 +40,15 @@ const AdminUpdateCollection = () => {
     const fetchCollectionData = async () => {
       setFetchLoading(true);
       try {
-        const response = await getCollectionById(slug);
+        const token = await getToken();
+        if (!token) {
+          setGeneralError('You must be logged in to access this page.');
+          toast.error('You must be logged in to access this page.');
+          setFetchLoading(false);
+          return;
+        }
+
+        const response = await getCollectionById(slug, token);
 
         if (response && response.success) {
           const formattedData = formatCollectionDataForForm(response.collection);
@@ -62,7 +70,7 @@ const AdminUpdateCollection = () => {
     if (slug) {
       fetchCollectionData();
     }
-  }, [slug]);
+  }, [slug, getToken]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -166,6 +174,31 @@ const AdminUpdateCollection = () => {
       <div className="flex flex-col justify-center items-center h-96">
         <LoaderCircle className="w-12 h-12 animate-spin text-primary-500 mb-4" />
         <div className="text-xl">Loading collection data...</div>
+      </div>
+    );
+  }
+
+  // If there's an error and no data was loaded, show error state
+  if (generalError && !originalData) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center gap-4 mb-6">
+          <Link to="/admin/collections" className="text-gray-400 hover:text-primary-500">
+            <ChevronLeft className="w-8 h-8" />
+          </Link>
+          <h1 className="text-2xl font-bold">Update Collection</h1>
+        </div>
+        <div className="p-4 mb-6 text-red-800 bg-red-100 rounded-md border border-red-300">
+          {generalError}
+        </div>
+        <div className="text-center">
+          <button
+            onClick={() => navigate('/admin/collections')}
+            className="btn-secondary"
+          >
+            Back to Collections
+          </button>
+        </div>
       </div>
     );
   }

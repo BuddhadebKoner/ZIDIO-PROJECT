@@ -12,6 +12,7 @@ import {
   identifyChangedFields,
   formatSubmitData
 } from '../../utils/product.utils';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminUpdateProduct = () => {
   const { slug } = useParams();
@@ -49,7 +50,6 @@ const AdminUpdateProduct = () => {
 
   // Debug effect to track image changes
   useEffect(() => {
-    console.log('FormData images changed:', formData.images);
   }, [formData.images]);
 
   useEffect(() => {
@@ -169,9 +169,9 @@ const AdminUpdateProduct = () => {
       }
 
       const token = await getToken();
+
       if (!token) {
         throw new Error('You must be logged in to update products');  
-        return;
       }
 
       const response = await updateProduct(slug, submitData, token);

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getInventoryBySlug, updateInventory } from '../../lib/api/admin.api';
-import FullPageLoader from '../../components/loaders/FullPageLoader';
 import { LoaderCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 

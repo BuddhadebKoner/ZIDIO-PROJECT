@@ -40,16 +40,27 @@ export const searchCollections = async (searchTerm = '', page = 1, limit = 5) =>
    }
 };
 
-export const getCollectionById = async (slug) => {
+export const getCollectionById = async (slug, token = null) => {
    try {
-      const response = await axiosInstance.get(`/collections/${slug}`);
+      const headers = {
+         'Content-Type': 'application/json',
+      };
+
+      // If token is provided, add it to headers
+      if (token) {
+         headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.get(`/collections/${slug}`, {
+         headers
+      });
       if (response.data && response.data.success) {
          return response.data;
       } else {
-         throw new Error(response.data?.message || "Failed to fetch product");
+         throw new Error(response.data?.message || "Failed to fetch collection");
       }
    } catch (error) {
-      console.error("Error fetching product:", error);
+      console.error("Error fetching collection:", error);
       throw error;
    }
 }
