@@ -5,6 +5,7 @@ import SingleImageUploader from '../../components/shared/SingleImageUploader';
 import { toast } from 'react-toastify';
 import { addProduct } from '../../lib/api/admin.api';
 import FindCollections from '../../components/dataFinding/FindCollections';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminAddProduct = () => {
   const [formData, setFormData] = useState({
@@ -22,8 +23,11 @@ const AdminAddProduct = () => {
     productModelLink: '',
     categoryName: '',
     subCategory: '',
-    collections: [] 
+    collections: []
   });
+
+
+  const { getToken } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -70,11 +74,16 @@ const AdminAddProduct = () => {
       setLoading(false);
       return;
     }
-
-    // Continue with form submission
-    console.log("Form data:", formData);
-    // Here you would typically send data to API
-    const res = await addProduct(formData);
+  
+    const token = await getToken();
+    if (!token) {
+      setError('You must be logged in to add products');
+      toast.error('You must be logged in to add products');
+      setLoading(false);
+      return;
+    }
+    
+    const res = await addProduct(formData, token);
     console.log("Response from API:", res);
     toast.success("Product created successfully!");
     setLoading(false);

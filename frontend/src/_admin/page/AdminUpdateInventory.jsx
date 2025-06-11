@@ -3,11 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getInventoryBySlug, updateInventory } from '../../lib/api/admin.api';
 import FullPageLoader from '../../components/loaders/FullPageLoader';
 import { LoaderCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminUpdateInventory = () => {
   // catch slug from params
   const { slug } = useParams();
   const navigate = useNavigate();
+
+  const { getToken } = useAuth();
 
   // State management
   const [inventory, setInventory] = useState(null);
@@ -23,7 +26,14 @@ const AdminUpdateInventory = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await getInventoryBySlug(slug);
+
+        const token = await getToken();
+        if (!token) {
+          setError('You must be logged in to view inventory.');
+          return;
+        }
+
+        const response = await getInventoryBySlug(slug, token);
 
         if (response.success) {
           setInventory(response.inventory);
@@ -81,8 +91,14 @@ const AdminUpdateInventory = () => {
         totalQuantity: calculateTotalQuantity()
       };
 
+      const token = await getToken();
+      if (!token) {
+        setError('You must be logged in to update inventory.');
+        return;
+      }
+
       // Call the API
-      const response = await updateInventory(slug, updatedInventory);
+      const response = await updateInventory(slug, updatedInventory, token);
 
       if (response.success) {
         setSuccess('Inventory updated successfully!');

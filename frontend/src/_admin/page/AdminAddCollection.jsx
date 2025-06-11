@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import SingleImageUploader from '../../components/shared/SingleImageUploader';
 import { addCollection } from '../../lib/api/admin.api';
 import FindProducts from '../../components/dataFinding/FindProducts';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminAddCollection = () => {
    const navigate = useNavigate()
@@ -20,6 +21,10 @@ const AdminAddCollection = () => {
    const [loading, setLoading] = useState(false)
    const [errors, setErrors] = useState({})
    const [generalError, setGeneralError] = useState('')
+
+
+   const { getToken } = useAuth()
+
 
    // Generate slug from name
    useEffect(() => {
@@ -58,7 +63,7 @@ const AdminAddCollection = () => {
          ...formData,
          productIds: selectedProductIds
       });
-      
+
       // Clear product ID errors
       if (errors.productIds) {
          setErrors(prev => {
@@ -114,8 +119,14 @@ const AdminAddCollection = () => {
             ...formData,
          }
 
+         const token = await getToken();
+         if (!token) {
+            setGeneralError('You must be logged in to add a collection.');
+            return;
+         }
+         
          // Submit to API endpoint
-         const response = await addCollection(dataToSubmit);
+         const response = await addCollection(dataToSubmit, token);
 
          if (!response.success) {
             // Handle field-specific errors from API
@@ -273,12 +284,12 @@ const AdminAddCollection = () => {
                   <h2 className="text-xl font-semibold mb-4 text-primary-300">Add Products</h2>
 
                   <div className="space-y-3">
-                     <FindProducts 
+                     <FindProducts
                         onSelectProducts={handleProductSelection}
                         selectedProductIds={formData.productIds}
                      />
                   </div>
-                  
+
                   {errors.productIds && (
                      <p className="text-red-500 text-xs mt-1">{errors.productIds}</p>
                   )}

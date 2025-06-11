@@ -5,10 +5,13 @@ import { toast } from "react-toastify"
 import FindProducts from '../../components/dataFinding/FindProducts'
 import { getOfferDetailsByCode } from '../../lib/api/offer.api'
 import { updateOffer } from '../../lib/api/admin.api'
+import { useAuth } from '../../context/AuthContext'
 
 const AdminUpdateOffer = () => {
   const navigate = useNavigate()
   const { slug } = useParams();
+
+  const { getToken } = useAuth();
 
   const [formData, setFormData] = useState({
     offerName: '',
@@ -194,7 +197,14 @@ const AdminUpdateOffer = () => {
 
     setLoading(true)
     try {
-      const response = await updateOffer(slug, changedFields)
+
+      const token = await getToken();
+      if (!token) {
+        toast.error('You must be logged in to update offers.')
+        return;
+      }
+
+      const response = await updateOffer(slug, changedFields, token)
       
       if (response.success) {
         // If there's a special message about replaced offers, show it

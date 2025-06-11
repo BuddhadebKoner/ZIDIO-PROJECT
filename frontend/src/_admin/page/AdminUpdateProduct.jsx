@@ -17,6 +17,8 @@ const AdminUpdateProduct = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
 
+  const { getToken } = useAuth();
+
   const [formData, setFormData] = useState({
     slug: '',
     title: '',
@@ -166,7 +168,13 @@ const AdminUpdateProduct = () => {
         throw new Error('Please upload at least one product image');
       }
 
-      const response = await updateProduct(slug, submitData);
+      const token = await getToken();
+      if (!token) {
+        throw new Error('You must be logged in to update products');  
+        return;
+      }
+
+      const response = await updateProduct(slug, submitData, token);
 
       if (response.success) {
         toast.success(response.message || "Product updated successfully");

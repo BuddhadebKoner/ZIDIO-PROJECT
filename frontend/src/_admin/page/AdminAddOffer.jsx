@@ -4,6 +4,7 @@ import { ChevronLeft, LoaderCircle, Plus, Trash2, AlertCircle } from 'lucide-rea
 import { toast } from "react-toastify"
 import { addOffer } from '../../lib/api/admin.api'
 import FindProducts from '../../components/dataFinding/FindProducts'
+import { useAuth } from '../../context/AuthContext'
 
 const AdminAddOffer = () => {
    const navigate = useNavigate()
@@ -16,6 +17,9 @@ const AdminAddOffer = () => {
       endDate: '',
       products: ['']
    })
+
+
+   const { getToken } = useAuth()
 
    const [loading, setLoading] = useState(false)
    const [error, setError] = useState('')
@@ -147,8 +151,13 @@ const AdminAddOffer = () => {
             discountValue: parseFloat(formData.discountValue)
          }
 
-         console.log("Offer form submitted:", dataToSubmit)
-         const response = await addOffer(dataToSubmit)
+         const token = await getToken()
+         if (!token) {
+            setError('You must be logged in to add an offer.')
+            toast.error('You must be logged in to add an offer.')
+            return
+         }
+         const response = await addOffer(dataToSubmit, token)
 
          if (response.success) {
             // Redirect back to offer list

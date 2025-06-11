@@ -11,10 +11,13 @@ import {
 } from '../../utils/collection.utils';
 import { updateCollection } from '../../lib/api/admin.api';
 import { getCollectionById } from '../../lib/api/collection.api';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminUpdateCollection = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+
+  const { getToken } = useAuth();
 
   const [originalData, setOriginalData] = useState(null);
   const [formData, setFormData] = useState({
@@ -122,8 +125,17 @@ const AdminUpdateCollection = () => {
     }
 
     try {
+
+      const token = await getToken();
+      if (!token) {
+        setGeneralError('You must be logged in to update collections.');
+        toast.error('You must be logged in to update collections.');
+        setLoading(false);
+        return;
+      }
+
       // Call the API with only the changed fields
-      const response = await updateCollection(slug, changedFields);
+      const response = await updateCollection(slug, changedFields, token);
 
       console.log('Update response:', response);
       

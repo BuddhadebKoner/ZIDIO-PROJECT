@@ -3,6 +3,7 @@ import { uploadImage } from '../../lib/api/auth.api';
 import { deleteImage } from '../../lib/api/admin.api';
 import { toast } from "react-toastify";
 import { Image, X, Upload, Loader2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const SingleImageUploader = ({
   setImageUrl,
@@ -21,6 +22,8 @@ const SingleImageUploader = ({
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
+  const { getToken } = useAuth();
+
   // Update preview and current ID when props change
   React.useEffect(() => {
     setPreview(currentImageUrl);
@@ -35,7 +38,13 @@ const SingleImageUploader = ({
       // If there's an existing image, delete it from Cloudinary first
       if (currentId) {
         try {
-          const deleteResult = await deleteImage(currentId);
+
+          const token = await getToken();
+          if (!token) {
+            throw new Error('You must be logged in to upload images.');
+          }
+
+          const deleteResult = await deleteImage(currentId, token);
           if (deleteResult.success) {
             console.log('Old image deleted from Cloudinary:', currentId);
           } else {
@@ -63,12 +72,12 @@ const SingleImageUploader = ({
       if (result.imageUrl) {
         setImageUrl(result.imageUrl);
       }
-      
+
       if (result.imageId) {
         setImageId(result.imageId);
         setCurrentId(result.imageId); // Update local state
       }
-      
+
       toast.success('Image uploaded successfully');
 
       // Clean up local preview
@@ -115,7 +124,12 @@ const SingleImageUploader = ({
     // Delete from Cloudinary if there's an image ID
     if (currentId) {
       try {
-        const result = await deleteImage(currentId);
+        const token = await getToken();
+        if (!token) {
+          toast.error('You must be logged in to delete images.');
+          return;
+        }
+        const result = await deleteImage(currentId, token);
         if (result.success) {
           console.log('Image deleted from Cloudinary:', currentId);
         } else {

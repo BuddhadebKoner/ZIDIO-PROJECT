@@ -3,6 +3,7 @@ import { uploadImage } from '../../lib/api/auth.api';
 import { deleteImage } from '../../lib/api/admin.api';
 import { toast } from "react-toastify";
 import { Image, X, Upload, Loader2, Plus } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const MultipleImageUploader = ({
   images = [],
@@ -13,6 +14,8 @@ const MultipleImageUploader = ({
   path = "products",
   maxImages = 10,
 }) => {
+  const { getToken } = useAuth();
+
   const [uploadingStates, setUploadingStates] = useState({});
   const [draggingIndex, setDraggingIndex] = useState(null);
   const fileInputRefs = useRef({});
@@ -86,7 +89,14 @@ const MultipleImageUploader = ({
       if (existingImage?.imageId) {
         try {
           // Delete the old image from Cloudinary before uploading new one
-          const result = await deleteImage(existingImage.imageId);
+
+          const token = await getToken();
+          if (!token) {
+            toast.error('You must be logged in to upload images.');
+            return;
+          }
+
+          const result = await deleteImage(existingImage.imageId, token);
           if (result.success) {
             console.log('Old image deleted from Cloudinary:', existingImage.imageId);
           }
@@ -95,7 +105,7 @@ const MultipleImageUploader = ({
           // Continue with upload even if deletion fails
         }
       }
-      
+
       uploadToCloudinary(file, index);
     }
 
@@ -107,11 +117,18 @@ const MultipleImageUploader = ({
 
   const handleRemoveImage = async (index) => {
     const imageToRemove = normalizedImages[index];
-    
+
     // If the image has an imageId, delete it from Cloudinary
     if (imageToRemove?.imageId) {
       try {
-        const result = await deleteImage(imageToRemove.imageId);
+
+        const token = await getToken();
+        if (!token) {
+          toast.error('You must be logged in to delete images.');
+          return;
+        }
+
+        const result = await deleteImage(imageToRemove.imageId, token);
         if (result.success) {
           console.log('Image deleted from Cloudinary:', imageToRemove.imageId);
         } else {
@@ -172,7 +189,14 @@ const MultipleImageUploader = ({
       if (existingImage?.imageId) {
         try {
           // Delete the old image from Cloudinary before uploading new one
-          const result = await deleteImage(existingImage.imageId);
+
+          const token = await getToken();
+          if (!token) {
+            toast.error('You must be logged in to upload images.');
+            return;
+          }
+
+          const result = await deleteImage(existingImage.imageId, token);
           if (result.success) {
             console.log('Old image deleted from Cloudinary via drag/drop:', existingImage.imageId);
           }
@@ -181,7 +205,7 @@ const MultipleImageUploader = ({
           // Continue with upload even if deletion fails
         }
       }
-      
+
       uploadToCloudinary(file, index);
     }
   }, [disabled, uploadingStates]);
@@ -218,15 +242,12 @@ const MultipleImageUploader = ({
 
             {/* Image slot */}
             <div
-              className={`w-full aspect-square rounded-lg border-2 transition-all ${
-                draggingIndex === index 
-                  ? 'border-primary-500 bg-primary-500/10' 
-                  : 'border-gray-600 border-dashed'
-              } ${
-                image.imageUrl ? 'p-2' : 'p-6'
-              } ${
-                disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
-              }`}
+              className={`w-full aspect-square rounded-lg border-2 transition-all ${draggingIndex === index
+                ? 'border-primary-500 bg-primary-500/10'
+                : 'border-gray-600 border-dashed'
+                } ${image.imageUrl ? 'p-2' : 'p-6'
+                } ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+                }`}
               onDragEnter={(e) => handleDragEnter(e, index)}
               onDragLeave={(e) => handleDragLeave(e, index)}
               onDragOver={handleDragOver}
@@ -299,9 +320,8 @@ const MultipleImageUploader = ({
         {/* Add new image button */}
         {normalizedImages.length < maxImages && (
           <div
-            className={`w-full aspect-square rounded-lg border-2 border-gray-600 border-dashed flex items-center justify-center transition-all hover:border-primary-500 hover:bg-primary-500/5 ${
-              disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
-            }`}
+            className={`w-full aspect-square rounded-lg border-2 border-gray-600 border-dashed flex items-center justify-center transition-all hover:border-primary-500 hover:bg-primary-500/5 ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+              }`}
             onClick={addNewImageSlot}
           >
             <div className="flex flex-col items-center text-gray-400">
