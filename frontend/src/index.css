@@ -629,3 +629,34 @@ body::before {
       height: 4px;
    }
 }
+
+/* Additional responsive utilities for extra small screens */
+@media (max-width: 480px) {
+   /* Smaller padding for mobile wishlist page */
+   .wishlist-mobile-padding {
+      padding: 0.75rem;
+   }
+   
+   /* Reduce gap on mobile grids */
+   .wishlist-mobile-gap {
+      gap: 0.75rem;
+   }
+
+   /* Ensure cards don't get too small on mobile */
+   .wishlist-card {
+      min-width: 280px;
+   }
+}
+
+/* Prevent cards from becoming too wide on larger screens */
+@media (min-width: 1536px) {
+   .wishlist-container {
+      max-width: 1400px;
+   }
+}
+
+/* Touch target optimization for mobile */
+.touch-target {
+   min-width: 44px;
+   min-height: 44px;
+}

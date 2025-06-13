@@ -31,16 +31,16 @@ const ForgotPassword = () => {
   }
 
   return (
-    <div className="text-gray-100 max-w-md mx-auto p-6">
-      <h2 className="text-2xl font-bold text-center mb-6 text-white">Forgot Password</h2>
-      <p className='text-sm font-normal text-center mb-8'>
+    <div className="text-gray-100 w-full mx-auto p-4 sm:p-6">
+      <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6 text-white">Forgot Password</h2>
+      <p className='text-xs sm:text-sm font-normal text-center mb-6 sm:mb-8 px-2'>
         {!successfulCreation 
           ? "Enter your email address to receive a password reset code" 
           : "Enter the code sent to your email and your new password"
         }
       </p>
       
-      <form onSubmit={!successfulCreation ? handleSendResetCode : handleResetPassword} className="space-y-5">
+      <form onSubmit={!successfulCreation ? handleSendResetCode : handleResetPassword} className="space-y-4 sm:space-y-5">
         {!successfulCreation ? (
           <>
             <div className="relative">
@@ -50,14 +50,14 @@ const ForgotPassword = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email address"
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-200 placeholder-gray-500"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-200 placeholder-gray-500 text-sm sm:text-base"
                 required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-gray-100 rounded-md transition-colors font-medium"
+              className="w-full py-2.5 sm:py-3 px-4 bg-primary-600 hover:bg-primary-700 text-gray-100 rounded-md transition-colors font-medium text-sm sm:text-base"
             >
               Send Reset Code
             </button>
@@ -71,7 +71,7 @@ const ForgotPassword = () => {
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="Reset code"
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-200 placeholder-gray-500"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-200 placeholder-gray-500 text-sm sm:text-base"
                 required
               />
             </div>
@@ -83,14 +83,14 @@ const ForgotPassword = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="New password"
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-200 placeholder-gray-500"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-200 placeholder-gray-500 text-sm sm:text-base"
                 required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-gray-100 rounded-md transition-colors font-medium"
+              className="w-full py-2.5 sm:py-3 px-4 bg-primary-600 hover:bg-primary-700 text-gray-100 rounded-md transition-colors font-medium text-sm sm:text-base"
             >
               Reset Password
             </button>
@@ -98,13 +98,13 @@ const ForgotPassword = () => {
         )}
         
         {error && (
-          <div className="p-3 bg-red-900/50 border border-red-800 rounded-md text-red-200 text-sm">
+          <div className="p-3 bg-red-900/50 border border-red-800 rounded-md text-red-200 text-xs sm:text-sm">
             {error}
           </div>
         )}
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-400">
+      <p className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-400">
         Remember your password?{' '}
         <Link to="/sign-in" className="text-primary-400 hover:text-primary-300 font-medium">
           Sign in

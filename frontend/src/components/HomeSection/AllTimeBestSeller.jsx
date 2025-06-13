@@ -116,7 +116,7 @@ const AllTimeBestSeller = ({ products: product }) => {
 
    const handleAddToCart = () => {
       if (!currentUser) {
-         toast.warning("Please login to add items to cart");
+         toast.warning("Please sign in to add items to cart");
          navigate('/sign-in');
          return;
       }

@@ -1,7 +1,7 @@
 import express from 'express';
 import { userAuth } from '../middlewares/userAuth.middleware.js';
-import { getOrderById, getOrders, placeOrder } from '../controllers/order.controller.js';
-import { placeOrderCashAndOnlineMixed, placeOrderCashOnDelivery, placeOrderOnlinePayment, verifyPayment } from '../controllers/orderExample.controller.js';
+import { getOrderById, getOrders } from '../controllers/order.controller.js';
+import { placeOrderCashAndOnlineMixed, placeOrderCashOnDelivery, placeOrderOnlinePayment, verifyPayment } from '../contro  llers/orderExample.controller.js';
 
 const orderRouter = express.Router();
 

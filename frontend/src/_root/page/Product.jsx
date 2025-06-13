@@ -27,7 +27,7 @@ const Product = () => {
     isError: productError,
   } = useGetProductById(slug)
 
-  console.log(productData, "productData")
+  // console.log(productData, "productData")
 
   const {
     mutate: addToWishlist,
@@ -122,6 +122,13 @@ const Product = () => {
 
   // Handle add to cart
   const handleAddToCart = () => {
+    // Check if user is authenticated first
+    if (!currentUser) {
+      toast.warning("Please sign in to add items to cart");
+      navigate('/sign-in');
+      return;
+    }
+
     if (!selectedSize) {
       toast.warning("Please select a size first");
       return;

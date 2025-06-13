@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import FullPageLoader from '../../components/loaders/FullPageLoader';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
-import ProductCard from '../../components/cards/ProductCard';
+import WishlistProductCard from '../../components/cards/WishlistProductCard';
 
 const AccountWishlist = () => {
   const { currentUser, isLoading } = useAuth();
@@ -17,10 +17,21 @@ const AccountWishlist = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Page Header */}
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-text mb-2">My Wishlist</h1>
+        <p className="text-text-muted text-sm sm:text-base">
+          {wishlist?.length > 0 
+            ? `${wishlist.length} item${wishlist.length !== 1 ? 's' : ''} saved for later`
+            : 'Your saved items will appear here'
+          }
+        </p>
+      </div>
+
       {wishlist?.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {wishlist.map(product => (
-            <ProductCard
+            <WishlistProductCard
               key={product._id}
               product={product}
             />

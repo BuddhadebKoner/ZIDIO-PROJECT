@@ -6,37 +6,20 @@ import { Heart, LoaderCircle, ShoppingCart, Check } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { toast } from 'react-toastify'
-import { useAddToCart, useAddToWishlist, useRemoveFromWishlist } from '../../lib/query/queriesAndMutation'
+import { useAddToCart, useRemoveFromWishlist } from '../../lib/query/queriesAndMutation'
 
-const ProductCard = ({ product }) => {
+const WishlistProductCard = ({ product }) => {
    const navigate = useNavigate();
    const [isHovered, setIsHovered] = useState(false);
-   const [isHeartActive, setIsHeartActive] = useState(false);
    const [isInCart, setIsInCart] = useState(false);
 
    const { currentUser, refreshUserData } = useAuth();
-
-   // console.log(currentUser.cart, currentUser.wishlist, product);
-
-   const {
-      mutate: addToWishlist,
-      isLoading: isAddingToWishlist,
-   } = useAddToWishlist({
-      onSuccess: () => {
-         setIsHeartActive(true);
-         toast.success("Added to wishlist");
-      },
-      onError: () => {
-         toast.error("Failed to add to wishlist");
-      }
-   });
 
    const {
       mutate: removeFromWishlist,
       isLoading: isRemovingFromWishlist,
    } = useRemoveFromWishlist({
       onSuccess: () => {
-         setIsHeartActive(false);
          toast.success("Removed from wishlist");
       },
       onError: () => {
@@ -50,16 +33,6 @@ const ProductCard = ({ product }) => {
       isError: isAddingToCartError,
       isSuccess: isAddingToCartSuccess,
    } = useAddToCart();
-
-   useEffect(() => {
-      if (currentUser?.wishlist && product) {
-         const isInWishlist = currentUser.wishlist.some(item =>
-            item === product._id || item === product.slug ||
-            (typeof item === 'object' && (item._id === product._id || item.slug === product.slug))
-         );
-         setIsHeartActive(isInWishlist);
-      }
-   }, [currentUser?.wishlist, product]);
 
    useEffect(() => {
       if (currentUser?.cart && product) {
@@ -109,7 +82,7 @@ const ProductCard = ({ product }) => {
       e.preventDefault();
       e.stopPropagation();
 
-      if (isAddingToWishlist || isRemovingFromWishlist) return;
+      if (isRemovingFromWishlist) return;
 
       if (!currentUser) {
          toast.error("Please login to manage your wishlist");
@@ -117,11 +90,8 @@ const ProductCard = ({ product }) => {
       }
 
       try {
-         if (isHeartActive) {
-            removeFromWishlist(product._id);
-         } else {
-            addToWishlist(product._id);
-         }
+         // Always remove from wishlist since this is wishlist page
+         removeFromWishlist(product._id);
       } catch (error) {
          toast.error("Failed to update wishlist");
       }
@@ -185,7 +155,7 @@ const ProductCard = ({ product }) => {
 
    return (
       <Card
-         className="cursor-pointer w-full border border-gray-800 
+         className="cursor-pointer w-full min-w-[260px] border border-gray-800 
                   hover:border-gray-700 transition-all duration-300 transform hover:translate-y-[-5px] 
                   hover:shadow-lg hover:shadow-primary-900/10"
          radius="lg"
@@ -199,7 +169,7 @@ const ProductCard = ({ product }) => {
          >
             <Link
                to={`/product/${product.slug}`}>
-               <div className="relative w-full h-[450px] sm:h-[400px] md:h-[400px] overflow-hidden">
+               <div className="relative w-full h-[350px] sm:h-[380px] md:h-[400px] overflow-hidden">
                   <img
                      src={firstImage}
                      alt={`${product.title} - view 1`}
@@ -235,18 +205,17 @@ const ProductCard = ({ product }) => {
 
             <div className="absolute top-3 right-3 z-10">
                <button
-                  className={`${isAddingToWishlist || isRemovingFromWishlist ? 'bg-gray-900/90' : 'bg-gray-900/80 hover:bg-gray-900'} 
+                  className={`${isRemovingFromWishlist ? 'bg-gray-900/90' : 'bg-gray-900/80 hover:bg-gray-900'} 
                            text-white backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center 
-                           transition-all duration-300 transform ${isAddingToWishlist || isRemovingFromWishlist ? '' : 'hover:scale-110 active:scale-90'}`}
+                           transition-all duration-300 transform ${isRemovingFromWishlist ? '' : 'hover:scale-110 active:scale-90'}`}
                   onClick={toggleHeart}
-                  disabled={isAddingToWishlist || isRemovingFromWishlist}
+                  disabled={isRemovingFromWishlist}
                >
-                  {(isAddingToWishlist || isRemovingFromWishlist) ? (
+                  {isRemovingFromWishlist ? (
                      <LoaderCircle className="w-4 h-4 text-primary-500 animate-spin" />
                   ) : (
                      <Heart
-                        className={`w-4 h-4 transition-colors duration-300 
-                                 ${isHeartActive ? 'fill-primary-500 text-primary-500' : 'text-white'}`}
+                        className="w-4 h-4 transition-colors duration-300 fill-primary-500 text-primary-500"
                      />
                   )}
                </button>
@@ -299,4 +268,4 @@ const ProductCard = ({ product }) => {
    )
 }
 
-export default ProductCard
+export default WishlistProductCard;

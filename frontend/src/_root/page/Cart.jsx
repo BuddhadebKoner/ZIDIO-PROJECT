@@ -1,36 +1,49 @@
 import React, { useState, useEffect } from 'react'
 import { useGetCartProducts } from '../../lib/query/queriesAndMutation'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import CartProductCard from '../../components/cards/CartProductCard'
 import CartSummeryCard from '../../components/cards/CartSummeryCard'
 import FullPageLoader from '../../components/loaders/FullPageLoader'
+import { useAuth } from '../../context/AuthContext'
 
 const Cart = () => {
   const {
     data,
-    isLoading,
-    isError,
+    isLoading: cartLoading,
+    isError: cartError,
   } = useGetCartProducts();
 
-  const [productAbliablity, setProductAbliability] = useState(true);
+  const [productAvailability, setProductAvailability] = useState(true);
+  const { currentUser, isLoading: authLoading, isAuthenticated } = useAuth();
 
-  // console.log("Cart data: ", data);
+  // Show loading while authentication is being checked
+  if (authLoading) {
+    return <FullPageLoader />
+  }
 
-  if (isLoading) return (
-    <>
-      <FullPageLoader />
-    </>
-  );
+  // Redirect to sign-in if user is not authenticated
+  if (!authLoading && !isAuthenticated) {
+    return <Navigate to="/sign-in" replace />
+  }
 
-  if (isError) return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh]">
-      <div className="text-xl font-medium mb-4">Error loading cart items</div>
-      <Link to="/" className="bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 transition-all">
-        Return to homepage
-      </Link>
-    </div>
-  );
+  // Show loading while cart data is being fetched
+  if (cartLoading) {
+    return <FullPageLoader />
+  }
 
+  // Handle cart loading errors
+  if (cartError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh]">
+        <div className="text-xl font-medium mb-4">Error loading cart items</div>
+        <Link to="/" className="bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 transition-all">
+          Return to homepage
+        </Link>
+      </div>
+    )
+  }
+
+  // Handle empty cart
   if (!data || !data.items || data.items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh]">
@@ -52,7 +65,7 @@ const Cart = () => {
             <CartProductCard
               key={item._id}
               item={item}
-              setProductAbliability={setProductAbliability}
+              setProductAvailability={setProductAvailability}
             />
           ))}
         </div>
@@ -61,7 +74,7 @@ const Cart = () => {
         <div className="lg:w-1/3 mt-6 lg:mt-0">
           <CartSummeryCard
             cartData={data}
-            productAvailable={productAbliablity} />
+            productAvailable={productAvailability} />
         </div>
       </div>
     </div>

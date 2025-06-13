@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
 const ProductPriceDetails = ({
   product,
@@ -15,6 +16,7 @@ const ProductPriceDetails = ({
   refreshCurrentUser,
   isMobile
 }) => {
+  const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState(
     product.size && product.size.length > 0 ? product.size[0].size : ''
   )
@@ -26,8 +28,9 @@ const ProductPriceDetails = ({
   // Handle add to cart functionality
   const handleAddToCart = async () => {
     if (!currentUser?.id) {
-      // Redirect to login or show login modal
-      alert('Please log in to add items to your cart')
+      // Redirect to sign in page with message
+      toast.warning('Please sign in to add items to cart')
+      navigate('/sign-in')
       return
     }
 
@@ -51,10 +54,10 @@ const ProductPriceDetails = ({
       refreshCurrentUser()
 
       // Show success message
-      alert('Product added to cart!')
+      toast.success('Product added to cart!')
     } catch (error) {
       console.error('Error adding to cart:', error)
-      alert('Failed to add product to cart. Please try again.')
+      toast.error('Failed to add product to cart. Please try again.')
     } finally {
       setAddingToCart(false)
     }

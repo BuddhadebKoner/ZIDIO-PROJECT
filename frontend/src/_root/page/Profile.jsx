@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, Link, Navigate } from 'react-router-dom';
 import { User, ShoppingBag, MapPin, LogOut, ChevronUp, ChevronDown, Camera, Loader2, AlertCircle, X, Star, CreditCard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { avatars, getAvatarUrl } from '../../utils/constant';
 import { useUpdateAvatar } from '../../lib/query/queriesAndMutation';
 import { toast } from 'react-toastify';
+import FullPageLoader from '../../components/loaders/FullPageLoader';
 
 const Profile = () => {
   const location = useLocation();
@@ -25,6 +26,16 @@ const Profile = () => {
   } = useUpdateAvatar();
 
   const { currentUser, isLoading, isAuthenticated, error: authError } = useAuth();
+
+  // Show loading while authentication is being checked
+  if (isLoading) {
+    return <FullPageLoader />
+  }
+
+  // Redirect to sign-in if user is not authenticated
+  if (!isLoading && !isAuthenticated) {
+    return <Navigate to="/sign-in" replace />
+  }
 
   useEffect(() => {
     if (updateErrorRaw) {
@@ -95,22 +106,9 @@ const Profile = () => {
     return `${countryCode}${firstTwoDigits}${maskedMiddle}${lastTwoDigits}`;
   };
 
-  if (!isLoading && !isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center p-6 bg-surface rounded-lg shadow-md">
-          <AlertCircle className="mx-auto h-12 w-12 text-accent-500 mb-4" />
-          <h3 className="text-lg font-medium mb-2">Authentication Required</h3>
-          <p className="text-text-muted mb-4">Please log in to view your profile.</p>
-          <NavLink
-            to="/login"
-            className="inline-block px-4 py-2 bg-primary-700 text-bg-white rounded-md hover:bg-primary-800 transition-colors"
-          >
-            Go to Login
-          </NavLink>
-        </div>
-      </div>
-    );
+  // Additional error handling and user verification
+  if (!currentUser) {
+    return <FullPageLoader />
   }
 
   const handleAvatarSelect = async (avatarName) => {
