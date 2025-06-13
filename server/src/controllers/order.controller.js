@@ -1,29 +1,39 @@
 import { Order } from "../models/order.model.js";
 import { User } from "../models/user.model.js";
+import { Address } from "../models/address.model.js";
 import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
 import mongoose, { startSession } from "mongoose";
 import { Payment } from "../models/payment.model.js";
 import { Inventory } from "../models/inventory.model.js";
-
+import { Product } from "../models/product.model.js";
 
 // Constants
 const VALID_ORDER_TYPES = ['COD', 'ONLINE', 'COD+ONLINE'];
+const FREE_DELIVERY_THRESHOLD = 1000;
+const DELIVERY_CHARGE_AMOUNT = 49;
+const MAXIMUM_ORDER_AMOUNT_LIMIT = 100000;
+const MINIMUM_PARTIAL_PAYMENT = 100;
+const MINIMUM_ORDER_AMOUNT = 10;
+const PRICE_TOLERANCE = 0.01; 
+const MAX_QUANTITY_PER_ITEM = 10;
 
 
 const getStripe = () => {
    return new Stripe(process.env.STRIPE_SECRET_KEY);
 };
 
-const validateAuth = (userId) => {
+// Enhanced validation function for user authentication and Stripe customer setup
+const validateAuth = async (userId, session) => {
    if (!userId) {
-      return {
-         isValid: false,
-         statusCode: 401,
-         message: "Unauthorized"
-      };
+      return null;
    }
-   return { isValid: true };
+   
+   const user = await User.findOne({ clerkId: userId })
+      .populate("address")
+      .session(session || null);
+   
+   return user;
 };
 
 const getAndVerifyUser = async (userId, session = null) => {

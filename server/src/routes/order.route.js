@@ -1,10 +1,14 @@
 import express from 'express';
 import { userAuth } from '../middlewares/userAuth.middleware.js';
-import { getOrderById, getOrders } from '../controllers/order.controller.js';
-import { placeOrderCashAndOnlineMixed, placeOrderCashOnDelivery, placeOrderOnlinePayment, verifyPayment } from '../contro  llers/orderExample.controller.js';
+import { getOrderById, getOrders, placeOrder, verifyPayment } from '../controllers/order.controller.js';
+import { placeOrderCashAndOnlineMixed, placeOrderCashOnDelivery, placeOrderOnlinePayment } from '../controllers/orderExample.controller.js';
 
 const orderRouter = express.Router();
 
+// place order (unified endpoint)
+orderRouter.post('/place-order', userAuth, placeOrder);
+
+// Legacy endpoints (using orderExample controller)
 // place order online payment
 orderRouter.post('/place-order-online', userAuth, placeOrderOnlinePayment);
 // place order with cash on delivery

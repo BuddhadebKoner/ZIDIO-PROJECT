@@ -1,11 +1,12 @@
 import { startSession } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
-import { User } from "../models/user.model.js";
 import Stripe from "stripe";
+import { User } from "../models/user.model.js";
 import { Product } from "../models/product.model.js";
 import { Inventory } from "../models/inventory.model.js";
 import { Order } from "../models/order.model.js";
 import { Payment } from "../models/payment.model.js";
+import { Address } from "../models/address.model.js";
 
 const getStripe = () => {
    return new Stripe(process.env.STRIPE_SECRET_KEY);
